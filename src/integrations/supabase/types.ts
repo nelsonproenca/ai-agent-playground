@@ -22,6 +22,7 @@ export type Database = {
           desafio_tecnico: string | null
           id: string
           nome: string | null
+          origem: string | null
           visto_pelo_nelson: boolean | null
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           desafio_tecnico?: string | null
           id?: string
           nome?: string | null
+          origem?: string | null
           visto_pelo_nelson?: boolean | null
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           desafio_tecnico?: string | null
           id?: string
           nome?: string | null
+          origem?: string | null
           visto_pelo_nelson?: boolean | null
         }
         Relationships: []
