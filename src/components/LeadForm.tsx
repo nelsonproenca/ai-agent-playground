@@ -29,12 +29,15 @@ const LeadForm = ({ onSuccess }: LeadFormProps) => {
     setLoading(true);
     setError("");
 
-    const { error: dbError } = await supabase.from("leads_ia").insert({
+    const payload = {
       nome: nome.trim().slice(0, 100),
       contato: contato.trim().slice(0, 255),
       canal: canal || null,
       desafio_tecnico: desafio.trim().slice(0, 2000),
-    });
+      origem: "Site_Institucional",
+    };
+
+    const { error: dbError } = await supabase.from("leads_ia").insert(payload);
 
     setLoading(false);
 

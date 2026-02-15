@@ -1,0 +1,1 @@
+ALTER TABLE public.leads_ia ADD COLUMN origem text DEFAULT 'Site_Institucional';
