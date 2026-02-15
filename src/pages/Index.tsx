@@ -3,6 +3,7 @@ import { Terminal, Code2, Cpu } from "lucide-react";
 import LeadForm from "@/components/LeadForm";
 import SuccessMessage from "@/components/SuccessMessage";
 import InstagramCTA from "@/components/InstagramCTA";
+import InternationalSection from "@/components/InternationalSection";
 
 const Index = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -74,6 +75,8 @@ const Index = () => {
             </div>
           </div>
         </div>
+
+        <InternationalSection />
       </main>
 
       <footer className="border-t border-border py-8 text-center">
