@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Terminal, Lock, Eye, Filter, X, Calendar, User, MessageSquare } from "lucide-react";
+import { Terminal, Lock, Eye, EyeOff, Filter, X, Calendar, User, MessageSquare, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,6 +88,15 @@ const Dashboard = () => {
       supabase.removeChannel(channel);
     };
   }, [authenticated]);
+
+  const toggleVisto = async (e: React.MouseEvent, lead: Lead) => {
+    e.stopPropagation();
+    const newValue = !lead.visto_pelo_nelson;
+    // Optimistic update
+    setLeads((prev) => prev.map((l) => l.id === lead.id ? { ...l, visto_pelo_nelson: newValue } : l));
+    if (selectedLead?.id === lead.id) setSelectedLead((prev) => prev ? { ...prev, visto_pelo_nelson: newValue } : prev);
+    await supabase.from("leads_ia").update({ visto_pelo_nelson: newValue }).eq("id", lead.id);
+  };
 
   const filteredLeads = leads.filter((lead) => {
     if (activeFilter === "all") return true;
@@ -178,19 +187,20 @@ const Dashboard = () => {
                 <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Canal</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Status</TableHead>
+                <TableHead className="font-mono text-xs text-muted-foreground text-center">Visto</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground w-[60px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : filteredLeads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
                     Nenhum lead encontrado.
                   </TableCell>
                 </TableRow>
@@ -207,6 +217,21 @@ const Dashboard = () => {
                     <TableCell className="font-medium text-foreground">{lead.nome ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{lead.canal ?? "—"}</TableCell>
                     <TableCell>{getStatusBadge(lead)}</TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => toggleVisto(e, lead)}
+                        title={lead.visto_pelo_nelson ? "Marcar como não visto" : "Marcar como visto"}
+                      >
+                        {lead.visto_pelo_nelson ? (
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                        ) : (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </TableCell>
                     <TableCell>
                       <Eye className="h-4 w-4 text-muted-foreground" />
                     </TableCell>
@@ -234,6 +259,24 @@ const Dashboard = () => {
               )}
             </SheetDescription>
           </SheetHeader>
+
+          {/* Visto toggle */}
+          {selectedLead && (
+            <div className="mt-4">
+              <Button
+                variant={selectedLead.visto_pelo_nelson ? "default" : "secondary"}
+                size="sm"
+                className="font-mono text-xs w-full gap-2"
+                onClick={(e) => toggleVisto(e, selectedLead)}
+              >
+                {selectedLead.visto_pelo_nelson ? (
+                  <><CheckCircle2 className="h-4 w-4" /> Visto pelo Nelson</>
+                ) : (
+                  <><EyeOff className="h-4 w-4" /> Marcar como visto</>
+                )}
+              </Button>
+            </div>
+          )}
 
           <div className="mt-6 space-y-6">
             {/* Contact */}
