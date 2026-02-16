@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       leads_ia: {
         Row: {
+          analise_ia: string | null
           canal: string | null
           contato: string | null
           created_at: string
@@ -26,6 +27,7 @@ export type Database = {
           visto_pelo_nelson: boolean | null
         }
         Insert: {
+          analise_ia?: string | null
           canal?: string | null
           contato?: string | null
           created_at?: string
@@ -36,6 +38,7 @@ export type Database = {
           visto_pelo_nelson?: boolean | null
         }
         Update: {
+          analise_ia?: string | null
           canal?: string | null
           contato?: string | null
           created_at?: string
