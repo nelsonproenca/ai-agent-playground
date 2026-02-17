@@ -13,7 +13,7 @@ const Index = () => {
         <div className="container max-w-6xl py-6 flex items-center gap-3">
           <Terminal className="h-6 w-6 text-primary" />
           <span className="font-mono font-bold text-foreground tracking-tight text-lg">
-            nelson<span className="text-primary">.dev</span>
+            nelson.proenca<span className="text-primary">.info</span>
           </span>
         </div>
       </header>
@@ -100,7 +100,7 @@ const Index = () => {
 
       <footer className="border-t border-border py-8 text-center mt-12">
         <p className="text-sm text-muted-foreground font-mono">
-          &copy; {new Date().getFullYear()} nelson.dev — Powered by Agentes IA
+          &copy; {new Date().getFullYear()} nelson.proenca.info — Powered by Agentes IA
         </p>
       </footer>
     </div>
