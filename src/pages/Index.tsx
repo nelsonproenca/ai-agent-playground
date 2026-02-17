@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Cpu, FlaskConical, Lock } from "lucide-react";
+import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
@@ -77,11 +77,28 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Área Restrita */}
-        <div className="max-w-4xl mx-auto mt-20 text-center">
+        {/* CTA Buttons */}
+        <div className="max-w-4xl mx-auto mt-20 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            to="/contato"
+            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-8 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full sm:w-auto"
+          >
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+              <MessageSquarePlus className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1 text-left">
+              <h3 className="text-xl font-extrabold text-foreground font-mono">
+                Fale <span className="text-primary">Comigo</span>
+              </h3>
+              <p className="text-sm text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                Envie seu desafio técnico.
+              </p>
+            </div>
+          </Link>
+
           <Link
             to="/admin"
-            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-8 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-8 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full sm:w-auto"
           >
             <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
               <Lock className="h-6 w-6 text-primary" />
