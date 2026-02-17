@@ -197,9 +197,14 @@ const Dashboard = () => {
               nelson<span className="text-primary">.admin</span>
             </span>
           </div>
-          <Badge variant="outline" className="font-mono text-xs border-primary/30 text-primary">
-            {leads.length} leads
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="font-mono text-xs border-primary/30 text-primary">
+              {leads.length} leads
+            </Badge>
+            <Button asChild variant="ghost" size="sm" className="font-mono text-xs text-muted-foreground gap-1">
+              <Link to="/">← Sair</Link>
+            </Button>
+          </div>
         </div>
         {/* Tabs */}
         <div className="container max-w-7xl pb-0">
