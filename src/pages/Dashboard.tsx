@@ -159,7 +159,7 @@ const Dashboard = () => {
             <div className="mx-auto inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 glow-primary">
               <Lock className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle className="font-mono text-foreground">Dashboard Admin</CardTitle>
+            <CardTitle className="font-mono text-foreground">Área Restrita</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">

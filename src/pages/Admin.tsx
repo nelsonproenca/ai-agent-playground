@@ -3,7 +3,7 @@ import { ArrowLeft, Shield, Users, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const adminLinks = [
-  { to: "/dashboard", icon: Shield, label: "Painel de Controle", desc: "Leads e análises IA" },
+  { to: "/dashboard", icon: Shield, label: "Área Restrita", desc: "Leads e análises IA" },
   { to: "/colabs", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
   { to: "/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
 ];
