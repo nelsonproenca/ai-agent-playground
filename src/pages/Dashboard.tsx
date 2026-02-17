@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Terminal, Lock, Eye, EyeOff, Filter, Calendar, User, MessageSquare, CheckCircle2, Users, Building2, UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -174,6 +175,9 @@ const Dashboard = () => {
               )}
               <Button type="submit" className="w-full font-mono">
                 Acessar
+              </Button>
+              <Button asChild variant="ghost" className="w-full font-mono text-muted-foreground">
+                <Link to="/">← Voltar para Home</Link>
               </Button>
             </form>
           </CardContent>
