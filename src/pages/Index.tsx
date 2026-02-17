@@ -4,6 +4,7 @@ import LeadForm from "@/components/LeadForm";
 import SuccessMessage from "@/components/SuccessMessage";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
+import TechPlayground from "@/components/TechPlayground";
 
 const Index = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -76,6 +77,7 @@ const Index = () => {
           </div>
         </div>
 
+        <TechPlayground />
         <InternationalSection />
       </main>
 
