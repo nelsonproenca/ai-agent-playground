@@ -7,7 +7,7 @@ const experiences = [
     period: "01/2025 — Atual",
     role: "Analista Dev .NET Core Sr.",
     project: "Morpheus (Cloud SONDA)",
-    techs: [".NET FW 4.8", "SQL Server 2022", "Azure", "AWS", "GCP", "OCI"],
+    techs: [".NET FW 4.8", "SQL Server (SSIS, SSRS, DDL e DML)", "React.JS", "Next.JS", "Azure", "AWS"],
     highlight: "Integração Multi-Cloud via Add-ins customizados.",
   },
   {
@@ -16,7 +16,7 @@ const experiences = [
     period: "03/2022 — 05/2024",
     role: "Especialista de TI",
     project: "Intranet 4.0",
-    techs: [".NET Core 3.1", "EF Core", "React.Js", "Azure Functions"],
+    techs: [".NET Core 3.1", "EF Core", "React.JS", "Next.JS", "Azure Functions"],
     highlight: "Fullstack + CI/CD e infra Azure (Key Vaults).",
   },
   {
@@ -25,7 +25,7 @@ const experiences = [
     period: "08/2008 — 09/2016",
     role: "Analista Sr. & Mobile",
     project: "Intranet SAP",
-    techs: ["Web APIs", "SQL Server", "Ionic", "iOS/Swift", "ETLs"],
+    techs: ["Web APIs", "SQL Server (SSIS, SSRS)", "Ionic", "iOS/Swift", "ETLs"],
     highlight: "Liderança técnica e apps híbridos/nativos.",
   },
 ];
