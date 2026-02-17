@@ -1,30 +1,23 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Terminal, Lock, Eye, EyeOff, Filter, X, Calendar, User, MessageSquare, CheckCircle2 } from "lucide-react";
+import { Terminal, Lock, Eye, EyeOff, Filter, Calendar, User, MessageSquare, CheckCircle2, Users, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
 import type { Tables } from "@/integrations/supabase/types";
+import GestaoColabs from "@/components/dashboard/GestaoColabs";
+import GestaoClientes from "@/components/dashboard/GestaoClientes";
 
 type Lead = Tables<"leads_ia">;
-
 type FilterKey = "all" | "alta_complexidade" | "automacao" | "consultoria_dotnet";
+type TabKey = "leads" | "colabs" | "clientes";
 
 const FILTER_CONFIG: Record<FilterKey, { label: string; keywords: string[] }> = {
   all: { label: "Todos", keywords: [] },
@@ -42,6 +35,12 @@ const FILTER_CONFIG: Record<FilterKey, { label: string; keywords: string[] }> = 
   },
 };
 
+const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
+  { key: "leads", label: "Leads", icon: Terminal },
+  { key: "colabs", label: "Colaboradores", icon: Users },
+  { key: "clientes", label: "Clientes", icon: Building2 },
+];
+
 const Dashboard = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -50,6 +49,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+  const [activeTab, setActiveTab] = useState<TabKey>("leads");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +70,6 @@ const Dashboard = () => {
         .from("leads_ia")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (!error && data) setLeads(data);
       setLoading(false);
     };
@@ -92,7 +91,6 @@ const Dashboard = () => {
   const toggleVisto = async (e: React.MouseEvent, lead: Lead) => {
     e.stopPropagation();
     const newValue = !lead.visto_pelo_nelson;
-    // Optimistic update
     setLeads((prev) => prev.map((l) => l.id === lead.id ? { ...l, visto_pelo_nelson: newValue } : l));
     if (selectedLead?.id === lead.id) setSelectedLead((prev) => prev ? { ...prev, visto_pelo_nelson: newValue } : prev);
     await supabase.from("leads_ia").update({ visto_pelo_nelson: newValue }).eq("id", lead.id);
@@ -159,88 +157,114 @@ const Dashboard = () => {
             {leads.length} leads
           </Badge>
         </div>
+        {/* Tabs */}
+        <div className="container max-w-7xl pb-0">
+          <div className="flex gap-1 border-b border-border -mb-px">
+            {TAB_CONFIG.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`flex items-center gap-2 px-4 py-2.5 font-mono text-xs transition-colors border-b-2 ${
+                  activeTab === key
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
 
       <main className="container max-w-7xl py-8 px-4 space-y-6">
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          {(Object.keys(FILTER_CONFIG) as FilterKey[]).map((key) => (
-            <Button
-              key={key}
-              variant={activeFilter === key ? "default" : "secondary"}
-              size="sm"
-              className="font-mono text-xs"
-              onClick={() => setActiveFilter(key)}
-            >
-              {FILTER_CONFIG[key].label}
-            </Button>
-          ))}
-        </div>
+        {activeTab === "leads" && (
+          <>
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              {(Object.keys(FILTER_CONFIG) as FilterKey[]).map((key) => (
+                <Button
+                  key={key}
+                  variant={activeFilter === key ? "default" : "secondary"}
+                  size="sm"
+                  className="font-mono text-xs"
+                  onClick={() => setActiveFilter(key)}
+                >
+                  {FILTER_CONFIG[key].label}
+                </Button>
+              ))}
+            </div>
 
-        {/* Table */}
-        <Card className="border-border bg-card overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="font-mono text-xs text-muted-foreground">Data</TableHead>
-                <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
-                <TableHead className="font-mono text-xs text-muted-foreground">Canal</TableHead>
-                <TableHead className="font-mono text-xs text-muted-foreground">Status</TableHead>
-                <TableHead className="font-mono text-xs text-muted-foreground text-center">Visto</TableHead>
-                <TableHead className="font-mono text-xs text-muted-foreground w-[60px]" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
-                    Carregando...
-                  </TableCell>
-                </TableRow>
-              ) : filteredLeads.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
-                    Nenhum lead encontrado.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredLeads.map((lead) => (
-                  <TableRow
-                    key={lead.id}
-                    className="border-border cursor-pointer hover:bg-secondary/50 transition-colors"
-                    onClick={() => setSelectedLead(lead)}
-                  >
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      {new Date(lead.created_at).toLocaleDateString("pt-BR")}
-                    </TableCell>
-                    <TableCell className="font-medium text-foreground">{lead.nome ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{lead.canal ?? "—"}</TableCell>
-                    <TableCell>{getStatusBadge(lead)}</TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => toggleVisto(e, lead)}
-                        title={lead.visto_pelo_nelson ? "Marcar como não visto" : "Marcar como visto"}
-                      >
-                        {lead.visto_pelo_nelson ? (
-                          <CheckCircle2 className="h-4 w-4 text-primary" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    </TableCell>
+            {/* Table */}
+            <Card className="border-border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="font-mono text-xs text-muted-foreground">Data</TableHead>
+                    <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
+                    <TableHead className="font-mono text-xs text-muted-foreground">Canal</TableHead>
+                    <TableHead className="font-mono text-xs text-muted-foreground">Status</TableHead>
+                    <TableHead className="font-mono text-xs text-muted-foreground text-center">Visto</TableHead>
+                    <TableHead className="font-mono text-xs text-muted-foreground w-[60px]" />
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </Card>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
+                        Carregando...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredLeads.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
+                        Nenhum lead encontrado.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredLeads.map((lead) => (
+                      <TableRow
+                        key={lead.id}
+                        className="border-border cursor-pointer hover:bg-secondary/50 transition-colors"
+                        onClick={() => setSelectedLead(lead)}
+                      >
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          {new Date(lead.created_at).toLocaleDateString("pt-BR")}
+                        </TableCell>
+                        <TableCell className="font-medium text-foreground">{lead.nome ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{lead.canal ?? "—"}</TableCell>
+                        <TableCell>{getStatusBadge(lead)}</TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => toggleVisto(e, lead)}
+                            title={lead.visto_pelo_nelson ? "Marcar como não visto" : "Marcar como visto"}
+                          >
+                            {lead.visto_pelo_nelson ? (
+                              <CheckCircle2 className="h-4 w-4 text-primary" />
+                            ) : (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </>
+        )}
+
+        {activeTab === "colabs" && <GestaoColabs />}
+        {activeTab === "clientes" && <GestaoClientes />}
       </main>
 
       {/* Detail Sheet */}
@@ -260,7 +284,6 @@ const Dashboard = () => {
             </SheetDescription>
           </SheetHeader>
 
-          {/* Visto toggle */}
           {selectedLead && (
             <div className="mt-4">
               <Button
@@ -279,7 +302,6 @@ const Dashboard = () => {
           )}
 
           <div className="mt-6 space-y-6">
-            {/* Contact */}
             {selectedLead?.contato && (
               <div className="space-y-2">
                 <h4 className="font-mono text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-2">
@@ -292,7 +314,6 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* Challenge */}
             <div className="space-y-2">
               <h4 className="font-mono text-xs text-muted-foreground uppercase tracking-wider">
                 {"// desafio_tecnico"}
@@ -302,7 +323,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* AI Analysis */}
             <div className="space-y-2">
               <h4 className="font-mono text-xs text-primary uppercase tracking-wider flex items-center gap-2">
                 ✦ Análise da Consultoria (IA)
