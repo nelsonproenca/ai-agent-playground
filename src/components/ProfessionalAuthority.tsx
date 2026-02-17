@@ -17,7 +17,7 @@ const experiences = [
     role: "Especialista de TI",
     project: "Intranet 4.0",
     techs: [".NET Core 3.1", "EF Core", "React.Js", "Azure Functions"],
-    highlight: "Fullstack + CI/CD e infra Azure (Key Vaults).",
+    highlight: "Liderança técnica em .Net Core/React.JS + CI/CD e Azure (App Services, Functions e Key Vaults).",
   },
   {
     icon: Smartphone,
