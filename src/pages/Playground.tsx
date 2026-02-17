@@ -31,7 +31,7 @@ const Playground = () => {
           <div className="flex items-center gap-3">
             <Terminal className="h-5 w-5 text-primary" />
             <span className="font-mono font-bold text-foreground tracking-tight">
-              nelson<span className="text-primary">.dev</span>
+              nelson.proenca<span className="text-primary">.info</span>
               <span className="text-muted-foreground ml-2 text-sm font-normal">/ playground</span>
             </span>
           </div>
@@ -135,7 +135,7 @@ const Playground = () => {
 
       <footer className="border-t border-border py-8 text-center">
         <p className="text-sm text-muted-foreground font-mono">
-          &copy; {new Date().getFullYear()} nelson.dev — Powered by Agentes IA
+          &copy; {new Date().getFullYear()} nelson.proenca.info — Powered by Agentes IA
         </p>
       </footer>
     </div>

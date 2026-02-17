@@ -32,7 +32,7 @@ const Clientes = () => {
         <div className="container max-w-6xl py-6 flex items-center gap-3">
           <Terminal className="h-6 w-6 text-primary" />
           <NavLink to="/" className="font-mono font-bold text-foreground tracking-tight text-lg">
-            nelson<span className="text-primary">.dev</span>
+            nelson.proenca<span className="text-primary">.info</span>
           </NavLink>
           <span className="text-muted-foreground font-mono text-sm ml-2">/ clientes</span>
         </div>
@@ -99,7 +99,7 @@ const Clientes = () => {
 
       <footer className="border-t border-border py-8 text-center">
         <p className="text-sm text-muted-foreground font-mono">
-          &copy; {new Date().getFullYear()} nelson.dev — Powered by Agentes IA
+          &copy; {new Date().getFullYear()} nelson.proenca.info — Powered by Agentes IA
         </p>
       </footer>
     </div>
