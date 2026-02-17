@@ -3,6 +3,7 @@ import { Terminal, Cpu, FlaskConical, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
+import ProfessionalAuthority from "@/components/ProfessionalAuthority";
 
 const Index = () => {
   return (
@@ -49,7 +50,11 @@ const Index = () => {
           </Button>
         </div>
 
-        <InternationalSection />
+        <ProfessionalAuthority />
+
+        <div className="mt-20">
+          <InternationalSection />
+        </div>
 
         {/* Instagram CTA + Stats */}
         <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto mt-20">
