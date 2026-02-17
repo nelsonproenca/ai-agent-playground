@@ -14,6 +14,107 @@ export type Database = {
   }
   public: {
     Tables: {
+      clientes: {
+        Row: {
+          created_at: string
+          email: string
+          empresa: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          segmento: string | null
+          site_url: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          empresa?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          segmento?: string | null
+          site_url?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          empresa?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          segmento?: string | null
+          site_url?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      colaboradores: {
+        Row: {
+          cargo: string | null
+          created_at: string
+          departamento: string | null
+          email: string
+          foto_url: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          cargo?: string | null
+          created_at?: string
+          departamento?: string | null
+          email: string
+          foto_url?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          cargo?: string | null
+          created_at?: string
+          departamento?: string | null
+          email?: string
+          foto_url?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      contatos_clientes: {
+        Row: {
+          cliente_id: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          nome: string
+          telefone: string | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contatos_clientes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enrich_company: {
         Row: {
           company_name: string | null
