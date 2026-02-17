@@ -65,9 +65,9 @@ const Index = () => {
               <div className="space-y-3">
                 {[
                   { label: "Anos de XP", value: "15+" },
-                  { label: "Stack", value: "MS SQL Server v08-22, React.JS" },
+                  { label: "Stack", value: ".NET, React.JS, MS SQL Server, Azure, IA" },
                   { label: "Automações", value: "n8n · IA" },
-                  { label: "Infra", value: "VPS + SQL Server 2022" },
+                  { label: "Infra", value: "VPS, Docker" },
                 ].map((stat) => (
                   <div key={stat.label} className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">{stat.label}</span>
