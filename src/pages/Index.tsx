@@ -65,7 +65,7 @@ const Index = () => {
               <div className="space-y-3">
                 {[
                   { label: "Anos de XP", value: "15+" },
-                  { label: "Stack", value: ".NET · Azure" },
+                  { label: "Stack", value: "MS SQL Server v08-22, React.JS" },
                   { label: "Automações", value: "n8n · IA" },
                   { label: "Infra", value: "VPS + SQL Server 2022" },
                 ].map((stat) => (
