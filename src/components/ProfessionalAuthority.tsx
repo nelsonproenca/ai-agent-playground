@@ -56,7 +56,39 @@ const ProfessionalAuthority = () => {
               key={exp.company}
               className="group relative rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-5 space-y-3 hover:border-primary/40 transition-all hover:shadow-lg hover:shadow-primary/5"
             >
-...
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <exp.icon className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-mono text-muted-foreground">
+                  {exp.period}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-foreground text-base">
+                  {exp.company}
+                </h3>
+                <p className="text-xs text-primary font-mono">{exp.role}</p>
+                <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                  Projeto: {exp.project}
+                </p>
+              </div>
+
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {exp.highlight}
+              </p>
+
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {exp.techs.map((tech) => (
+                  <span
+                    key={tech}
+                    className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-primary/20 bg-primary/5 text-primary"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
