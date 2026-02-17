@@ -129,6 +129,10 @@ const LeadForm = ({ onSuccess }: LeadFormProps) => {
         )}
         {loading ? "Processando..." : "Enviar Desafio"}
       </Button>
+
+      <p className="text-center text-[11px] font-mono text-muted-foreground/60 tracking-wide">
+        Processado via n8n Orchestrator
+      </p>
     </form>
   );
 };
