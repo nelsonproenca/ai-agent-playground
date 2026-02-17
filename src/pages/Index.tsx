@@ -56,63 +56,61 @@ const Index = () => {
           <InternationalSection />
         </div>
 
-        {/* Grid: Atendimento + Fale Comigo | Stats + Área Restrita */}
-        <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto mt-20">
-          {/* Coluna Esquerda */}
-          <div className="space-y-4">
-            <InstagramCTA />
-            <Link
-              to="/contato"
-              className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-                <MessageSquarePlus className="h-5 w-5 text-primary" />
-              </div>
-              <div className="space-y-0.5 text-left">
-                <h3 className="text-lg font-extrabold text-foreground font-mono">
-                  Fale <span className="text-primary">Comigo</span>
-                </h3>
-                <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                  Envie seu desafio técnico.
-                </p>
-              </div>
-            </Link>
-          </div>
-
-          {/* Coluna Direita */}
-          <div className="space-y-4">
-            <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-              <h4 className="font-mono text-sm text-muted-foreground">{"// stats"}</h4>
-              <div className="space-y-3">
-                {[
-                  { label: "Anos de XP", value: "15+" },
-                  { label: "Stack", value: ".NET, React.JS, MS SQL Server, Azure, IA" },
-                  { label: "Automações", value: "n8n · IA" },
-                  { label: "Infra", value: "VPS, Docker" },
-                ].map((stat) => (
-                  <div key={stat.label} className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{stat.label}</span>
-                    <span className="text-sm font-mono font-semibold text-primary">{stat.value}</span>
-                  </div>
-                ))}
-              </div>
+        {/* Fale Comigo + Área Restrita */}
+        <div className="grid lg:grid-cols-2 gap-4 max-w-4xl mx-auto mt-20">
+          <Link
+            to="/contato"
+            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
+          >
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+              <MessageSquarePlus className="h-5 w-5 text-primary" />
             </div>
-            <Link
-              to="/admin"
-              className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-                <Lock className="h-5 w-5 text-primary" />
-              </div>
-              <div className="space-y-0.5 text-left">
-                <h3 className="text-lg font-extrabold text-foreground font-mono">
-                  Área <span className="text-primary">Restrita</span>
-                </h3>
-                <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                  Gerenciamento do site.
-                </p>
-              </div>
-            </Link>
+            <div className="space-y-0.5 text-left">
+              <h3 className="text-lg font-extrabold text-foreground font-mono">
+                Fale <span className="text-primary">Comigo</span>
+              </h3>
+              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                Envie seu desafio técnico.
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
+          >
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+              <Lock className="h-5 w-5 text-primary" />
+            </div>
+            <div className="space-y-0.5 text-left">
+              <h3 className="text-lg font-extrabold text-foreground font-mono">
+                Área <span className="text-primary">Restrita</span>
+              </h3>
+              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                Gerenciamento do site.
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Atendimento + Stats */}
+        <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto mt-8">
+          <InstagramCTA />
+          <div className="rounded-xl border border-border bg-card p-6 space-y-4 h-full">
+            <h4 className="font-mono text-sm text-muted-foreground">{"// stats"}</h4>
+            <div className="space-y-3">
+              {[
+                { label: "Anos de XP", value: "15+" },
+                { label: "Stack", value: ".NET, React.JS, MS SQL Server, Azure, IA" },
+                { label: "Automações", value: "n8n · IA" },
+                { label: "Infra", value: "VPS, Docker" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">{stat.label}</span>
+                  <span className="text-sm font-mono font-semibold text-primary">{stat.value}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>
