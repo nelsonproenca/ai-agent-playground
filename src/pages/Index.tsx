@@ -27,14 +27,14 @@ const Index = () => {
         <div className="text-center mb-14 space-y-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-sm font-mono text-primary">
             <Cpu className="h-4 w-4" />
-            Playground de Agentes IA
+            Arquitetura de Software + IA
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-foreground leading-tight">
             Descreva seu desafio,<br />
             <span className="text-gradient-primary">meu agente resolve.</span>
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Envie seu problema técnico e receba uma análise de um especialista em .NET e Azure com mais de 15 anos de experiência.
+            Especialista em .NET Core e Azure com 15 anos de XP, integrando sistemas legados e modernos via Agentes IA.
           </p>
         </div>
 
@@ -67,6 +67,7 @@ const Index = () => {
                   { label: "Anos de XP", value: "15+" },
                   { label: "Stack", value: ".NET · Azure" },
                   { label: "Automações", value: "n8n · IA" },
+                  { label: "Infra", value: "VPS + SQL Server 2022" },
                 ].map((stat) => (
                   <div key={stat.label} className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">{stat.label}</span>
