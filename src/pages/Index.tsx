@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Cpu, FlaskConical, Shield, Users, Building2 } from "lucide-react";
+import { Terminal, Cpu, FlaskConical, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
@@ -49,42 +49,9 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Admin Section */}
-        <div className="max-w-4xl mx-auto mb-20">
-          <div className="text-center mb-8 space-y-2">
-            <h2 className="text-2xl font-extrabold text-foreground font-mono">
-              Área <span className="text-gradient-primary">Administrativa</span>
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              Gerencie leads, equipe e clientes em um só lugar.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { to: "/dashboard", icon: Shield, label: "Painel de Controle", desc: "Leads e análises IA" },
-              { to: "/colabs", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
-              { to: "/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
-            ].map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
-              >
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <item.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-mono font-bold text-foreground">{item.label}</h3>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
         <InternationalSection />
 
-        {/* Instagram CTA + Stats before footer */}
+        {/* Instagram CTA + Stats */}
         <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto mt-20">
           <InstagramCTA />
           <div className="rounded-xl border border-border bg-card p-6 space-y-4">
@@ -103,6 +70,17 @@ const Index = () => {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Área Restrita */}
+        <div className="max-w-4xl mx-auto mt-20 text-center">
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+          >
+            <Lock className="h-4 w-4" />
+            Gerenciamento do site.
+          </Link>
         </div>
       </main>
 
