@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus } from "lucide-react";
+import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
@@ -10,11 +10,29 @@ const Index = () => {
     <div className="min-h-screen bg-background grid-pattern">
       {/* Hero */}
       <header className="border-b border-border">
-        <div className="container max-w-6xl py-6 flex items-center gap-3">
-          <Terminal className="h-6 w-6 text-primary" />
-          <span className="font-mono font-bold text-foreground tracking-tight text-lg">
-            nelson.proenca<span className="text-primary">.info</span>
-          </span>
+        <div className="container max-w-6xl py-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Terminal className="h-6 w-6 text-primary" />
+            <span className="font-mono font-bold text-foreground tracking-tight text-lg">
+              nelson.proenca<span className="text-primary">.info</span>
+            </span>
+          </div>
+          <nav className="flex items-center gap-1">
+            {[
+              { to: "/colabs", label: "Colaboradores", icon: Users },
+              { to: "/clientes", label: "Clientes", icon: Building2 },
+              { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-mono text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+              >
+                <item.icon className="h-4 w-4" />
+                <span className="hidden md:inline">{item.label}</span>
+              </Link>
+            ))}
+          </nav>
         </div>
       </header>
 
