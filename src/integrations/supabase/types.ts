@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      enrich_company: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          id: string
+          output_ai: string | null
+          segment: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          output_ai?: string | null
+          segment?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          output_ai?: string | null
+          segment?: string | null
+        }
+        Relationships: []
+      }
       leads_ia: {
         Row: {
           analise_ia: string | null
@@ -47,6 +71,33 @@ export type Database = {
           nome?: string | null
           origem?: string | null
           visto_pelo_nelson?: boolean | null
+        }
+        Relationships: []
+      }
+      playground_analise: {
+        Row: {
+          created_at: string
+          id: string
+          input_tecnico: string | null
+          output_ia: string | null
+          status: string | null
+          tipo_analise: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_tecnico?: string | null
+          output_ia?: string | null
+          status?: string | null
+          tipo_analise?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_tecnico?: string | null
+          output_ia?: string | null
+          status?: string | null
+          tipo_analise?: string | null
         }
         Relationships: []
       }
