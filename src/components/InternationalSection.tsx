@@ -23,9 +23,9 @@ const InternationalSection = () => {
             <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
               <Globe className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-foreground">
+            <h2 className="text-2xl font-extrabold text-foreground font-mono">
               Experiência Global em{" "}
-              <span className="text-gradient-primary">Engenharia de Software</span>
+              <span className="text-primary">Engenharia de Software</span>
             </h2>
           </div>
 
