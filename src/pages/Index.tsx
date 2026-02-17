@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Terminal, Code2, Cpu } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Terminal, Code2, Cpu, FlaskConical } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import LeadForm from "@/components/LeadForm";
 import SuccessMessage from "@/components/SuccessMessage";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
-import TechPlayground from "@/components/TechPlayground";
-import LeadEnricher from "@/components/LeadEnricher";
 
 const Index = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -79,8 +79,22 @@ const Index = () => {
           </div>
         </div>
 
-        <TechPlayground />
-        <LeadEnricher />
+        {/* CTA Playground */}
+        <div className="mt-20 text-center space-y-4">
+          <h2 className="text-2xl font-extrabold text-foreground font-mono">
+            Experimente nossos <span className="text-gradient-primary">Playgrounds de IA</span>
+          </h2>
+          <p className="text-muted-foreground max-w-md mx-auto text-sm">
+            Teste consultoria IA em tempo real e enriquecimento de leads com automações n8n.
+          </p>
+          <Button asChild className="glow-primary font-mono gap-2">
+            <Link to="/playground">
+              <FlaskConical className="h-4 w-4" />
+              Acessar Playground
+            </Link>
+          </Button>
+        </div>
+
         <InternationalSection />
       </main>
 
