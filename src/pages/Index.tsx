@@ -73,24 +73,22 @@ const Index = () => {
         </div>
 
         {/* Área Restrita */}
-        <div className="max-w-4xl mx-auto mt-20 text-center space-y-6">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-foreground font-mono">
-              Área <span className="text-primary">Restrita</span>
-            </h2>
-            <p className="text-muted-foreground text-sm">Controle de leads, equipe e parcerias.</p>
-          </div>
-          
+        <div className="max-w-4xl mx-auto mt-20 text-center">
           <Link
             to="/admin"
-            className="inline-flex flex-col items-center gap-3 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 mx-auto"
+            className="flex flex-col items-center gap-3 group rounded-xl border border-border bg-card p-8 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 mx-auto w-full max-w-[70%]"
           >
             <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
               <Lock className="h-6 w-6 text-primary" />
             </div>
-            <span className="text-sm text-muted-foreground font-mono group-hover:text-primary transition-colors">
-              Gerenciamento do site.
-            </span>
+            <div className="space-y-1">
+              <h3 className="text-xl font-extrabold text-foreground font-mono">
+                Área <span className="text-primary">Restrita</span>
+              </h3>
+              <p className="text-sm text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                Gerenciamento do site.
+              </p>
+            </div>
           </Link>
         </div>
       </main>
