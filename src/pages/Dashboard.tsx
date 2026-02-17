@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Terminal, Lock, Eye, EyeOff, Filter, Calendar, User, MessageSquare, CheckCircle2, Users, Building2, UserPlus, Loader2 } from "lucide-react";
+import { Terminal, Lock, Eye, EyeOff, Filter, Calendar, User, MessageSquare, CheckCircle2, Users, Building2, UserPlus, Loader2, Inbox } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ const FILTER_CONFIG: Record<FilterKey, { label: string; keywords: string[] }> = 
 };
 
 const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: "leads", label: "Leads", icon: Terminal },
+  { key: "leads", label: "Leads", icon: Inbox },
   { key: "colabs", label: "Colaboradores", icon: Users },
   { key: "clientes", label: "Clientes", icon: Building2 },
 ];
@@ -52,6 +52,8 @@ const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [activeTab, setActiveTab] = useState<TabKey>("leads");
+  const [colabsCount, setColabsCount] = useState(0);
+  const [clientesCount, setClientesCount] = useState(0);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +78,15 @@ const Dashboard = () => {
       setLoading(false);
     };
 
+    const fetchCounts = async () => {
+      const { count: cCount } = await supabase.from("colaboradores").select("*", { count: "exact", head: true });
+      const { count: clCount } = await supabase.from("clientes").select("*", { count: "exact", head: true });
+      setColabsCount(cCount ?? 0);
+      setClientesCount(clCount ?? 0);
+    };
+
     fetchLeads();
+    fetchCounts();
 
     const channel = supabase
       .channel("leads-realtime")
@@ -197,32 +207,33 @@ const Dashboard = () => {
               nelson<span className="text-primary">.admin</span>
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="font-mono text-xs border-primary/30 text-primary">
-              {leads.length} leads
-            </Badge>
-            <Button asChild variant="ghost" size="sm" className="font-mono text-xs text-muted-foreground gap-1">
-              <Link to="/">← Sair</Link>
-            </Button>
-          </div>
+          <Button asChild variant="ghost" size="sm" className="font-mono text-xs text-muted-foreground gap-1">
+            <Link to="/">← Sair</Link>
+          </Button>
         </div>
         {/* Tabs */}
         <div className="container max-w-7xl pb-0">
           <div className="flex gap-1 border-b border-border -mb-px">
-            {TAB_CONFIG.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 px-4 py-2.5 font-mono text-xs transition-colors border-b-2 ${
-                  activeTab === key
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {label}
-              </button>
-            ))}
+            {TAB_CONFIG.map(({ key, label, icon: Icon }) => {
+              const count = key === "leads" ? leads.length : key === "colabs" ? colabsCount : clientesCount;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex items-center gap-2 px-4 py-2.5 font-mono text-xs transition-colors border-b-2 ${
+                    activeTab === key
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 min-w-[1.25rem] justify-center">
+                    {count}
+                  </Badge>
+                </button>
+              );
+            })}
           </div>
         </div>
       </header>
