@@ -21,7 +21,7 @@ const Index = () => {
             {[
               { to: "/colabs", label: "Colaboradores", icon: Users },
               { to: "/clientes", label: "Clientes", icon: Building2 },
-              { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+              { to: "/dashboard", label: "Área Restrita", icon: LayoutDashboard },
             ].map((item) => (
               <Link
                 key={item.to}
