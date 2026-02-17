@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Terminal, Lock, Eye, EyeOff, Filter, Calendar, User, MessageSquare, CheckCircle2, Users, Building2 } from "lucide-react";
+import { Terminal, Lock, Eye, EyeOff, Filter, Calendar, User, MessageSquare, CheckCircle2, Users, Building2, UserPlus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,6 +95,45 @@ const Dashboard = () => {
     setLeads((prev) => prev.map((l) => l.id === lead.id ? { ...l, visto_pelo_nelson: newValue } : l));
     if (selectedLead?.id === lead.id) setSelectedLead((prev) => prev ? { ...prev, visto_pelo_nelson: newValue } : prev);
     await supabase.from("leads_ia").update({ visto_pelo_nelson: newValue }).eq("id", lead.id);
+  };
+
+  const [converting, setConverting] = useState(false);
+
+  const convertLeadToCliente = async (lead: Lead) => {
+    setConverting(true);
+    const nome = lead.nome ?? "Sem nome";
+    const email = lead.contato ?? "";
+    const empresa = (lead as any).empresa ?? null;
+
+    const { data: cliente, error: clienteError } = await supabase
+      .from("clientes")
+      .insert({
+        nome,
+        email,
+        empresa,
+        segmento: null,
+        site_url: null,
+      })
+      .select()
+      .single();
+
+    if (clienteError || !cliente) {
+      toast.error("Erro ao criar cliente.");
+      setConverting(false);
+      return;
+    }
+
+    if (email) {
+      await supabase.from("contatos_clientes").insert({
+        cliente_id: cliente.id,
+        nome,
+        email,
+        telefone: null,
+      });
+    }
+
+    toast.success("Lead convertido em cliente com sucesso!");
+    setConverting(false);
   };
 
   const filteredLeads = leads.filter((lead) => {
@@ -296,6 +336,24 @@ const Dashboard = () => {
                   <><CheckCircle2 className="h-4 w-4" /> Visto pelo Nelson</>
                 ) : (
                   <><EyeOff className="h-4 w-4" /> Marcar como visto</>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {selectedLead && (
+            <div className="mt-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="font-mono text-xs w-full gap-2"
+                disabled={converting}
+                onClick={() => convertLeadToCliente(selectedLead)}
+              >
+                {converting ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Convertendo...</>
+                ) : (
+                  <><UserPlus className="h-4 w-4" /> Converter em Cliente</>
                 )}
               </Button>
             </div>

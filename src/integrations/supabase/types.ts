@@ -146,6 +146,7 @@ export type Database = {
           contato: string | null
           created_at: string
           desafio_tecnico: string | null
+          empresa: string | null
           id: string
           nome: string | null
           origem: string | null
@@ -157,6 +158,7 @@ export type Database = {
           contato?: string | null
           created_at?: string
           desafio_tecnico?: string | null
+          empresa?: string | null
           id?: string
           nome?: string | null
           origem?: string | null
@@ -168,6 +170,7 @@ export type Database = {
           contato?: string | null
           created_at?: string
           desafio_tecnico?: string | null
+          empresa?: string | null
           id?: string
           nome?: string | null
           origem?: string | null

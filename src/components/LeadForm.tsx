@@ -13,6 +13,7 @@ interface LeadFormProps {
 
 const LeadForm = ({ onSuccess }: LeadFormProps) => {
   const [nome, setNome] = useState("");
+  const [empresa, setEmpresa] = useState("");
   const [contato, setContato] = useState("");
   const [canal, setCanal] = useState("");
   const [desafio, setDesafio] = useState("");
@@ -31,6 +32,7 @@ const LeadForm = ({ onSuccess }: LeadFormProps) => {
 
     const payload = {
       nome: nome.trim().slice(0, 100),
+      empresa: empresa.trim().slice(0, 200) || null,
       contato: contato.trim().slice(0, 255),
       canal: canal || null,
       desafio_tecnico: desafio.trim().slice(0, 2000),
@@ -61,6 +63,20 @@ const LeadForm = ({ onSuccess }: LeadFormProps) => {
           onChange={(e) => setNome(e.target.value)}
           placeholder="Seu nome completo"
           maxLength={100}
+          className="bg-secondary border-border focus:border-primary focus:ring-primary/20 transition-all"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="empresa" className="text-sm font-mono tracking-wide text-muted-foreground">
+          {">"} Nome da Empresa
+        </Label>
+        <Input
+          id="empresa"
+          value={empresa}
+          onChange={(e) => setEmpresa(e.target.value)}
+          placeholder="Ex: Acme Corp"
+          maxLength={200}
           className="bg-secondary border-border focus:border-primary focus:ring-primary/20 transition-all"
         />
       </div>
