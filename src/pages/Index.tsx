@@ -56,8 +56,29 @@ const Index = () => {
           <InternationalSection />
         </div>
 
-        {/* Fale Comigo + Área Restrita */}
-        <div className="grid lg:grid-cols-2 gap-4 max-w-4xl mx-auto mt-20">
+        {/* Atendimento + Stats */}
+        <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto mt-20">
+          <InstagramCTA />
+          <div className="rounded-xl border border-border bg-card p-6 space-y-4 h-full">
+            <h4 className="font-mono text-sm text-muted-foreground">{"// stats"}</h4>
+            <div className="space-y-3">
+              {[
+                { label: "Anos de XP", value: "15+" },
+                { label: "Stack", value: ".NET, React.JS, MS SQL Server, Azure, IA" },
+                { label: "Automações", value: "n8n · IA" },
+                { label: "Infra", value: "VPS, Docker" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">{stat.label}</span>
+                  <span className="text-sm font-mono font-semibold text-primary">{stat.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Fale Comigo + Área Restrita (Final da Página) */}
+        <div className="grid lg:grid-cols-2 gap-4 max-w-4xl mx-auto mt-8">
           <Link
             to="/contato"
             className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
@@ -91,27 +112,6 @@ const Index = () => {
               </p>
             </div>
           </Link>
-        </div>
-
-        {/* Atendimento + Stats */}
-        <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto mt-8">
-          <InstagramCTA />
-          <div className="rounded-xl border border-border bg-card p-6 space-y-4 h-full">
-            <h4 className="font-mono text-sm text-muted-foreground">{"// stats"}</h4>
-            <div className="space-y-3">
-              {[
-                { label: "Anos de XP", value: "15+" },
-                { label: "Stack", value: ".NET, React.JS, MS SQL Server, Azure, IA" },
-                { label: "Automações", value: "n8n · IA" },
-                { label: "Infra", value: "VPS, Docker" },
-              ].map((stat) => (
-                <div key={stat.label} className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">{stat.label}</span>
-                  <span className="text-sm font-mono font-semibold text-primary">{stat.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </main>
 
