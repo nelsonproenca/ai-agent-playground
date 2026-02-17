@@ -76,7 +76,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto mt-20 text-center">
           <Link
             to="/admin"
-            className="flex items-center gap-6 group rounded-xl border border-border bg-card p-8 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 mx-auto w-full max-w-[70%]"
+            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-8 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
           >
             <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
               <Lock className="h-6 w-6 text-primary" />
