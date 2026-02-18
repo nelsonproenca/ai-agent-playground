@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import ImageUpload from "./ImageUpload";
 
 type Colaborador = Tables<"colaboradores">;
 
@@ -22,6 +24,7 @@ const GestaoColabs = () => {
   const [email, setEmail] = useState("");
   const [cargo, setCargo] = useState("");
   const [departamento, setDepartamento] = useState("");
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -61,6 +64,7 @@ const GestaoColabs = () => {
       email: email.trim(),
       cargo: cargo.trim() || null,
       departamento: departamento.trim() || null,
+      foto_url: fotoUrl,
     });
 
     if (error) {
@@ -71,10 +75,21 @@ const GestaoColabs = () => {
       setEmail("");
       setCargo("");
       setDepartamento("");
+      setFotoUrl(null);
       setErrors({});
       fetchColabs();
     }
     setSaving(false);
+  };
+
+  const handleUpdateFoto = async (colabId: string, url: string) => {
+    const { error } = await supabase.from("colaboradores").update({ foto_url: url }).eq("id", colabId);
+    if (error) {
+      toast.error("Erro ao atualizar foto.");
+    } else {
+      toast.success("Foto atualizada!");
+      fetchColabs();
+    }
   };
 
   return (
@@ -89,6 +104,9 @@ const GestaoColabs = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <ImageUpload currentUrl={fotoUrl} onUploaded={setFotoUrl} folder="colaboradores" label="Foto" />
+            </div>
             <div className="space-y-1">
               <Input
                 placeholder="Nome *"
@@ -145,32 +163,51 @@ const GestaoColabs = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="font-mono text-xs text-muted-foreground w-12"></TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">E-mail</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Cargo</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Departamento</TableHead>
+                <TableHead className="font-mono text-xs text-muted-foreground text-center">Foto</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : colabs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
                     Nenhum colaborador cadastrado.
                   </TableCell>
                 </TableRow>
               ) : (
                 colabs.map((c) => (
                   <TableRow key={c.id} className="border-border">
+                    <TableCell>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={c.foto_url ?? undefined} />
+                        <AvatarFallback className="bg-secondary text-muted-foreground text-[10px]">
+                          {c.nome.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TableCell>
                     <TableCell className="font-medium text-foreground">{c.nome}</TableCell>
                     <TableCell className="text-muted-foreground text-sm font-mono">{c.email}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.cargo ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.departamento ?? "—"}</TableCell>
+                    <TableCell className="text-center">
+                      <ImageUpload
+                        currentUrl={c.foto_url}
+                        onUploaded={(url) => handleUpdateFoto(c.id, url)}
+                        folder="colaboradores"
+                        label="Alterar"
+                        size="sm"
+                      />
+                    </TableCell>
                   </TableRow>
                 ))
               )}

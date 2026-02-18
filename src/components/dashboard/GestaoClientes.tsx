@@ -7,12 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Building2, Plus, Loader2, UserPlus, Contact, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import ImageUpload from "./ImageUpload";
 
 type Cliente = Tables<"clientes">;
 type Contato = Tables<"contatos_clientes">;
@@ -37,6 +36,7 @@ const GestaoClientes = () => {
   const [empresa, setEmpresa] = useState("");
   const [segmento, setSegmento] = useState("");
   const [siteUrl, setSiteUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Contact form
@@ -108,6 +108,7 @@ const GestaoClientes = () => {
       empresa: empresa.trim() || null,
       segmento: segmento.trim() || null,
       site_url: siteUrl.trim() || null,
+      logo_url: logoUrl,
     });
 
     if (error) {
@@ -119,10 +120,21 @@ const GestaoClientes = () => {
       setEmpresa("");
       setSegmento("");
       setSiteUrl("");
+      setLogoUrl(null);
       setErrors({});
       fetchClientes();
     }
     setSaving(false);
+  };
+
+  const handleUpdateLogo = async (clienteId: string, url: string) => {
+    const { error } = await supabase.from("clientes").update({ logo_url: url }).eq("id", clienteId);
+    if (error) {
+      toast.error("Erro ao atualizar logo.");
+    } else {
+      toast.success("Logo atualizado!");
+      fetchClientes();
+    }
   };
 
   const validateContato = () => {
@@ -184,6 +196,9 @@ const GestaoClientes = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmitCliente} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <ImageUpload currentUrl={logoUrl} onUploaded={setLogoUrl} folder="clientes" label="Logo" />
+            </div>
             <div className="space-y-1">
               <Input placeholder="Nome *" value={nome} onChange={(e) => setNome(e.target.value)}
                 className="font-mono bg-secondary border-border text-foreground" />
@@ -228,23 +243,25 @@ const GestaoClientes = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="font-mono text-xs text-muted-foreground w-12"></TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">E-mail</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Empresa</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Segmento</TableHead>
+                <TableHead className="font-mono text-xs text-muted-foreground text-center">Logo</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground text-center">Contatos</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground font-mono py-12">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : clientes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground font-mono py-12">
                     Nenhum cliente cadastrado.
                   </TableCell>
                 </TableRow>
@@ -255,10 +272,27 @@ const GestaoClientes = () => {
                     className={`border-border cursor-pointer transition-colors ${selectedClienteId === c.id ? "bg-primary/10" : "hover:bg-secondary/50"}`}
                     onClick={() => setSelectedClienteId(selectedClienteId === c.id ? null : c.id)}
                   >
+                    <TableCell>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={c.logo_url ?? undefined} />
+                        <AvatarFallback className="bg-secondary text-muted-foreground text-[10px]">
+                          {c.nome.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TableCell>
                     <TableCell className="font-medium text-foreground">{c.nome}</TableCell>
                     <TableCell className="text-muted-foreground text-sm font-mono">{c.email}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.empresa ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.segmento ?? "—"}</TableCell>
+                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                      <ImageUpload
+                        currentUrl={c.logo_url}
+                        onUploaded={(url) => handleUpdateLogo(c.id, url)}
+                        folder="clientes"
+                        label="Alterar"
+                        size="sm"
+                      />
+                    </TableCell>
                     <TableCell className="text-center">
                       <Button
                         variant={selectedClienteId === c.id ? "default" : "ghost"}
@@ -294,7 +328,6 @@ const GestaoClientes = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Add Contact Form */}
             <form onSubmit={handleAddContato} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Input placeholder="Nome do contato *" value={contatoNome} onChange={(e) => setContatoNome(e.target.value)}
@@ -320,7 +353,6 @@ const GestaoClientes = () => {
               </div>
             </form>
 
-            {/* Contacts List */}
             {loadingContatos ? (
               <p className="text-sm text-muted-foreground font-mono text-center py-4">Carregando contatos...</p>
             ) : contatos.length === 0 ? (
