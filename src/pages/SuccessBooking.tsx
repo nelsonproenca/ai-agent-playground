@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle, Mail, ArrowLeft, Linkedin, Server, Cloud, Brain, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import confetti from "canvas-confetti";
 
 const PILLARS = [
   {
@@ -26,17 +27,34 @@ const SuccessBooking = () => {
   const [showCheck, setShowCheck] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowCheck(true), 400);
+    const t = setTimeout(() => {
+      setShowCheck(true);
+      // Fire confetti burst
+      const end = Date.now() + 1500;
+      const colors = ["#00d4aa", "#7c3aed", "#3b82f6"];
+      (function frame() {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.6 },
+          colors,
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.6 },
+          colors,
+        });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }, 400);
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Subtle gradient orbs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[hsl(230_60%_30%/0.15)] blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[hsl(260_60%_40%/0.12)] blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-background grid-pattern relative overflow-hidden">
 
       <div className="relative z-10">
         {/* Header */}
