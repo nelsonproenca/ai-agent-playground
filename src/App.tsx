@@ -10,6 +10,7 @@ import Clientes from "./pages/Clientes";
 import Playground from "./pages/Playground";
 import Admin from "./pages/Admin";
 import Contato from "./pages/Contato";
+import SuccessBooking from "./pages/SuccessBooking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/contato" element={<Contato />} />
+          <Route path="/booking-success" element={<SuccessBooking />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
