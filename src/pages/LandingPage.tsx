@@ -187,15 +187,15 @@ const LandingPage = () => {
                 <Mail size={14} style={{ color: NAVY }} />
                 <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>proenca.nelson.79@gmail.com</span>
               </a>
-              <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/5511945598960" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 group">
                 <Phone size={14} style={{ color: NAVY }} />
-                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>WhatsApp</span>
+                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>+55 11 94559-8960</span>
               </a>
-              <a href="https://nelsonproenca.info" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.nelson-proenca-info.com.br" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 group">
                 <Globe size={14} style={{ color: NAVY }} />
-                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>nelsonproenca.info</span>
+                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>www.nelson-proenca-info.com.br</span>
               </a>
             </div>
           </div>
