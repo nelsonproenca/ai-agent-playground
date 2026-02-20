@@ -142,25 +142,37 @@ const LandingPage = () => {
     <div className="min-h-screen bg-white text-gray-900 font-sans print-a4">
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 8mm; }
-          .print-a4 { min-height: auto !important; }
-          .print-a4 section { padding-top: 10px !important; padding-bottom: 10px !important; }
-          .print-a4 h1 { font-size: 20px !important; line-height: 1.15 !important; }
-          .print-a4 h2 { font-size: 14px !important; }
-          .print-a4 h3 { font-size: 10px !important; }
-          .print-a4 p, .print-a4 span, .print-a4 label { font-size: 7.5px !important; line-height: 1.25 !important; }
-          .print-a4 .space-y-4 > * + * { margin-top: 3px !important; }
-          .print-a4 footer { padding: 4px 0 !important; }
+          @page { size: A4 portrait; margin: 6mm; }
+          * { break-inside: avoid-page; }
+          .print-a4 { min-height: auto !important; font-size: 8px !important; }
+          .print-a4 section { padding-top: 6px !important; padding-bottom: 6px !important; }
+          .print-a4 h1 { font-size: 17px !important; line-height: 1.1 !important; margin-bottom: 2px !important; }
+          .print-a4 h2 { font-size: 12px !important; margin-bottom: 4px !important; }
+          .print-a4 h3 { font-size: 9px !important; }
+          .print-a4 p, .print-a4 span, .print-a4 label { font-size: 7px !important; line-height: 1.2 !important; }
+          .print-a4 .space-y-4 > * + * { margin-top: 2px !important; }
+          .print-a4 footer { padding: 2px 0 !important; }
           .print-a4 [class*="py-20"], .print-a4 [class*="py-28"], .print-a4 [class*="pb-20"], .print-a4 [class*="pb-28"],
           .print-a4 [class*="pt-16"], .print-a4 [class*="pt-28"] {
-            padding-top: 12px !important; padding-bottom: 12px !important;
+            padding-top: 6px !important; padding-bottom: 6px !important;
           }
-          .print-a4 [class*="mb-16"] { margin-bottom: 8px !important; }
-          .print-a4 [class*="mb-6"] { margin-bottom: 4px !important; }
-          .print-a4 [class*="mt-10"] { margin-top: 6px !important; }
-          .print-a4 [class*="gap-6"] { gap: 6px !important; }
-          .print-a4 [class*="p-6"], .print-a4 [class*="p-8"] { padding: 8px !important; }
-          .print-a4 [class*="p-4"] { padding: 6px !important; }
+          .print-a4 [class*="mb-16"] { margin-bottom: 4px !important; }
+          .print-a4 [class*="mb-6"] { margin-bottom: 2px !important; }
+          .print-a4 [class*="mt-10"] { margin-top: 4px !important; }
+          .print-a4 [class*="mt-6"] { margin-top: 3px !important; }
+          .print-a4 [class*="gap-6"] { gap: 4px !important; }
+          .print-a4 [class*="gap-4"] { gap: 3px !important; }
+          .print-a4 [class*="gap-3"] { gap: 2px !important; }
+          .print-a4 [class*="p-6"], .print-a4 [class*="p-8"] { padding: 6px !important; }
+          .print-a4 [class*="p-4"] { padding: 4px !important; }
+          .print-a4 [class*="py-5"] { padding-top: 3px !important; padding-bottom: 3px !important; }
+          .print-a4 [class*="py-8"] { padding-top: 3px !important; padding-bottom: 3px !important; }
+          .print-a4 [class*="px-5"] { padding-left: 4px !important; padding-right: 4px !important; }
+          .print-a4 [class*="rounded-2xl"] { border-radius: 6px !important; }
+          .print-a4 [class*="rounded-xl"] { border-radius: 4px !important; }
+          .print-a4 [class*="tracking-\\[0\\.2em\\]"] { font-size: 6px !important; margin-bottom: 2px !important; }
+          .print-a4 svg { width: 12px !important; height: 12px !important; }
+          .print-a4 [class*="w-10"] { width: 20px !important; height: 20px !important; }
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}</style>
