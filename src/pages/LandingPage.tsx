@@ -3,7 +3,7 @@ import {
   Globe, Monitor, Users, ShieldCheck, RefreshCw, Link2,
   Lock, BarChart3, Database, Workflow, LayoutDashboard,
   Cloud, Server, DollarSign, Bot, Cpu, BrainCircuit,
-  Layers, Mail, Linkedin, QrCode, ArrowRight,
+  Layers, Mail, Linkedin, QrCode, ArrowRight, Phone,
 } from "lucide-react";
 
 const PILLARS = [
@@ -176,7 +176,7 @@ const LandingPage = () => {
                 15+ anos de experiência internacional transformando tecnologia em lucro
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <a href="https://www.linkedin.com/in/nelsonproenca/" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 group">
                 <Linkedin size={14} style={{ color: NAVY }} />
@@ -186,6 +186,16 @@ const LandingPage = () => {
                 className="flex items-center gap-1.5 group">
                 <Mail size={14} style={{ color: NAVY }} />
                 <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>proenca.nelson.79@gmail.com</span>
+              </a>
+              <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 group">
+                <Phone size={14} style={{ color: NAVY }} />
+                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>WhatsApp</span>
+              </a>
+              <a href="https://nelsonproenca.info" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 group">
+                <Globe size={14} style={{ color: NAVY }} />
+                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>nelsonproenca.info</span>
               </a>
             </div>
           </div>
@@ -215,6 +225,7 @@ const PillarCard = ({ pillar, index }: { pillar: typeof PILLARS[0]; index: numbe
           </div>
         </div>
       ))}
+      <p className="text-[9px] italic pt-1" style={{ color: NAVY_LIGHT }}>…e outras soluções sob medida para o seu negócio.</p>
     </div>
   </motion.div>
 );
