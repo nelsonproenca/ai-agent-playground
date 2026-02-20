@@ -185,7 +185,7 @@ const LandingPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {PILLARS.map((pillar, pi) => (
             <motion.div key={pillar.title} custom={pi} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-              className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 transition-all group">
+              className="rounded-2xl border-2 border-gray-200 bg-white p-6 md:p-8 transition-all group">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${pillar.color}12` }}>
                   <pillar.icon size={20} style={{ color: pillar.color }} />
