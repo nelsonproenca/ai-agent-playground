@@ -19,34 +19,46 @@ export type Database = {
           cliente_email: string | null
           cliente_nome: string | null
           cliente_whatsapp: string | null
+          comissao_paga: boolean | null
           created_at: string | null
           data_reuniao: string
           expert_responsavel: string | null
           id: string
+          indicado_por: string | null
           instagram_user_id: string | null
+          origem: string | null
           status: string | null
+          valor_projeto: number | null
         }
         Insert: {
           cliente_email?: string | null
           cliente_nome?: string | null
           cliente_whatsapp?: string | null
+          comissao_paga?: boolean | null
           created_at?: string | null
           data_reuniao: string
           expert_responsavel?: string | null
           id?: string
+          indicado_por?: string | null
           instagram_user_id?: string | null
+          origem?: string | null
           status?: string | null
+          valor_projeto?: number | null
         }
         Update: {
           cliente_email?: string | null
           cliente_nome?: string | null
           cliente_whatsapp?: string | null
+          comissao_paga?: boolean | null
           created_at?: string | null
           data_reuniao?: string
           expert_responsavel?: string | null
           id?: string
+          indicado_por?: string | null
           instagram_user_id?: string | null
+          origem?: string | null
           status?: string | null
+          valor_projeto?: number | null
         }
         Relationships: []
       }
