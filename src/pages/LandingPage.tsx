@@ -174,10 +174,10 @@ const LandingPage = () => {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              <a href="https://www.linkedin.com/in/nelsonproenca/" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.linkedin.com/in/nelson-proenca/" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 group">
                 <Linkedin size={14} style={{ color: NAVY }} />
-                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>/nelsonproenca</span>
+                <span className="text-[9px] font-medium" style={{ color: GRAPHITE_LIGHT }}>/nelson-proenca</span>
               </a>
               <a href="mailto:proenca.nelson.79@gmail.com"
                 className="flex items-center gap-1.5 group">
