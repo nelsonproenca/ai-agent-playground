@@ -227,25 +227,25 @@ const LandingPage = () => {
           </p>
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
             <a href="https://www.instagram.com/nelsonhaproenca/" target="_blank" rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 transition-all">
               <Instagram size={22} style={{ color: "#E1306C" }} />
               <span className="text-xs font-semibold text-gray-700">Instagram</span>
               <span className="text-[10px] text-gray-400">@nelsonhaproenca</span>
             </a>
             <a href="https://wa.me/5511945598960" target="_blank" rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 transition-all">
               <MessageCircle size={22} style={{ color: "#25D366" }} />
               <span className="text-xs font-semibold text-gray-700">WhatsApp</span>
               <span className="text-[10px] text-gray-400">+55 11 94559-8960</span>
             </a>
             <a href="tel:+5511945598960"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 transition-all">
               <Phone size={22} style={{ color: "#6366f1" }} />
               <span className="text-xs font-semibold text-gray-700">Telefone</span>
               <span className="text-[10px] text-gray-400">+55 11 94559-8960</span>
             </a>
             <a href="mailto:proenca.nelson.79@gmail.com"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 transition-all">
               <Mail size={22} style={{ color: "#0ea5e9" }} />
               <span className="text-xs font-semibold text-gray-700">E-mail</span>
               <span className="text-[10px] text-gray-400">proenca.nelson.79@gmail.com</span>
