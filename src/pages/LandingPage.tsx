@@ -139,7 +139,31 @@ const LandingPage = () => {
   const [formOpen, setFormOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans">
+    <div className="min-h-screen bg-white text-gray-900 font-sans print-a4">
+      <style>{`
+        @media print {
+          @page { size: A4 portrait; margin: 8mm; }
+          .print-a4 { min-height: auto !important; }
+          .print-a4 section { padding-top: 10px !important; padding-bottom: 10px !important; }
+          .print-a4 h1 { font-size: 20px !important; line-height: 1.15 !important; }
+          .print-a4 h2 { font-size: 14px !important; }
+          .print-a4 h3 { font-size: 10px !important; }
+          .print-a4 p, .print-a4 span, .print-a4 label { font-size: 7.5px !important; line-height: 1.25 !important; }
+          .print-a4 .space-y-4 > * + * { margin-top: 3px !important; }
+          .print-a4 footer { padding: 4px 0 !important; }
+          .print-a4 [class*="py-20"], .print-a4 [class*="py-28"], .print-a4 [class*="pb-20"], .print-a4 [class*="pb-28"],
+          .print-a4 [class*="pt-16"], .print-a4 [class*="pt-28"] {
+            padding-top: 12px !important; padding-bottom: 12px !important;
+          }
+          .print-a4 [class*="mb-16"] { margin-bottom: 8px !important; }
+          .print-a4 [class*="mb-6"] { margin-bottom: 4px !important; }
+          .print-a4 [class*="mt-10"] { margin-top: 6px !important; }
+          .print-a4 [class*="gap-6"] { gap: 6px !important; }
+          .print-a4 [class*="p-6"], .print-a4 [class*="p-8"] { padding: 8px !important; }
+          .print-a4 [class*="p-4"] { padding: 6px !important; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}</style>
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
