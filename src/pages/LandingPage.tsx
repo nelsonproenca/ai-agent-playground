@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Server, Database, Cloud, Brain, ArrowRight, Linkedin,
+  Server, Database, Cloud, Brain, Linkedin, Instagram,
   MessageCircle, Shield, Zap, Code2, Search, BarChart3,
   Settings, Bot, Workflow, Globe, Lock, Layers,
-  CheckCircle, Send, Loader2, X,
+  CheckCircle, Send, Loader2, X, Phone, Mail,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const PILLARS = [
   {
     icon: Code2,
-    title: "Ecossistema .NET",
+    title: ".NET",
     subtitle: "Backend & Performance",
     color: "#6366f1",
     services: [
@@ -148,7 +148,7 @@ const LandingPage = () => {
         <div className="relative max-w-6xl mx-auto px-5 pt-16 pb-20 md:pt-28 md:pb-28">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
             className="text-xs font-semibold uppercase tracking-[0.2em] mb-6" style={{ color: "#6366f1" }}>
-            Nelson Proença · Arquiteto de Soluções Sênior
+            Nelson Proença Informática
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6 }}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight max-w-4xl">
@@ -162,18 +162,6 @@ const LandingPage = () => {
             className="mt-6 text-base md:text-lg text-gray-500 max-w-2xl leading-relaxed">
             Engenharia de alta performance, modernização de sistemas e automação inteligente para empresas que não podem parar.
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.5 }}
-            className="mt-10 flex flex-wrap gap-4">
-            <button onClick={() => setFormOpen(true)}
-              className="px-7 py-3.5 rounded-xl text-white font-semibold text-sm flex items-center gap-2 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
-              Solicitar Diagnóstico Técnico <ArrowRight size={16} />
-            </button>
-            <a href="https://www.linkedin.com/in/nelson-proenca/" target="_blank" rel="noopener noreferrer"
-              className="px-7 py-3.5 rounded-xl border border-gray-200 text-gray-600 font-medium text-sm flex items-center gap-2 hover:border-gray-300 hover:bg-gray-50 transition">
-              <Linkedin size={16} /> LinkedIn
-            </a>
-          </motion.div>
         </div>
       </section>
 
@@ -190,7 +178,7 @@ const LandingPage = () => {
       <section className="max-w-6xl mx-auto px-5 py-20 md:py-28">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           className="text-center mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Pilares Tecnológicos</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Serviços</h2>
           <p className="text-gray-400 text-sm mt-3 max-w-lg mx-auto">Competências verticais que garantem entregas de ponta a ponta.</p>
         </motion.div>
 
@@ -219,41 +207,59 @@ const LandingPage = () => {
                     </div>
                   </div>
                 ))}
+                <p className="text-xs font-medium mt-3 pt-3 border-t border-gray-100" style={{ color: pillar.color }}>
+                  + outros serviços especializados →
+                </p>
               </div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Contato Section */}
       <section className="border-t border-gray-100" style={{
         background: "linear-gradient(180deg, rgba(99,102,241,0.04) 0%, rgba(139,92,246,0.02) 100%)",
       }}>
         <div className="max-w-2xl mx-auto px-5 py-20 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Pronto para escalar?</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Entre em Contato</h2>
           <p className="text-gray-400 text-sm mt-3 max-w-md mx-auto">
-            Solicite um diagnóstico técnico gratuito e descubra como otimizar sua arquitetura.
+            Fale comigo por qualquer um desses canais.
           </p>
-          <button onClick={() => setFormOpen(true)}
-            className="mt-8 px-8 py-3.5 rounded-xl text-white font-semibold text-sm inline-flex items-center gap-2 transition-all hover:shadow-xl hover:scale-[1.02]"
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
-            Solicitar Diagnóstico Técnico <ArrowRight size={16} />
-          </button>
+          <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <a href="https://www.instagram.com/nelson.ari/" target="_blank" rel="noopener noreferrer"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              <Instagram size={22} style={{ color: "#E1306C" }} />
+              <span className="text-xs font-semibold text-gray-700">Instagram</span>
+              <span className="text-[10px] text-gray-400">@nelson.ari</span>
+            </a>
+            <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              <MessageCircle size={22} style={{ color: "#25D366" }} />
+              <span className="text-xs font-semibold text-gray-700">WhatsApp</span>
+              <span className="text-[10px] text-gray-400">(11) 99999-9999</span>
+            </a>
+            <a href="tel:+5511999999999"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              <Phone size={22} style={{ color: "#6366f1" }} />
+              <span className="text-xs font-semibold text-gray-700">Telefone</span>
+              <span className="text-[10px] text-gray-400">(11) 99999-9999</span>
+            </a>
+            <a href="mailto:contato@nelsonproenca.com"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+              <Mail size={22} style={{ color: "#0ea5e9" }} />
+              <span className="text-xs font-semibold text-gray-700">E-mail</span>
+              <span className="text-[10px] text-gray-400">contato@nelson...</span>
+            </a>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-gray-100 bg-gray-50/60">
-        <div className="max-w-6xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-5 py-8 text-center">
           <p className="text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} <span className="font-semibold text-gray-500">Nelson Proença</span> — Arquiteto de Soluções Sênior
+            &copy; {new Date().getFullYear()} <span className="font-semibold text-gray-500">Nelson Proença Informática</span>
           </p>
-          <div className="flex items-center gap-5">
-            <a href="https://www.linkedin.com/in/nelson-proenca/" target="_blank" rel="noopener noreferrer"
-              className="text-gray-400 hover:text-gray-600 transition"><Linkedin size={18} /></a>
-            <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
-              className="text-gray-400 hover:text-gray-600 transition"><MessageCircle size={18} /></a>
-          </div>
         </div>
       </footer>
 
