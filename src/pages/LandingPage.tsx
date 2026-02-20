@@ -139,19 +139,19 @@ const LandingPage = () => {
   const [formOpen, setFormOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 80% 100%, rgba(139,92,246,0.06) 0%, transparent 70%)",
         }} />
-        <div className="relative max-w-6xl mx-auto px-5 pt-16 pb-20 md:pt-28 md:pb-28">
+        <div className="relative max-w-6xl mx-auto px-5 pt-16 pb-20 md:pt-28 md:pb-28 text-center">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
             className="text-xs font-semibold uppercase tracking-[0.2em] mb-6" style={{ color: "#6366f1" }}>
             Nelson Proença Informática
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight max-w-4xl">
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight max-w-4xl mx-auto">
             Arquitetura de Software &{" "}
             <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
               Inteligência que Escalam
@@ -159,7 +159,7 @@ const LandingPage = () => {
             seu Negócio
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
-            className="mt-6 text-base md:text-lg text-gray-500 max-w-2xl leading-relaxed">
+            className="mt-6 text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
             Engenharia de alta performance, modernização de sistemas e automação inteligente para empresas que não podem parar.
           </motion.p>
         </div>
@@ -226,29 +226,29 @@ const LandingPage = () => {
             Fale comigo por qualquer um desses canais.
           </p>
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <a href="https://www.instagram.com/nelson.ari/" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.instagram.com/nelsonhaproenca/" target="_blank" rel="noopener noreferrer"
               className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
               <Instagram size={22} style={{ color: "#E1306C" }} />
               <span className="text-xs font-semibold text-gray-700">Instagram</span>
-              <span className="text-[10px] text-gray-400">@nelson.ari</span>
+              <span className="text-[10px] text-gray-400">@nelsonhaproenca</span>
             </a>
-            <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+            <a href="https://wa.me/5511945598960" target="_blank" rel="noopener noreferrer"
               className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
               <MessageCircle size={22} style={{ color: "#25D366" }} />
               <span className="text-xs font-semibold text-gray-700">WhatsApp</span>
-              <span className="text-[10px] text-gray-400">(11) 99999-9999</span>
+              <span className="text-[10px] text-gray-400">+55 11 94559-8960</span>
             </a>
-            <a href="tel:+5511999999999"
+            <a href="tel:+5511945598960"
               className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
               <Phone size={22} style={{ color: "#6366f1" }} />
               <span className="text-xs font-semibold text-gray-700">Telefone</span>
-              <span className="text-[10px] text-gray-400">(11) 99999-9999</span>
+              <span className="text-[10px] text-gray-400">+55 11 94559-8960</span>
             </a>
-            <a href="mailto:contato@nelsonproenca.com"
+            <a href="mailto:proenca.nelson.79@gmail.com"
               className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
               <Mail size={22} style={{ color: "#0ea5e9" }} />
               <span className="text-xs font-semibold text-gray-700">E-mail</span>
-              <span className="text-[10px] text-gray-400">contato@nelson...</span>
+              <span className="text-[10px] text-gray-400">proenca.nelson.79@gmail.com</span>
             </a>
           </div>
         </div>
