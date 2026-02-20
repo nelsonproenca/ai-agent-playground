@@ -11,6 +11,7 @@ import Playground from "./pages/Playground";
 import Admin from "./pages/Admin";
 import Contato from "./pages/Contato";
 import SuccessBooking from "./pages/SuccessBooking";
+import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/contato" element={<Contato />} />
           <Route path="/booking-success" element={<SuccessBooking />} />
+          <Route path="/landing" element={<LandingPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
