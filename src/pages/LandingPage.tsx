@@ -151,7 +151,7 @@ const LandingPage = () => {
             Nelson Proença Informática
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight max-w-4xl mx-auto">
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight max-w-4xl mx-auto font-mono">
             Arquitetura de Software &{" "}
             <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
               Inteligência que Escalam
@@ -185,7 +185,7 @@ const LandingPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {PILLARS.map((pillar, pi) => (
             <motion.div key={pillar.title} custom={pi} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-              className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 hover:shadow-lg hover:border-gray-200 transition-all group">
+              className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 transition-all group">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${pillar.color}12` }}>
                   <pillar.icon size={20} style={{ color: pillar.color }} />
