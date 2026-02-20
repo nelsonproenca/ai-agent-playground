@@ -172,9 +172,6 @@ const LandingPage = () => {
               <p className="text-[11px] font-semibold" style={{ color: NAVY }}>
                 Nelson Proença
               </p>
-              <p className="text-[9px] mt-0.5" style={{ color: GRAPHITE_LIGHT }}>
-                15+ anos de experiência internacional transformando tecnologia em lucro
-              </p>
             </div>
             <div className="flex flex-wrap items-center gap-4">
               <a href="https://www.linkedin.com/in/nelsonproenca/" target="_blank" rel="noopener noreferrer"
