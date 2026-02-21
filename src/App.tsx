@@ -10,6 +10,9 @@ import Colabs from "./pages/Colabs";
 import Clientes from "./pages/Clientes";
 import Playground from "./pages/Playground";
 import Admin from "./pages/Admin";
+import LeadsPage from "./pages/LeadsPage";
+import ColabsPage from "./pages/ColabsPage";
+import ClientesPage from "./pages/ClientesPage";
 import GeradorConvites from "./pages/GeradorConvites";
 import Contato from "./pages/Contato";
 import SuccessBooking from "./pages/SuccessBooking";
@@ -33,6 +36,9 @@ const App = () => (
             <Route path="/playground" element={<Playground />} />
             <Route path="/login" element={<Dashboard />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/leads" element={<LeadsPage />} />
+            <Route path="/admin/colaboradores" element={<ColabsPage />} />
+            <Route path="/admin/clientes" element={<ClientesPage />} />
             <Route path="/convites" element={<GeradorConvites />} />
             <Route path="/contato" element={<Contato />} />
             <Route path="/booking-success" element={<SuccessBooking />} />
