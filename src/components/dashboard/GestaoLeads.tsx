@@ -177,14 +177,14 @@ const GestaoLeads = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 hover:bg-primary/10"
+                      className="h-8 w-8 group hover:bg-primary/10"
                       onClick={(e) => toggleVisto(e, lead)}
                       title={lead.visto_pelo_nelson ? "Marcar como não visto" : "Marcar como visto"}
                     >
                       {lead.visto_pelo_nelson ? (
                         <CheckCircle2 className="h-4 w-4 text-primary" />
                       ) : (
-                        <Eye className="h-5 w-5 text-foreground stroke-[2.5] hover:text-primary transition-colors" />
+                        <Eye className="h-5 w-5 text-foreground stroke-[2.5] group-hover:text-primary transition-colors" />
                       )}
                     </Button>
                   </TableCell>
