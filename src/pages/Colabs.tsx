@@ -82,10 +82,10 @@ const Colabs = () => {
                     </div>
                     <a
                       href={`mailto:${c.email}`}
-                      className="text-xs font-mono text-primary hover:underline flex items-center gap-1.5"
+                      className="text-xs font-mono text-primary hover:underline flex items-center gap-1.5 max-w-full overflow-hidden"
                     >
-                      <Mail className="h-3.5 w-3.5" />
-                      {c.email}
+                      <Mail className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{c.email}</span>
                     </a>
                   </CardContent>
                 </Card>
