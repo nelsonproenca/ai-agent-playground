@@ -9,9 +9,11 @@ import Colabs from "./pages/Colabs";
 import Clientes from "./pages/Clientes";
 import Playground from "./pages/Playground";
 import Admin from "./pages/Admin";
+import GeradorConvites from "./pages/GeradorConvites";
 import Contato from "./pages/Contato";
 import SuccessBooking from "./pages/SuccessBooking";
 import LandingPage from "./pages/LandingPage";
+import DashboardAgendamentos from "./pages/DashboardAgendamentos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,9 +31,11 @@ const App = () => (
           <Route path="/playground" element={<Playground />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/convites" element={<GeradorConvites />} />
           <Route path="/contato" element={<Contato />} />
           <Route path="/booking-success" element={<SuccessBooking />} />
           <Route path="/landing" element={<LandingPage />} />
+          <Route path="/agendamentos" element={<DashboardAgendamentos />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
