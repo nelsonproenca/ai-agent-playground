@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Users, Building2 } from "lucide-react";
+import { ArrowLeft, Shield, Users, Building2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const adminLinks = [
   { to: "/dashboard", icon: Shield, label: "Área Restrita", desc: "Leads e análises IA" },
   { to: "/colabs", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
   { to: "/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
+  { to: "/convites", icon: QrCode, label: "Gerador de Convites", desc: "QR Codes e links" },
 ];
 
 const Admin = () => {
