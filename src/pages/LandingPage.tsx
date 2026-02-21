@@ -183,13 +183,8 @@ const LandingPage = () => {
       `}</style>
 
       {/* Collaborator Selection Modal */}
-      <Dialog open={modalOpen && !selectedColab} onOpenChange={(open) => {
-        if (!open && !selectedColab) return; // prevent closing without selection
-        setModalOpen(open);
-      }}>
-        <DialogContent className="sm:max-w-md max-w-[95vw] max-h-[85vh] overflow-y-auto" onInteractOutside={(e) => {
-          if (!selectedColab) e.preventDefault();
-        }}>
+      <Dialog open={modalOpen && !selectedColab} onOpenChange={setModalOpen}>
+        <DialogContent className="sm:max-w-md max-w-[95vw] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-center text-lg font-semibold">
               Selecione o Colaborador
@@ -235,6 +230,13 @@ const LandingPage = () => {
               ))}
             </div>
           )}
+
+          <div className="pt-2 border-t">
+            <Button variant="outline" className="w-full gap-2" onClick={() => navigate("/admin")}>
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              Voltar à Área Restrita
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
