@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeCanvas } from "qrcode.react";
-import { ArrowLeft, Copy, Download, QrCode, Check, CloudUpload, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, Download, QrCode, Check, CloudUpload, Loader2, Image, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,9 +14,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Colaborador = Tables<"colaboradores">;
+
+type StoredFile = {
+  name: string;
+  url: string;
+  created_at: string | null;
+};
 
 const GeradorConvites = () => {
   const [colabs, setColabs] = useState<Colaborador[]>([]);
@@ -25,10 +32,30 @@ const GeradorConvites = () => {
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<StoredFile[]>([]);
+  const [galleryLoading, setGalleryLoading] = useState(true);
   const qrRef = useRef<HTMLDivElement>(null);
 
+  const fetchGallery = useCallback(async () => {
+    setGalleryLoading(true);
+    const { data, error } = await supabase.storage.from("uploads").list("convites", {
+      sortBy: { column: "created_at", order: "desc" },
+    });
+    if (!error && data) {
+      const files: StoredFile[] = data
+        .filter((f) => f.name.endsWith(".png"))
+        .map((f) => ({
+          name: f.name,
+          url: supabase.storage.from("uploads").getPublicUrl(`convites/${f.name}`).data.publicUrl,
+          created_at: f.created_at ?? null,
+        }));
+      setGallery(files);
+    }
+    setGalleryLoading(false);
+  }, []);
+
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase
         .from("colaboradores")
         .select("*")
@@ -36,8 +63,9 @@ const GeradorConvites = () => {
       if (data) setColabs(data);
       setLoading(false);
     };
-    fetch();
-  }, []);
+    fetchData();
+    fetchGallery();
+  }, [fetchGallery]);
 
   const selected = colabs.find((c) => c.id === selectedId);
 
@@ -90,12 +118,13 @@ const GeradorConvites = () => {
         const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(fileName);
         setSavedUrl(urlData.publicUrl);
         toast.success("QR Code salvo no storage!");
+        fetchGallery();
       }
       setSaving(false);
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [selected, generatedLink, getHiResBlob]);
+  }, [selected, generatedLink, getHiResBlob, fetchGallery]);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(generatedLink);
@@ -134,7 +163,7 @@ const GeradorConvites = () => {
         </div>
       </header>
 
-      <main className="container max-w-lg py-12 px-4 space-y-6">
+      <main className="container max-w-2xl py-12 px-4 space-y-6">
         {/* Select colaborador */}
         <Card className="border-border bg-card">
           <CardHeader className="pb-3">
@@ -253,6 +282,65 @@ const GeradorConvites = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Gallery */}
+        <Card className="border-border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-mono text-base text-foreground flex items-center gap-2">
+              <Image className="h-4 w-4 text-primary" />
+              Convites Salvos
+              <Badge variant="outline" className="font-mono text-xs border-primary/30 text-primary ml-auto">
+                {gallery.length}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {galleryLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : gallery.length === 0 ? (
+              <p className="text-sm text-muted-foreground font-mono text-center py-8">
+                Nenhum convite salvo ainda.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {gallery.map((file) => {
+                  const label = file.name
+                    .replace("convite-", "")
+                    .replace(".png", "")
+                    .replace(/-/g, " ");
+                  return (
+                    <div
+                      key={file.name}
+                      className="group rounded-lg border border-border bg-secondary p-3 flex flex-col items-center gap-2 hover:border-primary/40 transition-colors"
+                    >
+                      <img
+                        src={`${file.url}?t=${Date.now()}`}
+                        alt={label}
+                        className="w-full aspect-square rounded-md object-contain bg-card"
+                      />
+                      <p className="text-xs font-mono text-foreground capitalize truncate w-full text-center">
+                        {label}
+                      </p>
+                      <a
+                        href={file.url}
+                        download={file.name}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="ghost" size="sm" className="font-mono text-xs gap-1 h-7">
+                          <Download className="h-3 w-3" />
+                          Baixar
+                        </Button>
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
