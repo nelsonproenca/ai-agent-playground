@@ -1,0 +1,292 @@
+{
+  "name": "[PRD]SiteNPI-AddLeads",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "leads-site",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "daa2b538-b9f3-4f42-a568-6d6b80525455",
+      "name": "Webhook",
+      "webhookId": "296e9d3f-c17f-41c6-bc7a-230c79d50b4e"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise o desafio enviado por {{ $json.Nome }}: {{ $json.Desafio }}",
+        "options": {
+          "systemMessage": "=CONTEXTO DE IDENTIDADE:\nVocê é o Consultor Técnico Especialista da Nelson Proença Informática. Você representa o Nelson Proença, um Engenheiro de Software Fullstack com mais de 15 anos de experiência, pós-graduado em Engenharia de Software com SOA e com experiência internacional (Portugal).\n\nENTRADA DE DADOS (DADOS LIMPOS):\nVocê receberá um objeto JSON com os seguintes campos:\n\nCliente: {{ $json.Nome }}\n\nContacto: {{ $json.Contacto }}\n\nDesafio Técnico: {{ $json.Desafio }}\n\nCanal de Origem: {{ $json.Canal }}\n\nA TUA MISSÃO:\n\nAnálise de Engenharia: Analise o \"Desafio Técnico\" sob a ótica de quem domina .NET Core, Azure, SQL Server e Micro-serviços.\n\nQualificação de Lead: Identifique se o desafio requer uma solução robusta (Enterprise) ou se pode ser resolvido com automação ágil (n8n/IA).\n\nDemonstração de Autoridade: No seu raciocínio, considere as boas práticas que o Nelson aplica, como TDD, SCRUM e Arquitetura Cloud (Azure Service Bus, Functions).\n\nDIRETRIZES DE RESPOSTA:\n\nSe o cliente mencionar algo complexo, destaque que o Nelson tem experiência em projetos de grande escala como o Morpheus (Cloud SONDA) ou o projeto Galaxy (Lisboa).\n\nSeja consultivo: não dê apenas uma resposta rasa; sugira um caminho técnico (Ex: \"Para este caso de integração, o uso de uma arquitetura orientada a eventos com Azure seria o ideal\").\n\nMantenha o tom profissional, mas acessível.\n\nOBJETIVO FINAL:\nPrepare um resumo executivo para o Nelson Proença, pontuando a urgência e a stack tecnológica sugerida para este lead específico.\n\nIMPORTANTE: Sua análise deve ser profunda, porém concisa. Resuma os pontos técnicos em tópicos (bullet points) e limite sua resposta a no máximo 2.000 caracteres. Priorize a stack técnica e o valor de negócio.\n\nSua resposta deve ser em Markdown simplificado.\nUse apenas um asterisco para negrito (ex: texto).\nNÃO use sublinhados (_), pois eles causam erro de parsing no Telegram.\nNÃO use caracteres especiais de código como < > fora de blocos de código.\nSe precisar citar código ou logs, envolva-os em crases simples: `código aqui`.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9f3e1042-edfd-4f1b-abae-91f1bcfbbbd9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        416,
+        192
+      ],
+      "id": "61d0b0bb-d916-419f-8472-094849712f73",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gaRCgvjIotB3Z7nA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7833205940",
+        "text": "=🚀 **NOVO LEAD QUALIFICADO** 🚀\n*Nelson Proença Informática*\n\n👤 **CLIENTE:** {{ $node[\"Edit Fields\"].json.Nome }}\n📧 **CONTATO:** {{ $node[\"Edit Fields\"].json.Contato }}\n🌍 **CANAL:** {{ $node[\"Edit Fields\"].json.Canal }}\n\n---\n🧠 **ANÁLISE TÉCNICA (IA):**\n{{ $json.output }}\n\n---\n🛠️ **STATUS DO SISTEMA:**\n✅ Persistido no Supabase\n✅ Análise processada via n8n\n📂 *ID do Lead:* `{{ $node[\"Edit Fields\"].json.LeadID }}`",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        -80
+      ],
+      "id": "54115ed0-b140-43e8-9c96-b56f8a1379ff",
+      "name": "Send a text message",
+      "webhookId": "9047b763-48cb-4c84-8067-de5b37bb5462",
+      "credentials": {
+        "telegramApi": {
+          "id": "zGCWv1lolz4XSDY2",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "67add68e-0d8f-42b9-8ba4-2f156192e7e7",
+              "name": "Nome",
+              "value": "={{ $json.body.record.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "93e753ba-3cb7-4b45-bb71-f9cfc1345699",
+              "name": "Contato",
+              "value": "={{ $json.body.record.contato }}",
+              "type": "string"
+            },
+            {
+              "id": "273221bc-d593-4ed9-8450-30ab88e63e03",
+              "name": "Desafio",
+              "value": "={{ $json.body.record.desafio_tecnico }}",
+              "type": "string"
+            },
+            {
+              "id": "3a740180-1e1d-4784-9162-df987317c881",
+              "name": "Canal",
+              "value": "={{ $json.body.record.canal }}",
+              "type": "string"
+            },
+            {
+              "id": "8c065dcb-b45d-4876-b70c-7316bf7c3050",
+              "name": "LeadID",
+              "value": "={{ $json.body.record.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "246178e9-b946-486c-87ad-54c2ff6ecb11",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads_ia",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $node[\"Edit Fields\"].json.LeadID }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "visto_pelo_nelson",
+              "fieldValue": "False"
+            },
+            {
+              "fieldId": "analise_ia",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        800,
+        112
+      ],
+      "id": "abb453f6-1b78-42f5-952e-abe1f7235847",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "RZ2mrXdDyzccc4Qw",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "029f778a-deaf-40d5-9dcb-fe3d52d59cf6",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $input.first().json.output || \"\";\n\nconst cleanText = text\n  .replace(/</g, '(') // Transforma < em (\n  .replace(/>/g, ')') // Transforma > em )\n  .replace(/_/g, ' ') // Substitui underscores por espaços (evita erro de itálico)\n  .substring(0, 3500); // Garante o limite de tamanho\n\nreturn { clean_output: cleanText };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -80
+      ],
+      "id": "b067182d-c6af-4b68-9b95-2dc261e6d3b5",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "588ec668-5835-4e21-a064-a7518804f854",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c4b7d49bc7f303061c12cf83186eac1233fdf5ecf30add70410d27ff122fff8"
+  },
+  "id": "Xb6IvquUoQ6l94WN",
+  "tags": []
+}

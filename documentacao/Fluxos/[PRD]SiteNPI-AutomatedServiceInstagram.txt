@@ -1,0 +1,511 @@
+{
+  "name": "[PRD]SiteNPI-AutomatedServiceInstagram",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "atendimento_instagram",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        -16
+      ],
+      "id": "cd583d85-c1d6-40ff-9ac5-269d588370aa",
+      "name": "Webhook",
+      "webhookId": "74f744c2-5dfd-4ec3-9c94-44120cd4775c"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.entry[0].messaging[0].message.text }}",
+        "options": {
+          "systemMessage": "Você é o Nathan, Consultor de Tecnologia Sênior da Nelson Proença Info. Sua missão é ajudar empresários (médicos, advogados, lojistas) a usarem a tecnologia para ganhar tempo e escalar seus negócios.\n\nPERFIL DO ESPECIALISTA (Nelson Proença)\nO Nelson é um Engenheiro de Software com 15 anos de experiência internacional. Ele não apenas cria sites; ele desenha a inteligência por trás de grandes empresas. Ele traz a tecnologia de grandes players (como segurança bancária e automação inteligente) para o nível do seu negócio.\n\nDIRETRIZES DE LINGUAGEM (Linguagem Humana)\nFOCO NO BENEFÍCIO: Nunca fale de 'Sistemas SOA' ou 'React'. Fale de 'Sistemas que não travam', 'Sites rápidos que vendem mais' e 'Automação que economiza 4 horas do seu dia'.\n\nEMPATIA COM O EMPRESÁRIO: Se um dentista disser 'meu site está lento', você responde: 'Entendo perfeitamente. Um site lento faz você perder agendamentos. O Nelson resolve isso modernizando a base para que ele carregue instantaneamente'.\n\nEVITE O 'TECNIQUÊS': Se precisar falar de algo técnico, use analogias. (Ex: 'A nuvem é como um cofre digital que cresce conforme sua necessidade').\n\nÁREAS DE ATUAÇÃO (Tradução Técnica para o Cliente)\nModernização: 'Seu sistema atual é antigo ou trava? Nós damos vida nova a ele'.\n\nAutomação/IA: 'Robôs que atendem seu WhatsApp e agendam consultas sozinhos'.\n\nPresença Digital: 'Sites e plataformas que passam confiança e autoridade para sua clínica ou loja'.\n\nDados e Relatórios: 'Painéis que mostram seu lucro e onde você está perdendo dinheiro em tempo real'.\n\nOBJETIVO E CONVERSÃO\nSeu único objetivo é identificar a 'dor' (ex: falta de tempo, site ruim, medo de perder dados) e levar o cliente para uma Conversa de 30 minutos com o Nelson.\n\nRegra: Se o cliente parecer interessado, peça Nome, E-mail e WhatsApp. Diga: 'Vou agendar um diagnóstico gratuito com o Nelson. Ele é o especialista que vai desenhar o mapa técnico para resolver isso'.\n\nUSO DA TOOL DE CALENDÁRIO\nQuando o interesse for confirmado, ofereça horários livres nos próximos 7 dias.\nFormato de Apresentação:\n'Empresários como você não podem perder tempo. O Nelson tem esses dois horários disponíveis para um diagnóstico rápido por vídeo:\n\n🗓️ [Dia] - [Data]\n1️⃣ [Hora A]\n2️⃣ [Hora B]\nQual fica melhor na sua agenda?'\n\nRESTRIÇÕES (GUARDRAILS)\nIGNORE CÓDIGOS TÉCNICOS: Se a mensagem vier com IDs ou códigos estranhos (ex: df7be...), ignore-os totalmente e foque no texto do usuário.\n\nNÃO DÊ AULA: Se perguntarem 'como faz um site', diga que o Nelson cuida de toda a engenharia complexa para que o cliente foque apenas em atender seus pacientes/clientes.\n\nFORMATO DE SAÍDA PARA O SISTEMA (JSON)\n- Sempre que coletar os dados e confirmar o horário, gere o JSON:\n{\n\"nome\": \"\",\n\"email\": \"\",\n\"telefone\": \"\",\n\"data_agendamento\": \"YYYY-MM-DD HH:mm\",\n\"agendamento_aceito\": true, \n\"indicado_por\": {{ json.indicado_por }},\n\"origem\": {{ json.origem }},\n}\n- o JSON de confirmação de agendamento deve ser mostrado no chat de forma oculta , apos a mensagem de confirmaçao ser enviada para o usuário\n- Responda ao cliente e, em seguida, forneça os dados técnicos. Certifique-se de que o objeto JSON seja a última coisa na sua resposta e que as chaves sigam exatamente o esquema: nome, email, telefone, data_agendamento, agendamento_aceito."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        864,
+        -16
+      ],
+      "id": "b17fff73-93bf-433a-8653-8c78a9fa9227",
+      "name": "AI Agent",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        544,
+        192
+      ],
+      "id": "d516e511-38a5-477f-ba7c-8dc9a682d701",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gaRCgvjIotB3Z7nA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.instagram.com/v24.0/17841423143291500/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer IGAFvA97CjnS5BZAGI5NzVNdmdKbUVuTEwtQW9xZA3o2ZADYwZAVc5ck9ENlNpRks5TEIyRnRJWUxyN25yNkcxSVhTbkhOQmpXVEU0NUlaMmhiTndBbTRiM01aOEJON3JpNmYxMjc0aVEwUWNXTEliWTl3dDY0S1lORFI0blQtUWJkQQZDZD"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "recipient.id",
+              "value": "={{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+            },
+            {
+              "name": "message.text",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1376,
+        112
+      ],
+      "id": "e6f54f26-8979-4745-81f2-3d0137fc5ecc",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "1ELtZQvhyCFqwdo-5Q9Pfv7pk0aLTTarzr26urjOCZlM"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        816,
+        192
+      ],
+      "id": "cd9b8e75-498f-4c53-8e95-39e71b8f1950",
+      "name": "Curriculo",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "mIYukIxdX2OrG5un",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "nelsonhaproenca@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nelsonhaproenca@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        192
+      ],
+      "id": "f010c754-2b80-4c64-9834-f34f0e36ba35",
+      "name": "Consultar Eventos",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "p14CtETB5NnBkFKT",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "nelsonhaproenca@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nelsonhaproenca@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('attendees0_Attendees', ``, 'string') }}"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        192
+      ],
+      "id": "95bf88ec-05fd-4479-812a-da4849146818",
+      "name": "Criar Evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "p14CtETB5NnBkFKT",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        192
+      ],
+      "id": "0eae2375-e0ae-4386-b2d4-0a2f71b1ae4a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "809c6415-ebff-42c0-8847-9ec13aa644f2",
+              "name": "origem",
+              "value": "={{ $json.body.entry[0]?.messaging[0]?.referral?.ref === null ? 'site_instagram' : 'folder_fisico' }}",
+              "type": "string"
+            },
+            {
+              "id": "0efd4e34-e134-447e-8289-075a5efd00e7",
+              "name": "indicado_por",
+              "value": "={{ $json.body.entry[0]?.messaging[0]?.referral?.ref === null ? 'Nelson Proença' : $json.body.entry[0]?.messaging[0]?.referral?.ref }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -16
+      ],
+      "id": "95791c28-bd89-4a43-b3e6-8b9c87b50bf1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "44525d89-afd1-4f70-9370-984c6fa8f635",
+              "name": "nome",
+              "value": "={{ typeof $json.output === 'string' ? JSON.parse($json.output).nome : $json.output.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "7c2f4e25-16f5-49d0-b49e-e47b30344beb",
+              "name": "email",
+              "value": "={{ typeof $json.output === 'string' ? JSON.parse($json.output).email : $json.output.email }}",
+              "type": "string"
+            },
+            {
+              "id": "31dd7f7b-c75f-422a-b2bf-49e70b43032c",
+              "name": "telefone",
+              "value": "={{ typeof $json.output === 'string' ? JSON.parse($json.output).telefone : $json.output.telefone }}",
+              "type": "string"
+            },
+            {
+              "id": "13d86e7a-a308-4edc-8e0b-8e3a397e4ee4",
+              "name": "data_agendamento",
+              "value": "={{ typeof $json.output === 'string' ? JSON.parse($json.output).data_agendamento : $json.output.data_agendamento }}",
+              "type": "string"
+            },
+            {
+              "id": "a8462c85-1433-425d-bd1c-d84a7bccc3a6",
+              "name": "agendamento_aceito",
+              "value": "={{ typeof $json.output === 'string' ? JSON.parse($json.output).agendamento_aceito : $json.output.agendamento_aceito }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        -32
+      ],
+      "id": "dbb23cb4-e7f1-492d-b875-43954f89ec16",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "32b46fdf-8cfb-4c3a-9a6d-44bb81677ac9",
+              "leftValue": "={{ $node[\"AI Agent\"].json.output.agendamento_aceito }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        -16
+      ],
+      "id": "5b471ba5-4add-463c-b71b-a10ac51587e2",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "tableId": "agendamentos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "cliente_nome",
+              "fieldValue": "={{ json.nome }}"
+            },
+            {
+              "fieldId": "cliente_email",
+              "fieldValue": "={{ json.email }}"
+            },
+            {
+              "fieldId": "cliente_whatsapp",
+              "fieldValue": "={{ json.telefone }}"
+            },
+            {
+              "fieldId": "data_reuniao",
+              "fieldValue": "={{ json.data_agendamento }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "confirmado"
+            },
+            {
+              "fieldId": "instagram_user_id",
+              "fieldValue": "={{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+            },
+            {
+              "fieldId": "indicado_por",
+              "fieldValue": "={{ json.indicado_por }}"
+            },
+            {
+              "fieldId": "origem",
+              "fieldValue": "={{ json.origem }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        -224
+      ],
+      "id": "3d0af1b5-2f93-4f25-baea-5d2ae59476f6",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "RZ2mrXdDyzccc4Qw",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1632,
+        -224
+      ],
+      "id": "8527466d-3d75-4f28-bd58-0ffede97a2f4",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Curriculo": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Eventos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "972cff78-79f5-4679-9e41-f4f584a67f16",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c4b7d49bc7f303061c12cf83186eac1233fdf5ecf30add70410d27ff122fff8"
+  },
+  "id": "ltYe2RxTxW5TNcQo",
+  "tags": []
+}

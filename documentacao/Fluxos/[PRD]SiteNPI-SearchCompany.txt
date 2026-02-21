@@ -1,0 +1,213 @@
+{
+  "name": "[PRD]SiteNPI-SearchCompany",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "enriquecer-empresa",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        -32
+      ],
+      "id": "47cf5dd5-ea30-46d8-82d7-71380279a77d",
+      "name": "Webhook",
+      "webhookId": "a52ce243-6cb6-4f58-bf78-8863293e5909"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Verifique se foi passada alguma informacao no campo Nome da Empresa: {{ $json.NomeEmpresa }}. Se não existir nada pegue a informação do Segmento: {{ $json.SegmentoEmpresa }}. Usando a TOOL Google Search adicionada em seu contexto, faça as seguintes pesquisas:\n\n# Nome da Empresa\nPesquisar da seguinte forma: \"O que a empresa {{ $json.NomeEmpresa }} faz e quais seus serviços.\"\n\n# Segmento da Empresa\nPesquisar da seguinte forma: \"Quais seus serviços deste Segmento {{ $json.SegmentoEmpresa }}. Ex: Dentista, Arquiteto, Cabelereiro e outros.\"\n",
+        "options": {
+          "systemMessage": "=Você é o Nelson Proença, Consultor de Automação IA. Recebi estes dados de pesquisa vindo da execucao do prompt anterior.\n\nIdentifique o setor (Ex: Odontologia, Arquitetura).\n\nResuma o modelo de negócio em 2 frases.\n\nSugira 5 automações específicas que usem n8n, IA, Midias Sociais (Instragram, Facebook, LinkedIn), WhatsApp ou Telegran para escalar esse negócio.\nSeja extremamente profissional e focado em lucro/eficiência."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "50fd7f7c-01cd-4fa4-94f9-cd3cb4204836",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        272,
+        160
+      ],
+      "id": "450e359f-ed9d-4e35-ac27-c803883e4c71",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gaRCgvjIotB3Z7nA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "playground_analise",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $node[\"Edit Fields\"].json.LeadID }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "output_ia",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -32
+      ],
+      "id": "e7dd9e39-805c-481e-91e3-6fd4d2b34894",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "RZ2mrXdDyzccc4Qw",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "273221bc-d593-4ed9-8450-30ab88e63e03",
+              "name": "NomeEmpresa",
+              "value": "={{ $json.body.record.nome_empresa }}",
+              "type": "string"
+            },
+            {
+              "id": "7350a167-6452-4667-8e28-1deeefbf6dc2",
+              "name": "SegmentoEmpresa",
+              "value": "={{ $json.body.record.segmento_empresa }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "0ba6355f-4e06-4462-ae34-a4ff4a45e4c7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        416,
+        160
+      ],
+      "id": "909d0990-1ca7-4718-abcd-364b76cd9f71",
+      "name": "GoogleSearch",
+      "credentials": {
+        "serpApi": {
+          "id": "WaT46952fd8IkdzP",
+          "name": "SerpAPI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSearch": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f8be4ac3-ffb8-4ff8-bd2e-ab2037a33711",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c4b7d49bc7f303061c12cf83186eac1233fdf5ecf30add70410d27ff122fff8"
+  },
+  "id": "H2xEDyr0NjYsBnii",
+  "tags": []
+}

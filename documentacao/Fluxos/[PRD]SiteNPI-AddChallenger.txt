@@ -1,0 +1,187 @@
+{
+  "name": "[PRD]SiteNPI-AddChallenger",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analise-tecnica",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        -32
+      ],
+      "id": "1c1ee610-05a2-43bc-84a4-40129cb3b15a",
+      "name": "Webhook",
+      "webhookId": "296e9d3f-c17f-41c6-bc7a-230c79d50b4e"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um Agente Especialista em Engenharia de Software. Sua base de conhecimento são 15 anos de .NET, Azure e SQL Server. O usuário enviou um tipo_analise {{ $json.tipo_analise }}. Analise o {{ $json.input_tecnico }} e forneça uma solução técnica profunda, citando padrões de projeto (Design Patterns) e boas práticas de nuvem.\n\n# Análise de Erros (Log/Debug)\n\nVocê é o Nelson Proença, Arquiteto de Software com 15 anos de experiência. O usuário enviou um log de erro ou trecho de código com bug. Sua missão é:\n\nIdentificar a causa raiz (Ex: Deadlock, Memory Leak, Injeção de Dependência mal configurada).\n\nFornecer a correção exata em C#/.NET ou SQL.\n\nExplicar como evitar isso usando boas práticas (Clean Code/SOLID).\nTom de voz: Técnico, direto e prestativo. Mencione se o erro for comum em ambientes Azure se houver indícios.\n\n# Review de Arquitetura (High Level)\n\nVocê é o Nelson Proença, Especialista em Arquitetura SOA e Cloud. O usuário descreveu uma estrutura de sistema. Analise sob a ótica de:\n\nEscalabilidade: A solução suporta picos de carga? Sugira Azure Service Bus ou Redis se necessário.\n\nManutenibilidade: A separação de camadas está clara?\n\nCusto/Benefício: Sugira Serverless (Azure Functions) para otimizar custos.\nTom de voz: Consultivo e estratégico. Use termos como 'Acoplamento', 'Resiliência' e 'Observabilidade'.\n\n# Otimização de SQL/Dados\n\nVocê é o Nelson Proença, Especialista em Bancos de Dados Relacionais. O usuário enviou uma Query ou estrutura de tabela. Analise buscando:\n\nGargalos de performance (Missing Indexes, Scans desnecessários).\n\nSugira melhorias usando recursos modernos do SQL Server 2022 (como melhorias em Columnstore ou Intelligent Query Processing).\n\nVerifique normalização vs desnormalização para o cenário proposto.\nTom de voz: Extremamente técnico e focado em performance (milissegundos importam).",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "82aa658b-5af4-4b3e-9a03-aebb6d15d122",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        272,
+        192
+      ],
+      "id": "5f4bb5b0-616b-4df0-b44c-79394ef4e754",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gaRCgvjIotB3Z7nA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "273221bc-d593-4ed9-8450-30ab88e63e03",
+              "name": "InputTecnico",
+              "value": "={{ $json.body.record.input_tecnico }}",
+              "type": "string"
+            },
+            {
+              "id": "3a740180-1e1d-4784-9162-df987317c881",
+              "name": "TipoAnalise",
+              "value": "={{ $json.body.record.tipo_analise }}",
+              "type": "string"
+            },
+            {
+              "id": "8c065dcb-b45d-4876-b70c-7316bf7c3050",
+              "name": "AnaliseID",
+              "value": "={{ $json.body.record.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "3237d491-a5d8-4ebf-9432-2d4fc7cd0fab",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "playground_analise",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $node[\"Edit Fields\"].json.LeadID }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "output_ia",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -32
+      ],
+      "id": "ffc9c1ab-d4af-4abf-b361-08cecf04b5a7",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "RZ2mrXdDyzccc4Qw",
+          "name": "Supabase account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8fb2b633-04b5-43a3-963f-2ca582195a98",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c4b7d49bc7f303061c12cf83186eac1233fdf5ecf30add70410d27ff122fff8"
+  },
+  "id": "G8znRFLuaeQyeeaS",
+  "tags": []
+}
