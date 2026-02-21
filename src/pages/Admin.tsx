@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const adminLinks = [
   { to: "/admin/leads", icon: Inbox, label: "Leads", desc: "Leads e análises IA" },
-  { to: "/agendamentos", icon: CalendarDays, label: "Agendamentos", desc: "Dashboard de reuniões e pipeline" },
+  { to: "/admin/agendamentos", icon: CalendarDays, label: "Agendamentos", desc: "Dashboard de reuniões e pipeline" },
   { to: "/admin/colaboradores", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
   { to: "/admin/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
   { to: "/convites", icon: QrCode, label: "Gerador de Convites", desc: "QR Codes e links" },
