@@ -117,7 +117,8 @@ const LandingPage = () => {
     // Match collaborators with existing QR files
     const matched: ColabWithQr[] = [];
     for (const colab of colabs) {
-      const expectedName = `convite-${colab.nome.toLowerCase().replace(/\s+/g, "-")}.png`;
+      const safeName = colab.nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, "-");
+      const expectedName = `convite-${safeName}.png`;
       const found = pngFiles.find((f) => f.name === expectedName);
       if (found) {
         const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(`convites/${found.name}`);
