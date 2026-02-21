@@ -285,30 +285,30 @@ const LandingPage = () => {
 
         {/* CTA Section */}
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-          className="print-cta mt-6 rounded-lg p-5 md:p-6 text-center" style={{ background: NAVY }}>
+          className="print-cta mt-6 rounded-lg p-5 md:p-6 text-center border-2" style={{ background: "#f8fafc", borderColor: NAVY }}>
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
             {selectedColab && (
               <div className="flex-shrink-0">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg border flex items-center justify-center overflow-hidden" style={{ borderColor: NAVY }}>
                   <img
                     src={`${selectedColab.qr_url}?t=${Date.now()}`}
                     alt={`QR Code - ${selectedColab.nome}`}
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <p className="text-[9px] text-white/60 mt-1.5 font-medium">
+                <p className="text-[9px] mt-1.5 font-medium" style={{ color: GRAPHITE_LIGHT }}>
                   Ref: {selectedColab.nome}
                 </p>
               </div>
             )}
-            <div className="text-white text-center md:text-left">
-              <h2 className="font-display text-lg md:text-xl font-bold">Diagnóstico Técnico Gratuito</h2>
-              <p className="text-xs text-white/70 mt-1 max-w-sm leading-relaxed">
+            <div className="text-center md:text-left">
+              <h2 className="font-display text-lg md:text-xl font-bold" style={{ color: NAVY }}>Diagnóstico Técnico Gratuito</h2>
+              <p className="text-xs mt-1 max-w-sm leading-relaxed" style={{ color: GRAPHITE_LIGHT }}>
                 Escaneie para agendar uma sessão estratégica e descobrir como otimizar sua operação com tecnologia de ponta.
               </p>
               <div className="flex items-center gap-1.5 justify-center md:justify-start mt-2">
-                <ArrowRight size={12} className="text-white/50" />
-                <span className="text-[10px] text-white/50 font-medium uppercase tracking-wider">Vagas limitadas por mês</span>
+                <ArrowRight size={12} style={{ color: NAVY_LIGHT }} />
+                <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: NAVY_LIGHT }}>Vagas limitadas por mês</span>
               </div>
             </div>
           </div>
