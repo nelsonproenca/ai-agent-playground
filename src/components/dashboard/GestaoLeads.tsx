@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Filter, Calendar, User, MessageSquare, CheckCircle2, EyeOff, Eye, UserPlus, Loader2 } from "lucide-react";
+import { Filter, Calendar, User, MessageSquare, CheckCircle2, Eye, UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -140,9 +140,8 @@ const GestaoLeads = () => {
               <TableHead className="font-mono text-xs text-muted-foreground">Data</TableHead>
               <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
               <TableHead className="font-mono text-xs text-muted-foreground">Canal</TableHead>
-              <TableHead className="font-mono text-xs text-muted-foreground">Status</TableHead>
               <TableHead className="font-mono text-xs text-muted-foreground text-center">Visto</TableHead>
-              <TableHead className="font-mono text-xs text-muted-foreground w-[60px]" />
+              
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -170,7 +169,6 @@ const GestaoLeads = () => {
                   </TableCell>
                   <TableCell className="font-medium text-foreground">{lead.nome ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{lead.canal ?? "—"}</TableCell>
-                  <TableCell>{getStatusBadge(lead)}</TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="ghost"
@@ -182,12 +180,9 @@ const GestaoLeads = () => {
                       {lead.visto_pelo_nelson ? (
                         <CheckCircle2 className="h-4 w-4 text-primary" />
                       ) : (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Eye className="h-4 w-4 text-muted-foreground" />
                   </TableCell>
                 </TableRow>
               ))
@@ -224,7 +219,7 @@ const GestaoLeads = () => {
                 {selectedLead.visto_pelo_nelson ? (
                   <><CheckCircle2 className="h-4 w-4" /> Visto pelo Nelson</>
                 ) : (
-                  <><EyeOff className="h-4 w-4" /> Marcar como visto</>
+                  <><Eye className="h-4 w-4" /> Marcar como visto</>
                 )}
               </Button>
             </div>
