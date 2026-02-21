@@ -175,7 +175,7 @@ const GestaoLeads = () => {
                   <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.analise_ia ?? ""}>{lead.analise_ia ?? "—"}</TableCell>
                   <TableCell className="text-center">
                     <button
-                      className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-primary/20 transition-colors"
+                      className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-primary/80 transition-colors"
                       onClick={(e) => toggleVisto(e, lead)}
                       title={lead.visto_pelo_nelson ? "Marcar como não visto" : "Marcar como visto"}
                     >
