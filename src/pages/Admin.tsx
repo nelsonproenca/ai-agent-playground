@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Inbox, Users, Building2, QrCode, FileText, CalendarDays, LogOut } from "lucide-react";
+import { Inbox, Users, Building2, QrCode, FileText, CalendarDays, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -30,18 +30,10 @@ const Admin = () => {
           <h1 className="font-mono font-bold text-foreground text-lg">
             Gerenciamento <span className="text-primary">do Site</span>
           </h1>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm" className="font-mono gap-2">
-              <Link to="/">
-                <ArrowLeft className="h-4 w-4" />
-                Voltar
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" className="font-mono gap-2 text-muted-foreground" onClick={() => { logout(); navigate("/login"); }}>
-              <LogOut className="h-4 w-4" />
-              Sair
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" className="font-mono gap-2 text-muted-foreground" onClick={() => { logout(); navigate("/login"); }}>
+            <LogOut className="h-4 w-4" />
+            Sair
+          </Button>
         </div>
       </header>
 
