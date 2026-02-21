@@ -190,10 +190,10 @@ const DashboardAgendamentos = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-secondary/50">
+                     <TableRow className="bg-secondary/50">
+                      <TableHead className="font-mono text-xs font-bold w-10"></TableHead>
                       <TableHead className="font-mono text-xs font-bold whitespace-nowrap">Data/Hora</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Cliente</TableHead>
-                      <TableHead className="font-mono text-xs font-bold">Contato</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Origem</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Colaborador</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Status</TableHead>
@@ -205,6 +205,15 @@ const DashboardAgendamentos = () => {
                       const st = statusConfig[a.status ?? "pendente"] ?? statusConfig.pendente;
                       return (
                         <TableRow key={a.id} className="hover:bg-muted/30 transition-colors">
+                          {/* Contato icon */}
+                          <TableCell className="w-10 px-2">
+                            <ContactModal
+                              nome={a.cliente_nome}
+                              email={a.cliente_email}
+                              whatsapp={a.cliente_whatsapp}
+                            />
+                          </TableCell>
+
                           {/* Date */}
                           <TableCell className="font-mono text-xs whitespace-nowrap">
                             {formatDate(a.data_reuniao)}
@@ -212,27 +221,7 @@ const DashboardAgendamentos = () => {
 
                           {/* Client */}
                           <TableCell>
-                            <div className="space-y-0.5">
-                              <p className="font-medium text-sm">{a.cliente_nome ?? "—"}</p>
-                              {a.cliente_email && (
-                                <a
-                                  href={`mailto:${a.cliente_email}`}
-                                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                                >
-                                  <Mail className="h-3 w-3" />
-                                  {a.cliente_email}
-                                </a>
-                              )}
-                            </div>
-                          </TableCell>
-
-                          {/* Contato */}
-                          <TableCell>
-                            <ContactModal
-                              nome={a.cliente_nome}
-                              email={a.cliente_email}
-                              whatsapp={a.cliente_whatsapp}
-                            />
+                            <p className="font-medium text-sm">{a.cliente_nome ?? "—"}</p>
                           </TableCell>
 
                           {/* Origem */}
@@ -354,14 +343,13 @@ const ContactModal = ({
   return (
     <>
       <Button
-        variant="outline"
-        size="sm"
-        className="h-7 text-xs font-mono gap-1.5"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
         onClick={() => setOpen(true)}
         disabled={!hasContact}
       >
-        <Phone className="h-3.5 w-3.5" />
-        Contato
+        <Phone className="h-4 w-4 text-emerald-400" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
