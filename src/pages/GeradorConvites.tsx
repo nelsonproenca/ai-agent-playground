@@ -323,17 +323,37 @@ const GeradorConvites = () => {
                       <p className="text-xs font-mono text-foreground capitalize truncate w-full text-center">
                         {label}
                       </p>
-                      <a
-                        href={file.url}
-                        download={file.name}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button variant="ghost" size="sm" className="font-mono text-xs gap-1 h-7">
-                          <Download className="h-3 w-3" />
-                          Baixar
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={file.url}
+                          download={file.name}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="ghost" size="sm" className="font-mono text-xs gap-1 h-7">
+                            <Download className="h-3 w-3" />
+                            Baixar
+                          </Button>
+                        </a>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="font-mono text-xs gap-1 h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={async () => {
+                            const { error } = await supabase.storage
+                              .from("uploads")
+                              .remove([`convites/${file.name}`]);
+                            if (error) {
+                              toast.error("Erro ao excluir convite.");
+                            } else {
+                              toast.success("Convite excluído!");
+                              fetchGallery();
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
                         </Button>
-                      </a>
+                      </div>
                     </div>
                   );
                 })}
