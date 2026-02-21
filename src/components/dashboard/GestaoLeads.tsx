@@ -140,6 +140,8 @@ const GestaoLeads = () => {
               <TableHead className="font-mono text-xs text-muted-foreground">Data</TableHead>
               <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
               <TableHead className="font-mono text-xs text-muted-foreground">Canal</TableHead>
+              <TableHead className="font-mono text-xs text-muted-foreground">Desafio</TableHead>
+              <TableHead className="font-mono text-xs text-muted-foreground">Análise IA</TableHead>
               <TableHead className="font-mono text-xs text-muted-foreground text-center">Visto</TableHead>
               
             </TableRow>
@@ -169,6 +171,8 @@ const GestaoLeads = () => {
                   </TableCell>
                   <TableCell className="font-medium text-foreground">{lead.nome ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{lead.canal ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.desafio_tecnico ?? ""}>{lead.desafio_tecnico ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.analise_ia ?? ""}>{lead.analise_ia ?? "—"}</TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="ghost"
