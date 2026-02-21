@@ -352,8 +352,8 @@ const LandingPage = () => {
           <Button
             variant="outline"
             onClick={() => navigate("/admin")}
-            className="gap-2 text-sm font-semibold"
-            style={{ borderColor: NAVY, color: NAVY }}
+            className="gap-2 text-sm font-semibold text-white"
+            style={{ borderColor: NAVY, background: NAVY }}
           >
             <ArrowRight size={16} className="rotate-180" />
             Voltar
