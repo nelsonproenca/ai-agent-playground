@@ -284,24 +284,20 @@ const LandingPage = () => {
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           className="print-cta mt-6 rounded-lg p-5 md:p-6 text-center" style={{ background: NAVY }}>
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
-            <div className="flex-shrink-0">
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-white flex items-center justify-center overflow-hidden">
-                {selectedColab ? (
+            {selectedColab && (
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-white flex items-center justify-center overflow-hidden">
                   <img
                     src={`${selectedColab.qr_url}?t=${Date.now()}`}
                     alt={`QR Code - ${selectedColab.nome}`}
                     className="w-full h-full object-contain"
                   />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full">
-                    <Loader2 className="h-6 w-6 animate-spin" style={{ color: NAVY }} />
-                  </div>
-                )}
+                </div>
+                <p className="text-[9px] text-white/60 mt-1.5 font-medium">
+                  Ref: {selectedColab.nome}
+                </p>
               </div>
-              <p className="text-[9px] text-white/60 mt-1.5 font-medium">
-                {selectedColab ? `Ref: ${selectedColab.nome}` : "Escaneie o QR Code"}
-              </p>
-            </div>
+            )}
             <div className="text-white text-center md:text-left">
               <h2 className="font-display text-lg md:text-xl font-bold">Diagnóstico Técnico Gratuito</h2>
               <p className="text-xs text-white/70 mt-1 max-w-sm leading-relaxed">
