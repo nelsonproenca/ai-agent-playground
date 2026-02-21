@@ -18,6 +18,9 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -127,7 +130,7 @@ const DashboardAgendamentos = () => {
       <main className="container max-w-7xl py-6 px-4 space-y-6">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <KpiCard icon={Users} label="Total de Leads" value={totalLeads} loading={isLoading} />
+          <KpiCard icon={Users} label="Total de Reuniões" value={totalLeads} loading={isLoading} />
           <KpiCard icon={Clock} label="Reuniões Pendentes" value={pendentes} loading={isLoading} accent />
           <KpiCard icon={DollarSign} label="Valor em Pipeline" value={formatCurrency(pipeline)} loading={isLoading} />
         </div>
@@ -190,7 +193,7 @@ const DashboardAgendamentos = () => {
                     <TableRow className="bg-secondary/50">
                       <TableHead className="font-mono text-xs font-bold whitespace-nowrap">Data/Hora</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Cliente</TableHead>
-                      <TableHead className="font-mono text-xs font-bold">WhatsApp</TableHead>
+                      <TableHead className="font-mono text-xs font-bold">Contato</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Origem</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Colaborador</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Status</TableHead>
@@ -223,22 +226,13 @@ const DashboardAgendamentos = () => {
                             </div>
                           </TableCell>
 
-                          {/* WhatsApp */}
+                          {/* Contato */}
                           <TableCell>
-                            {a.cliente_whatsapp ? (
-                              <a
-                                href={`https://wa.me/${cleanPhone(a.cliente_whatsapp)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-                              >
-                                <Phone className="h-3.5 w-3.5" />
-                                WhatsApp
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
-                            )}
+                            <ContactModal
+                              nome={a.cliente_nome}
+                              email={a.cliente_email}
+                              whatsapp={a.cliente_whatsapp}
+                            />
                           </TableCell>
 
                           {/* Origem */}
@@ -346,5 +340,74 @@ const KpiCard = ({
     </CardContent>
   </Card>
 );
+const ContactModal = ({
+  nome,
+  email,
+  whatsapp,
+}: {
+  nome: string | null;
+  email: string | null;
+  whatsapp: string | null;
+}) => {
+  const [open, setOpen] = useState(false);
+  const hasContact = email || whatsapp;
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs font-mono gap-1.5"
+        onClick={() => setOpen(true)}
+        disabled={!hasContact}
+      >
+        <Phone className="h-3.5 w-3.5" />
+        Contato
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-mono">{nome ?? "Cliente"}</DialogTitle>
+            <DialogDescription>Informações de contato</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+              >
+                <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center">
+                  <Mail className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-mono">E-mail</p>
+                  <p className="text-sm font-medium">{email}</p>
+                </div>
+              </a>
+            )}
+            {whatsapp && (
+              <a
+                href={`https://wa.me/${cleanPhone(whatsapp)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+              >
+                <div className="w-9 h-9 rounded-md bg-emerald-500/10 flex items-center justify-center">
+                  <Phone className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-mono">WhatsApp</p>
+                  <p className="text-sm font-medium">{whatsapp}</p>
+                </div>
+              </a>
+            )}
+            {!hasContact && (
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum contato disponível.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
 
 export default DashboardAgendamentos;
