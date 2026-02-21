@@ -107,7 +107,12 @@ const GeradorConvites = () => {
         return;
       }
 
-      const fileName = `convites/convite-${selected.nome.toLowerCase().replace(/\s+/g, "-")}.png`;
+    const safeName = selected.nome
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+    const fileName = `convites/convite-${safeName}.png`;
       const { error } = await supabase.storage
         .from("uploads")
         .upload(fileName, blob, { contentType: "image/png", upsert: true });
@@ -139,7 +144,8 @@ const GeradorConvites = () => {
     if (!blob) return;
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.download = `convite-${selected.nome.toLowerCase().replace(/\s+/g, "-")}.png`;
+    const sn = selected.nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, "-");
+    link.download = `convite-${sn}.png`;
     link.href = url;
     link.click();
     URL.revokeObjectURL(url);
@@ -245,6 +251,7 @@ const GeradorConvites = () => {
                     size="icon"
                     className="shrink-0 h-8 w-8"
                     onClick={handleCopy}
+                    title="Copiar link"
                   >
                     {copied ? (
                       <Check className="h-4 w-4 text-green-500" />
