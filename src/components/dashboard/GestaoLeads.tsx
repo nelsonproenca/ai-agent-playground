@@ -174,10 +174,8 @@ const GestaoLeads = () => {
                   <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.desafio_tecnico ?? ""}>{lead.desafio_tecnico ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.analise_ia ?? ""}>{lead.analise_ia ?? "—"}</TableCell>
                   <TableCell className="text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 group hover:bg-primary/10"
+                    <button
+                      className="h-8 w-8 inline-flex items-center justify-center rounded-md group transition-colors"
                       onClick={(e) => toggleVisto(e, lead)}
                       title={lead.visto_pelo_nelson ? "Marcar como não visto" : "Marcar como visto"}
                     >
@@ -186,7 +184,7 @@ const GestaoLeads = () => {
                       ) : (
                         <Eye className="h-5 w-5 text-foreground stroke-[2.5] group-hover:text-primary transition-colors" />
                       )}
-                    </Button>
+                    </button>
                   </TableCell>
                 </TableRow>
               ))
