@@ -30,7 +30,7 @@ const InstagramCTA = () => {
       </div>
 
       <a
-        href="https://www.instagram.com/nelson.ari/"
+        href="https://ig.me/m/nelsonhaproenca"
         target="_blank"
         rel="noopener noreferrer"
         className="block"
