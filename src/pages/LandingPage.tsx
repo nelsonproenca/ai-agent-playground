@@ -117,7 +117,8 @@ const LandingPage = () => {
     // Match collaborators with existing QR files
     const matched: ColabWithQr[] = [];
     for (const colab of colabs) {
-      const expectedName = `convite-${colab.nome.toLowerCase().replace(/\s+/g, "-")}.png`;
+      const safeName = colab.nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, "-");
+      const expectedName = `convite-${safeName}.png`;
       const found = pngFiles.find((f) => f.name === expectedName);
       if (found) {
         const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(`convites/${found.name}`);
@@ -284,30 +285,30 @@ const LandingPage = () => {
 
         {/* CTA Section */}
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-          className="print-cta mt-6 rounded-lg p-5 md:p-6 text-center" style={{ background: NAVY }}>
+          className="print-cta mt-6 rounded-lg p-5 md:p-6 text-center border-2" style={{ background: "#f8fafc", borderColor: NAVY }}>
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
             {selectedColab && (
               <div className="flex-shrink-0">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg border flex items-center justify-center overflow-hidden" style={{ borderColor: NAVY }}>
                   <img
                     src={`${selectedColab.qr_url}?t=${Date.now()}`}
                     alt={`QR Code - ${selectedColab.nome}`}
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <p className="text-[9px] text-white/60 mt-1.5 font-medium">
+                <p className="text-[9px] mt-1.5 font-medium" style={{ color: GRAPHITE_LIGHT }}>
                   Ref: {selectedColab.nome}
                 </p>
               </div>
             )}
-            <div className="text-white text-center md:text-left">
-              <h2 className="font-display text-lg md:text-xl font-bold">Diagnóstico Técnico Gratuito</h2>
-              <p className="text-xs text-white/70 mt-1 max-w-sm leading-relaxed">
+            <div className="text-center md:text-left">
+              <h2 className="font-display text-lg md:text-xl font-bold" style={{ color: NAVY }}>Diagnóstico Técnico Gratuito</h2>
+              <p className="text-xs mt-1 max-w-sm leading-relaxed" style={{ color: GRAPHITE_LIGHT }}>
                 Escaneie para agendar uma sessão estratégica e descobrir como otimizar sua operação com tecnologia de ponta.
               </p>
               <div className="flex items-center gap-1.5 justify-center md:justify-start mt-2">
-                <ArrowRight size={12} className="text-white/50" />
-                <span className="text-[10px] text-white/50 font-medium uppercase tracking-wider">Vagas limitadas por mês</span>
+                <ArrowRight size={12} style={{ color: NAVY_LIGHT }} />
+                <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: NAVY_LIGHT }}>Vagas limitadas por mês</span>
               </div>
             </div>
           </div>
@@ -347,17 +348,26 @@ const LandingPage = () => {
         </footer>
 
         {/* Print button - hidden on print */}
-        {selectedColab && (
-          <div className="no-print mt-6 flex justify-center">
+        <div className="no-print mt-6 flex justify-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/admin")}
+            className="gap-2 text-sm font-semibold text-white"
+            style={{ borderColor: NAVY, background: NAVY }}
+          >
+            <ArrowRight size={16} className="rotate-180" />
+            Voltar
+          </Button>
+          {selectedColab && (
             <Button
               onClick={() => window.print()}
-              className="gap-2"
+              className="gap-2 text-sm font-semibold text-white"
               style={{ background: NAVY }}
             >
               Imprimir Flyer
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

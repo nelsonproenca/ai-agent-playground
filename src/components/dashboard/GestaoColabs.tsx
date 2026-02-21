@@ -7,8 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, Plus, Loader2 } from "lucide-react";
+import { Users, Plus, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import ImageUpload from "./ImageUpload";
@@ -20,6 +19,7 @@ const GestaoColabs = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [editId, setEditId] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [cargo, setCargo] = useState("");
@@ -54,42 +54,61 @@ const GestaoColabs = () => {
     return Object.keys(errs).length === 0;
   };
 
+  const resetForm = () => {
+    setEditId(null);
+    setNome("");
+    setEmail("");
+    setCargo("");
+    setDepartamento("");
+    setFotoUrl(null);
+    setErrors({});
+  };
+
+  const handleEdit = (c: Colaborador) => {
+    setEditId(c.id);
+    setNome(c.nome);
+    setEmail(c.email);
+    setCargo(c.cargo ?? "");
+    setDepartamento(c.departamento ?? "");
+    setFotoUrl(c.foto_url);
+    setErrors({});
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setSaving(true);
-    const { error } = await supabase.from("colaboradores").insert({
+
+    const payload = {
       nome: nome.trim(),
       email: email.trim(),
       cargo: cargo.trim() || null,
       departamento: departamento.trim() || null,
       foto_url: fotoUrl,
-    });
+    };
 
-    if (error) {
-      toast.error("Erro ao cadastrar colaborador.");
+    if (editId) {
+      const { error } = await supabase.from("colaboradores").update(payload).eq("id", editId);
+      if (error) {
+        toast.error("Erro ao atualizar colaborador.");
+      } else {
+        toast.success("Colaborador atualizado com sucesso!");
+        resetForm();
+        fetchColabs();
+      }
     } else {
-      toast.success("Colaborador cadastrado com sucesso!");
-      setNome("");
-      setEmail("");
-      setCargo("");
-      setDepartamento("");
-      setFotoUrl(null);
-      setErrors({});
-      fetchColabs();
+      const { error } = await supabase.from("colaboradores").insert(payload);
+      if (error) {
+        toast.error("Erro ao cadastrar colaborador.");
+      } else {
+        toast.success("Colaborador cadastrado com sucesso!");
+        resetForm();
+        fetchColabs();
+      }
     }
     setSaving(false);
-  };
-
-  const handleUpdateFoto = async (colabId: string, url: string) => {
-    const { error } = await supabase.from("colaboradores").update({ foto_url: url }).eq("id", colabId);
-    if (error) {
-      toast.error("Erro ao atualizar foto.");
-    } else {
-      toast.success("Foto atualizada!");
-      fetchColabs();
-    }
   };
 
   return (
@@ -99,7 +118,7 @@ const GestaoColabs = () => {
         <CardHeader>
           <CardTitle className="font-mono text-foreground flex items-center gap-2 text-base">
             <Plus className="h-4 w-4 text-primary" />
-            Cadastrar Colaborador
+            {editId ? "Editar Colaborador" : "Cadastrar Colaborador"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -138,11 +157,16 @@ const GestaoColabs = () => {
               onChange={(e) => setDepartamento(e.target.value)}
               className="font-mono bg-secondary border-border text-foreground"
             />
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 flex gap-2">
               <Button type="submit" className="font-mono w-full sm:w-auto" disabled={saving}>
                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Cadastrar
+                Salvar
               </Button>
+              {editId && (
+                <Button type="button" variant="outline" className="font-mono" onClick={resetForm}>
+                  Cancelar
+                </Button>
+              )}
             </div>
           </form>
         </CardContent>
@@ -163,50 +187,37 @@ const GestaoColabs = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="font-mono text-xs text-muted-foreground w-12"></TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">E-mail</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Cargo</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Departamento</TableHead>
-                <TableHead className="font-mono text-xs text-muted-foreground text-center">Foto</TableHead>
+                <TableHead className="font-mono text-xs text-muted-foreground text-center w-16">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground font-mono py-12">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : colabs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground font-mono py-12">
                     Nenhum colaborador cadastrado.
                   </TableCell>
                 </TableRow>
               ) : (
                 colabs.map((c) => (
                   <TableRow key={c.id} className="border-border">
-                    <TableCell>
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={c.foto_url ?? undefined} />
-                        <AvatarFallback className="bg-secondary text-muted-foreground text-[10px]">
-                          {c.nome.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </TableCell>
                     <TableCell className="font-medium text-foreground">{c.nome}</TableCell>
                     <TableCell className="text-muted-foreground text-sm font-mono">{c.email}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.cargo ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.departamento ?? "—"}</TableCell>
                     <TableCell className="text-center">
-                      <ImageUpload
-                        currentUrl={c.foto_url}
-                        onUploaded={(url) => handleUpdateFoto(c.id, url)}
-                        folder="colaboradores"
-                        label="Alterar"
-                        size="sm"
-                      />
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(c)}>
+                        <Pencil className="h-4 w-4 text-primary" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

@@ -1,17 +1,28 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Users, Building2, QrCode, FileText, CalendarDays } from "lucide-react";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Inbox, Users, Building2, QrCode, FileText, CalendarDays, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const adminLinks = [
-  { to: "/dashboard", icon: Shield, label: "Área Restrita", desc: "Leads e análises IA" },
-  { to: "/agendamentos", icon: CalendarDays, label: "Agendamentos", desc: "Dashboard de reuniões e pipeline" },
-  { to: "/colabs", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
-  { to: "/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
+  { to: "/admin/leads", icon: Inbox, label: "Leads", desc: "Leads e análises IA" },
+  { to: "/admin/agendamentos", icon: CalendarDays, label: "Agendamentos", desc: "Dashboard de reuniões e pipeline" },
+  { to: "/admin/colaboradores", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
+  { to: "/admin/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
   { to: "/convites", icon: QrCode, label: "Gerador de Convites", desc: "QR Codes e links" },
   { to: "/landing", icon: FileText, label: "Flyer para Impressão", desc: "Landing page com QR personalizado" },
 ];
 
 const Admin = () => {
+  const navigate = useNavigate();
+  const { authenticated, logout } = useAuth();
+
+  useEffect(() => {
+    if (!authenticated) navigate("/login", { replace: true });
+  }, [authenticated, navigate]);
+
+  if (!authenticated) return null;
+
   return (
     <div className="min-h-screen bg-background grid-pattern">
       <header className="border-b border-border">
@@ -19,11 +30,9 @@ const Admin = () => {
           <h1 className="font-mono font-bold text-foreground text-lg">
             Gerenciamento <span className="text-primary">do Site</span>
           </h1>
-          <Button asChild variant="outline" size="sm" className="font-mono gap-2">
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Link>
+          <Button variant="ghost" size="sm" className="font-mono gap-2 text-muted-foreground" onClick={() => { logout(); navigate("/login"); }}>
+            <LogOut className="h-4 w-4" />
+            Sair
           </Button>
         </div>
       </header>
