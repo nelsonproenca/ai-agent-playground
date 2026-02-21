@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeCanvas } from "qrcode.react";
-import { ArrowLeft, Copy, Download, QrCode, Check } from "lucide-react";
+import { ArrowLeft, Copy, Download, QrCode, Check, CloudUpload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +23,8 @@ const GeradorConvites = () => {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedUrl, setSavedUrl] = useState<string | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,6 +48,55 @@ const GeradorConvites = () => {
     ? `https://ig.me/m/nelsonhaproenca?ref=${refParam}`
     : "";
 
+  const getHiResBlob = useCallback((): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      if (!qrRef.current) return resolve(null);
+      const canvas = qrRef.current.querySelector("canvas");
+      if (!canvas) return resolve(null);
+      const hiRes = document.createElement("canvas");
+      const size = 1024;
+      hiRes.width = size;
+      hiRes.height = size;
+      const ctx = hiRes.getContext("2d");
+      if (!ctx) return resolve(null);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(canvas, 0, 0, size, size);
+      hiRes.toBlob((blob) => resolve(blob), "image/png");
+    });
+  }, []);
+
+  // Auto-save to Supabase when QR renders
+  useEffect(() => {
+    if (!selected) return;
+    setSavedUrl(null);
+
+    // Small delay to let canvas render
+    const timer = setTimeout(async () => {
+      setSaving(true);
+      const blob = await getHiResBlob();
+      if (!blob) {
+        setSaving(false);
+        return;
+      }
+
+      const fileName = `convites/convite-${selected.nome.toLowerCase().replace(/\s+/g, "-")}.png`;
+      const { error } = await supabase.storage
+        .from("uploads")
+        .upload(fileName, blob, { contentType: "image/png", upsert: true });
+
+      if (error) {
+        toast.error("Erro ao salvar QR Code no storage.");
+      } else {
+        const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(fileName);
+        setSavedUrl(urlData.publicUrl);
+        toast.success("QR Code salvo no storage!");
+      }
+      setSaving(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [selected, generatedLink, getHiResBlob]);
+
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(generatedLink);
     setCopied(true);
@@ -53,27 +104,18 @@ const GeradorConvites = () => {
     setTimeout(() => setCopied(false), 2000);
   }, [generatedLink]);
 
-  const handleDownload = useCallback(() => {
-    if (!qrRef.current || !selected) return;
-    const canvas = qrRef.current.querySelector("canvas");
-    if (!canvas) return;
-
-    // Create high-res version
-    const hiRes = document.createElement("canvas");
-    const size = 1024;
-    hiRes.width = size;
-    hiRes.height = size;
-    const ctx = hiRes.getContext("2d");
-    if (!ctx) return;
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(canvas, 0, 0, size, size);
-
+  const handleDownload = useCallback(async () => {
+    if (!selected) return;
+    const blob = await getHiResBlob();
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.download = `convite-${selected.nome.toLowerCase().replace(/\s+/g, "-")}.png`;
-    link.href = hiRes.toDataURL("image/png");
+    link.href = url;
     link.click();
+    URL.revokeObjectURL(url);
     toast.success("QR Code baixado!");
-  }, [selected]);
+  }, [selected, getHiResBlob]);
 
   return (
     <div className="min-h-screen bg-background grid-pattern">
@@ -192,6 +234,21 @@ const GeradorConvites = () => {
                   <Download className="h-4 w-4" />
                   Baixar QR Code (PNG)
                 </Button>
+
+                {/* Storage status */}
+                <div className="flex items-center justify-center gap-2 text-xs font-mono">
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                      <span className="text-muted-foreground">Salvando no storage...</span>
+                    </>
+                  ) : savedUrl ? (
+                    <>
+                      <CloudUpload className="h-3 w-3 text-primary" />
+                      <span className="text-muted-foreground">Salvo no Supabase Storage</span>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </CardContent>
           </Card>
