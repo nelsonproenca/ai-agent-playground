@@ -20,14 +20,11 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
-const NAVY = "210 53% 17%";
-const NAVY_FG = "0 0% 100%";
-
 const statusConfig: Record<string, { label: string; color: string }> = {
-  pendente: { label: "Pendente", color: "bg-amber-100 text-amber-800 border-amber-200" },
-  confirmado: { label: "Confirmado", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  concluido: { label: "Concluído", color: "bg-sky-100 text-sky-800 border-sky-200" },
-  cancelado: { label: "Cancelado", color: "bg-red-100 text-red-800 border-red-200" },
+  pendente: { label: "Pendente", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+  confirmado: { label: "Confirmado", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  concluido: { label: "Concluído", color: "bg-sky-500/20 text-sky-400 border-sky-500/30" },
+  cancelado: { label: "Cancelado", color: "bg-red-500/20 text-red-400 border-red-500/30" },
 };
 
 const formatDate = (iso: string) => {
@@ -111,20 +108,17 @@ const DashboardAgendamentos = () => {
   const pipeline = agendamentos.reduce((s, a) => s + (a.valor_projeto ?? 0), 0);
 
   return (
-    <div className="min-h-screen" style={{ background: "hsl(210 20% 97%)" }}>
+    <div className="min-h-screen bg-background grid-pattern">
       {/* Header */}
-      <header className="border-b" style={{ borderColor: "hsl(210 15% 90%)", background: "hsl(210 53% 17%)" }}>
+      <header className="border-b border-border">
         <div className="container max-w-7xl py-4 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CalendarDays className="h-5 w-5" style={{ color: "hsl(210 30% 70%)" }} />
-            <h1 className="font-mono font-bold text-white text-base tracking-tight">
-              Dashboard <span style={{ color: "hsl(210 30% 70%)" }}>Agendamentos</span>
-            </h1>
-          </div>
-          <Button asChild variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 font-mono gap-2">
+          <h1 className="font-mono font-bold text-foreground text-lg">
+            Dashboard <span className="text-primary">Agendamentos</span>
+          </h1>
+          <Button asChild variant="outline" size="sm" className="font-mono gap-2">
             <Link to="/admin">
               <ArrowLeft className="h-4 w-4" />
-              Área Restrita
+              Voltar
             </Link>
           </Button>
         </div>
@@ -177,11 +171,11 @@ const DashboardAgendamentos = () => {
         </div>
 
         {/* Table */}
-        <Card className="border shadow-sm overflow-hidden" style={{ borderColor: "hsl(210 15% 88%)" }}>
+        <Card className="border border-border bg-card overflow-hidden">
           <CardContent className="p-0">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 className="h-7 w-7 animate-spin" style={{ color: "hsl(210 53% 17%)" }} />
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground font-mono">Carregando agendamentos…</p>
               </div>
             ) : filtered.length === 0 ? (
@@ -193,7 +187,7 @@ const DashboardAgendamentos = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow style={{ background: "hsl(210 20% 96%)" }}>
+                    <TableRow className="bg-secondary/50">
                       <TableHead className="font-mono text-xs font-bold whitespace-nowrap">Data/Hora</TableHead>
                       <TableHead className="font-mono text-xs font-bold">Cliente</TableHead>
                       <TableHead className="font-mono text-xs font-bold">WhatsApp</TableHead>
@@ -259,7 +253,6 @@ const DashboardAgendamentos = () => {
                             <Badge
                               variant="secondary"
                               className="font-mono text-[10px]"
-                              style={{ background: "hsl(210 53% 17% / 0.08)", color: "hsl(210 53% 30%)" }}
                             >
                               {a.indicado_por ?? "—"}
                             </Badge>
@@ -287,7 +280,7 @@ const DashboardAgendamentos = () => {
                           {/* Financial */}
                           <TableCell className="text-right">
                             <div className="flex flex-col items-end gap-1">
-                              <span className="font-mono text-sm font-semibold" style={{ color: "hsl(210 53% 25%)" }}>
+                              <span className="font-mono text-sm font-semibold text-primary">
                                 {formatCurrency(a.valor_projeto)}
                               </span>
                               <div className="flex items-center gap-1.5">
@@ -332,24 +325,20 @@ const KpiCard = ({
   accent?: boolean;
 }) => (
   <Card
-    className="border shadow-sm"
-    style={{ borderColor: accent ? "hsl(40 80% 60%)" : "hsl(210 15% 88%)" }}
+    className={`border bg-card ${accent ? "border-amber-500/40" : "border-border"}`}
   >
     <CardContent className="p-5 flex items-center gap-4">
       <div
-        className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0"
-        style={{
-          background: accent ? "hsl(40 80% 95%)" : "hsl(210 53% 17% / 0.06)",
-        }}
+        className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${accent ? "bg-amber-500/10" : "bg-primary/10"}`}
       >
-        <Icon className="h-5 w-5" style={{ color: accent ? "hsl(40 70% 40%)" : "hsl(210 53% 30%)" }} />
+        <Icon className={`h-5 w-5 ${accent ? "text-amber-400" : "text-primary"}`} />
       </div>
       <div>
         <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{label}</p>
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin mt-1 text-muted-foreground" />
         ) : (
-          <p className="text-xl font-bold font-mono mt-0.5" style={{ color: "hsl(210 53% 17%)" }}>
+          <p className="text-xl font-bold font-mono mt-0.5 text-foreground">
             {value}
           </p>
         )}
