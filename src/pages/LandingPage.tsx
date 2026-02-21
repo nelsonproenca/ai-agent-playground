@@ -185,14 +185,16 @@ const LandingPage = () => {
       {/* Collaborator Selection Modal */}
       <Dialog open={modalOpen && !selectedColab} onOpenChange={setModalOpen}>
         <DialogContent hideClose className="sm:max-w-md max-w-[95vw] max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-center text-lg font-semibold">
-              Selecione o Colaborador
-            </DialogTitle>
-            <DialogDescription className="text-center text-sm">
-              Escolha quem será associado a este flyer para impressão
-            </DialogDescription>
-          </DialogHeader>
+          {!loadingColabs && colabsWithQr.length > 0 && (
+            <DialogHeader>
+              <DialogTitle className="text-center text-lg font-semibold">
+                Selecione o Colaborador
+              </DialogTitle>
+              <DialogDescription className="text-center text-sm">
+                Escolha quem será associado a este flyer para impressão
+              </DialogDescription>
+            </DialogHeader>
+          )}
 
           {loadingColabs ? (
             <div className="flex items-center justify-center py-12">
