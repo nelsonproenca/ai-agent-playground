@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Terminal, Lock, Inbox, Users, Building2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,11 +32,14 @@ const Dashboard = () => {
   const activeTab = (searchParams.get("tab") as TabKey) || "leads";
   const setActiveTab = (tab: TabKey) => setSearchParams({ tab });
 
+  const { login: authLogin } = useAuth();
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === "nelson2024") {
       setAuthenticated(true);
       setPasswordError("");
+      authLogin();
       navigate("/admin");
       return;
     } else {

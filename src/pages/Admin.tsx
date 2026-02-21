@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Inbox, Users, Building2, QrCode, FileText, CalendarDays } from "lucide-react";
+import { useEffect } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Inbox, Users, Building2, QrCode, FileText, CalendarDays, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 import GestaoLeads from "@/components/dashboard/GestaoLeads";
 import GestaoColabs from "@/components/dashboard/GestaoColabs";
 import GestaoClientes from "@/components/dashboard/GestaoClientes";
@@ -23,7 +23,17 @@ const TAB_CONFIG: { key: TabKey & string; label: string; icon: React.ElementType
 
 const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { authenticated, logout } = useAuth();
   const activeTab = (searchParams.get("tab") as TabKey) || null;
+
+  useEffect(() => {
+    if (!authenticated) {
+      navigate("/login", { replace: true });
+    }
+  }, [authenticated, navigate]);
+
+  if (!authenticated) return null;
 
   const setActiveTab = (tab: TabKey & string) => {
     setSearchParams({ tab });
@@ -36,12 +46,18 @@ const Admin = () => {
           <h1 className="font-mono font-bold text-foreground text-lg">
             Gerenciamento <span className="text-primary">do Site</span>
           </h1>
-          <Button asChild variant="outline" size="sm" className="font-mono gap-2">
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="font-mono gap-2">
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" className="font-mono gap-2 text-muted-foreground" onClick={() => { logout(); navigate("/login"); }}>
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 
