@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Users, Building2, QrCode } from "lucide-react";
+import { ArrowLeft, Shield, Users, Building2, QrCode, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const adminLinks = [
@@ -7,6 +7,7 @@ const adminLinks = [
   { to: "/colabs", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
   { to: "/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
   { to: "/convites", icon: QrCode, label: "Gerador de Convites", desc: "QR Codes e links" },
+  { to: "/landing", icon: FileText, label: "Flyer para Impressão", desc: "Landing page com QR personalizado" },
 ];
 
 const Admin = () => {

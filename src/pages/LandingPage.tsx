@@ -1,10 +1,30 @@
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Globe, Monitor, Users, ShieldCheck, RefreshCw, Link2,
   Lock, BarChart3, Database, Workflow, LayoutDashboard,
   Cloud, Server, DollarSign, Bot, Cpu, BrainCircuit,
-  Layers, Mail, Linkedin, QrCode, ArrowRight, Phone,
+  Layers, Mail, Linkedin, ArrowRight, Phone, Loader2,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+type ColabWithQr = {
+  id: string;
+  nome: string;
+  cargo: string | null;
+  foto_url: string | null;
+  qr_url: string;
+};
 
 const PILLARS = [
   {
@@ -66,6 +86,67 @@ const GRAPHITE_LIGHT = "#4a5568";
 const ACCENT = "#1e3a5f";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(true);
+  const [colabsWithQr, setColabsWithQr] = useState<ColabWithQr[]>([]);
+  const [loadingColabs, setLoadingColabs] = useState(true);
+  const [selectedColab, setSelectedColab] = useState<ColabWithQr | null>(null);
+
+  const fetchColabsWithQr = useCallback(async () => {
+    setLoadingColabs(true);
+    // Fetch all saved QR files
+    const { data: files } = await supabase.storage.from("uploads").list("convites", {
+      sortBy: { column: "created_at", order: "desc" },
+    });
+    if (!files || files.length === 0) {
+      setColabsWithQr([]);
+      setLoadingColabs(false);
+      return;
+    }
+
+    const pngFiles = files.filter((f) => f.name.endsWith(".png"));
+
+    // Fetch collaborators
+    const { data: colabs } = await supabase.from("colaboradores").select("*").order("nome");
+    if (!colabs) {
+      setColabsWithQr([]);
+      setLoadingColabs(false);
+      return;
+    }
+
+    // Match collaborators with existing QR files
+    const matched: ColabWithQr[] = [];
+    for (const colab of colabs) {
+      const expectedName = `convite-${colab.nome.toLowerCase().replace(/\s+/g, "-")}.png`;
+      const found = pngFiles.find((f) => f.name === expectedName);
+      if (found) {
+        const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(`convites/${found.name}`);
+        matched.push({
+          id: colab.id,
+          nome: colab.nome,
+          cargo: colab.cargo,
+          foto_url: colab.foto_url,
+          qr_url: urlData.publicUrl,
+        });
+      }
+    }
+    setColabsWithQr(matched);
+    setLoadingColabs(false);
+  }, []);
+
+  useEffect(() => {
+    fetchColabsWithQr();
+  }, [fetchColabsWithQr]);
+
+  const handleSelectColab = (colab: ColabWithQr) => {
+    setSelectedColab(colab);
+    setModalOpen(false);
+  };
+
+  const handleGoToCreate = () => {
+    navigate("/convites");
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans flyer-a4" style={{ color: GRAPHITE }}>
       <style>{`
@@ -97,8 +178,65 @@ const LandingPage = () => {
           .flyer-a4 .print-footer { padding: 6px 0 0 !important; margin-top: 4px !important; }
           .flyer-a4 .print-footer p { font-size: 6.5px !important; }
           .flyer-a4 .print-divider { margin: 4px 0 !important; }
+          .no-print { display: none !important; }
         }
       `}</style>
+
+      {/* Collaborator Selection Modal */}
+      <Dialog open={modalOpen && !selectedColab} onOpenChange={(open) => {
+        if (!open && !selectedColab) return; // prevent closing without selection
+        setModalOpen(open);
+      }}>
+        <DialogContent className="sm:max-w-md max-w-[95vw] max-h-[85vh] overflow-y-auto" onInteractOutside={(e) => {
+          if (!selectedColab) e.preventDefault();
+        }}>
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-semibold">
+              Selecione o Colaborador
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm">
+              Escolha quem será associado a este flyer para impressão
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingColabs ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : colabsWithQr.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 py-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                Nenhum colaborador possui QR Code gerado ainda.
+              </p>
+              <Button onClick={handleGoToCreate} className="gap-2">
+                Criar QR Codes
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 py-2">
+              {colabsWithQr.map((colab) => (
+                <button
+                  key={colab.id}
+                  onClick={() => handleSelectColab(colab)}
+                  className="flex items-center gap-3 w-full rounded-lg border border-border p-3 hover:bg-accent/10 hover:border-primary/40 transition-all text-left"
+                >
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={colab.foto_url ?? undefined} />
+                    <AvatarFallback className="text-xs bg-secondary">
+                      {colab.nome.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm text-foreground truncate">{colab.nome}</p>
+                    <p className="text-xs text-muted-foreground truncate">{colab.cargo ?? "Sem cargo"}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Safe margin wrapper */}
       <div className="max-w-[210mm] mx-auto px-5 py-6 md:px-8 md:py-8" style={{ padding: "20px" }}>
@@ -128,13 +266,11 @@ const LandingPage = () => {
 
         {/* Pillar Grid */}
         <div className="print-grid mt-6">
-          {/* First row: 3 pillars */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
             {PILLARS.slice(0, 3).map((pillar, pi) => (
               <PillarCard key={pillar.title} pillar={pillar} index={pi} />
             ))}
           </div>
-          {/* Second row: 2 pillars centered */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mt-4 md:mt-5 md:max-w-[66.666%] md:mx-auto">
             {PILLARS.slice(3).map((pillar, pi) => (
               <PillarCard key={pillar.title} pillar={pillar} index={pi + 3} />
@@ -147,10 +283,22 @@ const LandingPage = () => {
           className="print-cta mt-6 rounded-lg p-5 md:p-6 text-center" style={{ background: NAVY }}>
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
             <div className="flex-shrink-0">
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-white flex items-center justify-center">
-                <QrCode size={48} style={{ color: NAVY }} strokeWidth={1.5} />
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                {selectedColab ? (
+                  <img
+                    src={`${selectedColab.qr_url}?t=${Date.now()}`}
+                    alt={`QR Code - ${selectedColab.nome}`}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full">
+                    <Loader2 className="h-6 w-6 animate-spin" style={{ color: NAVY }} />
+                  </div>
+                )}
               </div>
-              <p className="text-[9px] text-white/60 mt-1.5 font-medium">Escaneie o QR Code</p>
+              <p className="text-[9px] text-white/60 mt-1.5 font-medium">
+                {selectedColab ? `Ref: ${selectedColab.nome}` : "Escaneie o QR Code"}
+              </p>
             </div>
             <div className="text-white text-center md:text-left">
               <h2 className="font-display text-lg md:text-xl font-bold">Diagnóstico Técnico Gratuito</h2>
@@ -197,6 +345,19 @@ const LandingPage = () => {
             </div>
           </div>
         </footer>
+
+        {/* Print button - hidden on print */}
+        {selectedColab && (
+          <div className="no-print mt-6 flex justify-center">
+            <Button
+              onClick={() => window.print()}
+              className="gap-2"
+              style={{ background: NAVY }}
+            >
+              Imprimir Flyer
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
