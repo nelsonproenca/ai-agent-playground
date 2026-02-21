@@ -7,8 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building2, Plus, Loader2, UserPlus, Contact, Trash2 } from "lucide-react";
+import { Building2, Plus, Loader2, UserPlus, Contact, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import ImageUpload from "./ImageUpload";
@@ -16,7 +15,6 @@ import ImageUpload from "./ImageUpload";
 type Cliente = Tables<"clientes">;
 type Contato = Tables<"contatos_clientes">;
 
-// Phone mask helper
 const maskPhone = (value: string) => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 2) return digits;
@@ -31,6 +29,7 @@ const GestaoClientes = () => {
   const [saving, setSaving] = useState(false);
 
   // Client form
+  const [editId, setEditId] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [empresa, setEmpresa] = useState("");
@@ -43,6 +42,7 @@ const GestaoClientes = () => {
   const [selectedClienteId, setSelectedClienteId] = useState<string | null>(null);
   const [contatos, setContatos] = useState<Contato[]>([]);
   const [loadingContatos, setLoadingContatos] = useState(false);
+  const [editContatoId, setEditContatoId] = useState<string | null>(null);
   const [contatoNome, setContatoNome] = useState("");
   const [contatoEmail, setContatoEmail] = useState("");
   const [contatoTelefone, setContatoTelefone] = useState("");
@@ -70,9 +70,7 @@ const GestaoClientes = () => {
     setLoadingContatos(false);
   };
 
-  useEffect(() => {
-    fetchClientes();
-  }, []);
+  useEffect(() => { fetchClientes(); }, []);
 
   useEffect(() => {
     if (selectedClienteId) {
@@ -81,6 +79,24 @@ const GestaoClientes = () => {
       setContatos([]);
     }
   }, [selectedClienteId]);
+
+  // --- Client form helpers ---
+  const resetClientForm = () => {
+    setEditId(null);
+    setNome(""); setEmail(""); setEmpresa(""); setSegmento(""); setSiteUrl(""); setLogoUrl(null); setErrors({});
+  };
+
+  const handleEditCliente = (c: Cliente) => {
+    setEditId(c.id);
+    setNome(c.nome);
+    setEmail(c.email);
+    setEmpresa(c.empresa ?? "");
+    setSegmento(c.segmento ?? "");
+    setSiteUrl(c.site_url ?? "");
+    setLogoUrl(c.logo_url);
+    setErrors({});
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -102,39 +118,39 @@ const GestaoClientes = () => {
     if (!validate()) return;
 
     setSaving(true);
-    const { error } = await supabase.from("clientes").insert({
+    const payload = {
       nome: nome.trim(),
       email: email.trim(),
       empresa: empresa.trim() || null,
       segmento: segmento.trim() || null,
       site_url: siteUrl.trim() || null,
       logo_url: logoUrl,
-    });
+    };
 
-    if (error) {
-      toast.error("Erro ao cadastrar cliente.");
+    if (editId) {
+      const { error } = await supabase.from("clientes").update(payload).eq("id", editId);
+      if (error) { toast.error("Erro ao atualizar cliente."); }
+      else { toast.success("Cliente atualizado!"); resetClientForm(); fetchClientes(); }
     } else {
-      toast.success("Cliente cadastrado com sucesso!");
-      setNome("");
-      setEmail("");
-      setEmpresa("");
-      setSegmento("");
-      setSiteUrl("");
-      setLogoUrl(null);
-      setErrors({});
-      fetchClientes();
+      const { error } = await supabase.from("clientes").insert(payload);
+      if (error) { toast.error("Erro ao cadastrar cliente."); }
+      else { toast.success("Cliente cadastrado!"); resetClientForm(); fetchClientes(); }
     }
     setSaving(false);
   };
 
-  const handleUpdateLogo = async (clienteId: string, url: string) => {
-    const { error } = await supabase.from("clientes").update({ logo_url: url }).eq("id", clienteId);
-    if (error) {
-      toast.error("Erro ao atualizar logo.");
-    } else {
-      toast.success("Logo atualizado!");
-      fetchClientes();
-    }
+  // --- Contact form helpers ---
+  const resetContatoForm = () => {
+    setEditContatoId(null);
+    setContatoNome(""); setContatoEmail(""); setContatoTelefone(""); setContatoErrors({});
+  };
+
+  const handleEditContato = (ct: Contato) => {
+    setEditContatoId(ct.id);
+    setContatoNome(ct.nome);
+    setContatoEmail(ct.email ?? "");
+    setContatoTelefone(ct.telefone ?? "");
+    setContatoErrors({});
   };
 
   const validateContato = () => {
@@ -150,27 +166,26 @@ const GestaoClientes = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleAddContato = async (e: React.FormEvent) => {
+  const handleSubmitContato = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClienteId || !validateContato()) return;
 
     setSavingContato(true);
-    const { error } = await supabase.from("contatos_clientes").insert({
+    const payload = {
       cliente_id: selectedClienteId,
       nome: contatoNome.trim(),
       email: contatoEmail.trim() || null,
       telefone: contatoTelefone.trim() || null,
-    });
+    };
 
-    if (error) {
-      toast.error("Erro ao adicionar contato.");
+    if (editContatoId) {
+      const { error } = await supabase.from("contatos_clientes").update(payload).eq("id", editContatoId);
+      if (error) { toast.error("Erro ao atualizar contato."); }
+      else { toast.success("Contato atualizado!"); resetContatoForm(); fetchContatos(selectedClienteId); }
     } else {
-      toast.success("Contato adicionado!");
-      setContatoNome("");
-      setContatoEmail("");
-      setContatoTelefone("");
-      setContatoErrors({});
-      fetchContatos(selectedClienteId);
+      const { error } = await supabase.from("contatos_clientes").insert(payload);
+      if (error) { toast.error("Erro ao adicionar contato."); }
+      else { toast.success("Contato adicionado!"); resetContatoForm(); fetchContatos(selectedClienteId); }
     }
     setSavingContato(false);
   };
@@ -178,6 +193,7 @@ const GestaoClientes = () => {
   const handleDeleteContato = async (contatoId: string) => {
     if (!selectedClienteId) return;
     await supabase.from("contatos_clientes").delete().eq("id", contatoId);
+    if (editContatoId === contatoId) resetContatoForm();
     fetchContatos(selectedClienteId);
     toast.success("Contato removido.");
   };
@@ -191,7 +207,7 @@ const GestaoClientes = () => {
         <CardHeader>
           <CardTitle className="font-mono text-foreground flex items-center gap-2 text-base">
             <Plus className="h-4 w-4 text-primary" />
-            Cadastrar Cliente
+            {editId ? "Editar Cliente" : "Cadastrar Cliente"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -218,11 +234,16 @@ const GestaoClientes = () => {
                 className="font-mono bg-secondary border-border text-foreground" />
               {errors.siteUrl && <p className="text-xs text-destructive font-mono">{errors.siteUrl}</p>}
             </div>
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 flex gap-2">
               <Button type="submit" className="font-mono w-full sm:w-auto" disabled={saving}>
                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Cadastrar Cliente
+                Salvar
               </Button>
+              {editId && (
+                <Button type="button" variant="outline" className="font-mono" onClick={resetClientForm}>
+                  Cancelar
+                </Button>
+              )}
             </div>
           </form>
         </CardContent>
@@ -243,25 +264,24 @@ const GestaoClientes = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="font-mono text-xs text-muted-foreground w-12"></TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Nome</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">E-mail</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Empresa</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">Segmento</TableHead>
-                <TableHead className="font-mono text-xs text-muted-foreground text-center">Logo</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground text-center">Contatos</TableHead>
+                <TableHead className="font-mono text-xs text-muted-foreground text-center w-16">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : clientes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground font-mono py-12">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono py-12">
                     Nenhum cliente cadastrado.
                   </TableCell>
                 </TableRow>
@@ -272,27 +292,10 @@ const GestaoClientes = () => {
                     className={`border-border cursor-pointer transition-colors ${selectedClienteId === c.id ? "bg-primary/10" : "hover:bg-secondary/50"}`}
                     onClick={() => setSelectedClienteId(selectedClienteId === c.id ? null : c.id)}
                   >
-                    <TableCell>
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={c.logo_url ?? undefined} />
-                        <AvatarFallback className="bg-secondary text-muted-foreground text-[10px]">
-                          {c.nome.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </TableCell>
                     <TableCell className="font-medium text-foreground">{c.nome}</TableCell>
                     <TableCell className="text-muted-foreground text-sm font-mono">{c.email}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.empresa ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{c.segmento ?? "—"}</TableCell>
-                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                      <ImageUpload
-                        currentUrl={c.logo_url}
-                        onUploaded={(url) => handleUpdateLogo(c.id, url)}
-                        folder="clientes"
-                        label="Alterar"
-                        size="sm"
-                      />
-                    </TableCell>
                     <TableCell className="text-center">
                       <Button
                         variant={selectedClienteId === c.id ? "default" : "ghost"}
@@ -305,6 +308,11 @@ const GestaoClientes = () => {
                       >
                         <Contact className="h-3 w-3" />
                         Contatos
+                      </Button>
+                    </TableCell>
+                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditCliente(c)}>
+                        <Pencil className="h-4 w-4 text-primary" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -321,14 +329,14 @@ const GestaoClientes = () => {
           <CardHeader>
             <CardTitle className="font-mono text-foreground flex items-center gap-2 text-base">
               <UserPlus className="h-4 w-4 text-primary" />
-              Contatos — {selectedCliente?.nome ?? ""}
+              {editContatoId ? "Editar Contato" : "Contatos"} — {selectedCliente?.nome ?? ""}
               <Badge variant="outline" className="font-mono text-xs border-primary/30 text-primary ml-auto">
                 {contatos.length}
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form onSubmit={handleAddContato} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <form onSubmit={handleSubmitContato} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Input placeholder="Nome do contato *" value={contatoNome} onChange={(e) => setContatoNome(e.target.value)}
                   className="font-mono bg-secondary border-border text-foreground" />
@@ -345,11 +353,16 @@ const GestaoClientes = () => {
                   className="font-mono bg-secondary border-border text-foreground" />
                 {contatoErrors.contatoTelefone && <p className="text-xs text-destructive font-mono">{contatoErrors.contatoTelefone}</p>}
               </div>
-              <div className="sm:col-span-3">
+              <div className="sm:col-span-3 flex gap-2">
                 <Button type="submit" size="sm" className="font-mono gap-1" disabled={savingContato}>
                   {savingContato && <Loader2 className="h-3 w-3 animate-spin" />}
-                  <Plus className="h-3 w-3" /> Adicionar Contato
+                  Salvar
                 </Button>
+                {editContatoId && (
+                  <Button type="button" variant="outline" size="sm" className="font-mono" onClick={resetContatoForm}>
+                    Cancelar
+                  </Button>
+                )}
               </div>
             </form>
 
@@ -367,10 +380,16 @@ const GestaoClientes = () => {
                         {[ct.email, ct.telefone].filter(Boolean).join(" · ") || "—"}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDeleteContato(ct.id)}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary"
+                        onClick={() => handleEditContato(ct)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteContato(ct.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
