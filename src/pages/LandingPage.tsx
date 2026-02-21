@@ -184,7 +184,7 @@ const LandingPage = () => {
 
       {/* Collaborator Selection Modal */}
       <Dialog open={modalOpen && !selectedColab} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md max-w-[95vw] max-h-[85vh] overflow-y-auto">
+        <DialogContent hideClose className="sm:max-w-md max-w-[95vw] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-center text-lg font-semibold">
               Selecione o Colaborador
