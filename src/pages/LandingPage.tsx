@@ -348,17 +348,26 @@ const LandingPage = () => {
         </footer>
 
         {/* Print button - hidden on print */}
-        {selectedColab && (
-          <div className="no-print mt-6 flex justify-center">
+        <div className="no-print mt-6 flex justify-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/admin")}
+            className="gap-2 text-sm font-semibold"
+            style={{ borderColor: NAVY, color: NAVY }}
+          >
+            <ArrowRight size={16} className="rotate-180" />
+            Voltar
+          </Button>
+          {selectedColab && (
             <Button
               onClick={() => window.print()}
-              className="gap-2"
+              className="gap-2 text-sm font-semibold text-white"
               style={{ background: NAVY }}
             >
               Imprimir Flyer
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
