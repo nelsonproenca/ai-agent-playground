@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Terminal, Lock, Inbox, Users, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,7 @@ const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -35,6 +36,8 @@ const Dashboard = () => {
     if (password === "nelson2024") {
       setAuthenticated(true);
       setPasswordError("");
+      navigate("/admin");
+      return;
     } else {
       setPasswordError("Senha incorreta.");
     }

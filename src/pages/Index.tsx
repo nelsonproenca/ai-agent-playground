@@ -21,7 +21,7 @@ const Index = () => {
             {[
               { to: "/colabs", label: "Colaboradores", icon: Users },
               { to: "/clientes", label: "Clientes", icon: Building2 },
-              { to: "/dashboard", label: "Área Restrita", icon: LayoutDashboard },
+              { to: "/login", label: "Área Restrita", icon: LayoutDashboard },
             ].map((item) => (
               <Link
                 key={item.to}
@@ -115,7 +115,7 @@ const Index = () => {
           </Link>
 
           <Link
-            to="/admin"
+            to="/login"
             className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
           >
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
