@@ -167,7 +167,12 @@ const LandingPage = () => {
           .flyer-a4 .print-header h1 { font-size: 16px !important; line-height: 1.1 !important; }
           .flyer-a4 .print-header p { font-size: 8px !important; }
           .flyer-a4 .print-grid { gap: 6px !important; margin-top: 6px !important; }
-          .flyer-a4 .print-card { padding: 6px 8px !important; }
+          .flyer-a4 .print-card { padding: 6px 8px !important; break-inside: avoid; }
+          .flyer-a4 .print-grid .grid { display: grid !important; }
+          .flyer-a4 .print-grid .md\\:grid-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+          .flyer-a4 .print-grid .md\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+          .flyer-a4 .print-grid .md\\:max-w-\\[66\\.666\\%\\] { max-width: 66.666% !important; }
+          .flyer-a4 .print-grid .md\\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
           .flyer-a4 .print-card h3 { font-size: 8.5px !important; margin-bottom: 3px !important; }
           .flyer-a4 .print-card p { font-size: 6.5px !important; line-height: 1.2 !important; }
           .flyer-a4 .print-card .svc-name { font-size: 7px !important; }
@@ -176,6 +181,9 @@ const LandingPage = () => {
           .flyer-a4 .print-cta { padding: 8px !important; margin-top: 6px !important; }
           .flyer-a4 .print-cta h2 { font-size: 10px !important; }
           .flyer-a4 .print-cta p { font-size: 7px !important; }
+          .flyer-a4 .print-cta .flex-col { flex-direction: row !important; }
+          .flyer-a4 .print-cta .md\\:text-left { text-align: left !important; }
+          .flyer-a4 .print-cta .justify-center.md\\:justify-start { justify-content: flex-start !important; }
           .flyer-a4 .print-footer { padding: 6px 0 0 !important; margin-top: 4px !important; }
           .flyer-a4 .print-footer p { font-size: 6.5px !important; }
           .flyer-a4 .print-divider { margin: 4px 0 !important; }
@@ -286,7 +294,7 @@ const LandingPage = () => {
         {/* CTA Section */}
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           className="print-cta mt-6 rounded-lg p-5 md:p-6 text-center border-2" style={{ background: "#f8fafc", borderColor: NAVY }}>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 print-cta-inner">
             {selectedColab && (
               <div className="flex-shrink-0">
                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg border flex items-center justify-center overflow-hidden" style={{ borderColor: NAVY }}>
