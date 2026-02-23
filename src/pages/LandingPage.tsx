@@ -162,6 +162,11 @@ const LandingPage = () => {
             width: 210mm; min-height: 297mm; max-height: 297mm; 
             overflow: hidden; padding: 20px !important;
             font-size: 7.5px !important;
+            display: flex !important; flex-direction: column !important;
+          }
+          .flyer-a4 > div { 
+            flex: 1 !important; display: flex !important; flex-direction: column !important; 
+            justify-content: space-between !important;
           }
           .flyer-a4 .print-header { padding: 12px 0 8px !important; }
           .flyer-a4 .print-header h1 { font-size: 16px !important; line-height: 1.1 !important; }
