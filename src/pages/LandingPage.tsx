@@ -160,32 +160,25 @@ const LandingPage = () => {
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .flyer-a4 { 
             width: 210mm; min-height: 297mm; max-height: 297mm; 
-            overflow: hidden; padding: 10px 14px !important;
-            font-size: 7px !important;
+            overflow: hidden; padding: 20px !important;
+            font-size: 7.5px !important;
           }
-          .flyer-a4 .print-header { padding: 6px 0 4px !important; }
-          .flyer-a4 .print-header h1 { font-size: 15px !important; line-height: 1.1 !important; margin-bottom: 0 !important; }
-          .flyer-a4 .print-header p { font-size: 7px !important; margin-top: 1px !important; }
-          .flyer-a4 .print-header .header-divider { margin-top: 3px !important; margin-bottom: 0 !important; }
-          .flyer-a4 .print-header .header-subtitle { margin-top: 2px !important; }
-          .flyer-a4 .print-grid { margin-top: 4px !important; }
-          .flyer-a4 .print-grid .grid { gap: 4px !important; }
-          .flyer-a4 .print-card { padding: 4px 6px !important; border-radius: 4px !important; }
-          .flyer-a4 .print-card h3 { font-size: 8px !important; margin-bottom: 2px !important; }
-          .flyer-a4 .print-card p { font-size: 6px !important; line-height: 1.15 !important; }
-          .flyer-a4 .print-card .svc-name { font-size: 6.5px !important; }
-          .flyer-a4 .print-card svg { width: 8px !important; height: 8px !important; }
-          .flyer-a4 .print-card .pillar-icon { width: 18px !important; height: 18px !important; }
-          .flyer-a4 .print-card .pillar-icon svg { width: 11px !important; height: 11px !important; }
-          .flyer-a4 .print-card .space-y-2\\.5 { gap: 1px !important; }
-          .flyer-a4 .print-card .space-y-2\\.5 > * + * { margin-top: 1px !important; }
-          .flyer-a4 .print-cta { padding: 6px !important; margin-top: 4px !important; }
-          .flyer-a4 .print-cta h2 { font-size: 9px !important; }
-          .flyer-a4 .print-cta p { font-size: 6px !important; }
-          .flyer-a4 .print-cta img { width: 60px !important; height: 60px !important; }
-          .flyer-a4 .print-footer { padding: 3px 0 0 !important; margin-top: 3px !important; }
-          .flyer-a4 .print-footer p, .flyer-a4 .print-footer span { font-size: 6px !important; }
-          .flyer-a4 .print-footer svg { width: 10px !important; height: 10px !important; }
+          .flyer-a4 .print-header { padding: 12px 0 8px !important; }
+          .flyer-a4 .print-header h1 { font-size: 16px !important; line-height: 1.1 !important; }
+          .flyer-a4 .print-header p { font-size: 8px !important; }
+          .flyer-a4 .print-grid { gap: 6px !important; margin-top: 6px !important; }
+          .flyer-a4 .print-card { padding: 6px 8px !important; }
+          .flyer-a4 .print-card h3 { font-size: 8.5px !important; margin-bottom: 3px !important; }
+          .flyer-a4 .print-card p { font-size: 6.5px !important; line-height: 1.2 !important; }
+          .flyer-a4 .print-card .svc-name { font-size: 7px !important; }
+          .flyer-a4 .print-card svg { width: 10px !important; height: 10px !important; }
+          .flyer-a4 .print-card .pillar-icon svg { width: 14px !important; height: 14px !important; }
+          .flyer-a4 .print-cta { padding: 8px !important; margin-top: 6px !important; }
+          .flyer-a4 .print-cta h2 { font-size: 10px !important; }
+          .flyer-a4 .print-cta p { font-size: 7px !important; }
+          .flyer-a4 .print-footer { padding: 6px 0 0 !important; margin-top: 4px !important; }
+          .flyer-a4 .print-footer p { font-size: 6.5px !important; }
+          .flyer-a4 .print-divider { margin: 4px 0 !important; }
           .no-print { display: none !important; }
         }
       `}</style>
@@ -251,7 +244,7 @@ const LandingPage = () => {
       </Dialog>
 
       {/* Safe margin wrapper */}
-      <div className="max-w-[210mm] mx-auto px-5 py-4 md:px-8 md:py-6">
+      <div className="max-w-[210mm] mx-auto px-5 py-6 md:px-8 md:py-8" style={{ padding: "20px" }}>
 
         {/* Header */}
         <header className="print-header text-center pb-6 border-b-2" style={{ borderColor: NAVY }}>
@@ -269,8 +262,8 @@ const LandingPage = () => {
             <p className="font-display text-sm md:text-base font-medium mt-1" style={{ color: NAVY_LIGHT }}>
               Engenharia de Software & Consultoria Tecnológica
             </p>
-            <div className="w-16 h-[2px] mx-auto mt-4 header-divider" style={{ background: `linear-gradient(90deg, transparent, ${NAVY}, transparent)` }} />
-            <p className="mt-3 text-xs md:text-sm max-w-xl mx-auto leading-relaxed header-subtitle" style={{ color: GRAPHITE_LIGHT }}>
+            <div className="w-16 h-[2px] mx-auto mt-4" style={{ background: `linear-gradient(90deg, transparent, ${NAVY}, transparent)` }} />
+            <p className="mt-3 text-xs md:text-sm max-w-xl mx-auto leading-relaxed" style={{ color: GRAPHITE_LIGHT }}>
               Arquitetura estratégica e inovação tecnológica para acelerar o crescimento do seu negócio
             </p>
           </motion.div>
