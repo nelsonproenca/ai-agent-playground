@@ -169,9 +169,7 @@ const LandingPage = () => {
           .flyer-a4 .print-header .header-divider { margin-top: 3px !important; margin-bottom: 0 !important; }
           .flyer-a4 .print-header .header-subtitle { margin-top: 2px !important; }
           .flyer-a4 .print-grid { margin-top: 4px !important; }
-          .flyer-a4 .print-grid .grid { gap: 4px !important; display: grid !important; }
-          .flyer-a4 .print-grid .grid-cols-1.md\\:grid-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
-          .flyer-a4 .print-grid .grid-cols-1.md\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+          .flyer-a4 .print-grid .grid { gap: 4px !important; }
           .flyer-a4 .print-card { padding: 4px 6px !important; border-radius: 4px !important; }
           .flyer-a4 .print-card h3 { font-size: 8px !important; margin-bottom: 2px !important; }
           .flyer-a4 .print-card p { font-size: 6px !important; line-height: 1.15 !important; }
