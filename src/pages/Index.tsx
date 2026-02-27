@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard } from "lucide-react";
+import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
@@ -127,6 +127,26 @@ const Index = () => {
               </h3>
               <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
                 Gerenciamento do site.
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Loja DTC */}
+        <div className="max-w-4xl mx-auto mt-4">
+          <Link
+            to="/loja"
+            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
+          >
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+              <ShoppingBag className="h-5 w-5 text-primary" />
+            </div>
+            <div className="space-y-0.5 text-left">
+              <h3 className="text-lg font-extrabold text-foreground font-mono">
+                Nossa <span className="text-primary">Loja</span>
+              </h3>
+              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                Produtos premium com entrega rápida.
               </p>
             </div>
           </Link>

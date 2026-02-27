@@ -253,6 +253,42 @@ export type Database = {
         }
         Relationships: []
       }
+      produtos_dtc: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          descricao: string | null
+          id: string
+          imagem_url: string | null
+          nome: string
+          preco: number
+          preco_comparativo: number | null
+          shopify_variant_id: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome: string
+          preco: number
+          preco_comparativo?: number | null
+          shopify_variant_id?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome?: string
+          preco?: number
+          preco_comparativo?: number | null
+          shopify_variant_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
