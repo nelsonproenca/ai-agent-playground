@@ -1,5 +1,5 @@
 // Shopify Headless Checkout via Permalinks
-const SHOPIFY_STORE_DOMAIN = "sualoja.myshopify.com"; // Configure aqui
+const SHOPIFY_STORE_DOMAIN = "nelson-proenca-informatica.myshopify.com";
 
 export function buildCheckoutUrl(variantId: string, quantity = 1, discountCode?: string): string {
   let url = `https://${SHOPIFY_STORE_DOMAIN}/cart/${variantId}:${quantity}`;
