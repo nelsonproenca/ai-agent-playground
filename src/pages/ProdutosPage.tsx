@@ -14,13 +14,15 @@ import { toast } from "sonner";
 
 interface Produto {
   id: string;
-  nome: string;
-  descricao: string | null;
-  preco: number;
-  preco_comparativo: number | null;
-  imagem_url: string | null;
+  name: string;
+  description: string | null;
+  descriptionhtml: string | null;
+  price: number;
+  image_url: string | null;
+  shopify_id: string | null;
   shopify_variant_id: string | null;
-  ativo: boolean;
+  producttype: string | null;
+  active: boolean;
   created_at: string;
 }
 
@@ -31,7 +33,17 @@ const ProdutosPage = () => {
   const [editId, setEditId] = useState<string | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
-  const emptyForm = { nome: "", descricao: "", preco: "", preco_comparativo: "", imagem_url: "", shopify_variant_id: "", ativo: true };
+  const emptyForm = {
+    name: "",
+    description: "",
+    descriptionhtml: "",
+    price: "",
+    image_url: "",
+    shopify_id: "",
+    shopify_variant_id: "",
+    producttype: "",
+    active: true,
+  };
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
@@ -48,13 +60,15 @@ const ProdutosPage = () => {
   const handleEdit = (p: Produto) => {
     setEditId(p.id);
     setForm({
-      nome: p.nome,
-      descricao: p.descricao || "",
-      preco: String(p.preco),
-      preco_comparativo: p.preco_comparativo ? String(p.preco_comparativo) : "",
-      imagem_url: p.imagem_url || "",
+      name: p.name,
+      description: p.description || "",
+      descriptionhtml: p.descriptionhtml || "",
+      price: String(p.price),
+      image_url: p.image_url || "",
+      shopify_id: p.shopify_id || "",
       shopify_variant_id: p.shopify_variant_id || "",
-      ativo: p.ativo,
+      producttype: p.producttype || "",
+      active: p.active,
     });
     formRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -66,19 +80,21 @@ const ProdutosPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nome.trim() || !form.preco) {
+    if (!form.name.trim() || !form.price) {
       toast.error("Nome e Preço são obrigatórios");
       return;
     }
 
     const payload = {
-      nome: form.nome.trim(),
-      descricao: form.descricao.trim() || null,
-      preco: parseFloat(form.preco),
-      preco_comparativo: form.preco_comparativo ? parseFloat(form.preco_comparativo) : null,
-      imagem_url: form.imagem_url.trim() || null,
+      name: form.name.trim(),
+      description: form.description.trim() || null,
+      descriptionhtml: form.descriptionhtml.trim() || null,
+      price: parseFloat(form.price),
+      image_url: form.image_url.trim() || null,
+      shopify_id: form.shopify_id.trim() || null,
       shopify_variant_id: form.shopify_variant_id.trim() || null,
-      ativo: form.ativo,
+      producttype: form.producttype.trim() || null,
+      active: form.active,
     };
 
     if (editId) {
@@ -130,33 +146,43 @@ const ProdutosPage = () => {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="font-mono text-xs">Nome do Produto *</Label>
-                <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Ex: Camiseta Premium" />
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Camiseta Premium" />
               </div>
               <div className="space-y-2">
-                <Label className="font-mono text-xs">Shopify Variant ID</Label>
-                <Input value={form.shopify_variant_id} onChange={(e) => setForm({ ...form, shopify_variant_id: e.target.value })} placeholder="Ex: 44012345678" />
+                <Label className="font-mono text-xs">Tipo de Produto</Label>
+                <Input value={form.producttype} onChange={(e) => setForm({ ...form, producttype: e.target.value })} placeholder="Ex: Acessórios para Celular" />
               </div>
             </div>
             <div className="space-y-2">
               <Label className="font-mono text-xs">Descrição</Label>
-              <Textarea value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} placeholder="Descrição detalhada do produto..." rows={4} />
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Descrição resumida do produto..." rows={3} />
             </div>
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label className="font-mono text-xs">Descrição HTML (Rich Text)</Label>
+              <Textarea value={form.descriptionhtml} onChange={(e) => setForm({ ...form, descriptionhtml: e.target.value })} placeholder="<p>Descrição detalhada com HTML...</p>" rows={4} className="font-mono text-xs" />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="font-mono text-xs">Preço (R$) *</Label>
-                <Input type="number" step="0.01" value={form.preco} onChange={(e) => setForm({ ...form, preco: e.target.value })} placeholder="99.90" />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-mono text-xs">Preço Comparativo (De)</Label>
-                <Input type="number" step="0.01" value={form.preco_comparativo} onChange={(e) => setForm({ ...form, preco_comparativo: e.target.value })} placeholder="149.90" />
+                <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="99.90" />
               </div>
               <div className="space-y-2">
                 <Label className="font-mono text-xs">URL da Imagem</Label>
-                <Input value={form.imagem_url} onChange={(e) => setForm({ ...form, imagem_url: e.target.value })} placeholder="https://..." />
+                <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="font-mono text-xs">Shopify Product ID</Label>
+                <Input value={form.shopify_id} onChange={(e) => setForm({ ...form, shopify_id: e.target.value })} placeholder="Ex: 9176175935726" />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-mono text-xs">Shopify Variant ID</Label>
+                <Input value={form.shopify_variant_id} onChange={(e) => setForm({ ...form, shopify_variant_id: e.target.value })} placeholder="Ex: 47711004360942" />
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Switch checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} />
+              <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
               <Label className="font-mono text-xs">Produto Ativo</Label>
             </div>
             <div className="flex gap-2">
@@ -178,8 +204,9 @@ const ProdutosPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="font-mono text-xs">Produto</TableHead>
+                <TableHead className="font-mono text-xs">Tipo</TableHead>
                 <TableHead className="font-mono text-xs">Preço</TableHead>
-                <TableHead className="font-mono text-xs">De</TableHead>
+                <TableHead className="font-mono text-xs">Shopify ID</TableHead>
                 <TableHead className="font-mono text-xs">Variant ID</TableHead>
                 <TableHead className="font-mono text-xs">Ativo</TableHead>
                 <TableHead className="font-mono text-xs text-right">Ações</TableHead>
@@ -188,15 +215,14 @@ const ProdutosPage = () => {
             <TableBody>
               {produtos.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell className="font-mono text-sm font-semibold max-w-[200px] truncate">{p.nome}</TableCell>
-                  <TableCell className="font-mono text-sm text-primary">R$ {p.preco.toFixed(2).replace(".", ",")}</TableCell>
-                  <TableCell className="font-mono text-sm text-muted-foreground">
-                    {p.preco_comparativo ? `R$ ${p.preco_comparativo.toFixed(2).replace(".", ",")}` : "—"}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground max-w-[120px] truncate">{p.shopify_variant_id || "—"}</TableCell>
+                  <TableCell className="font-mono text-sm font-semibold max-w-[180px] truncate">{p.name}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground max-w-[120px] truncate">{p.producttype || "—"}</TableCell>
+                  <TableCell className="font-mono text-sm text-primary">R$ {p.price.toFixed(2).replace(".", ",")}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground max-w-[100px] truncate">{p.shopify_id || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground max-w-[100px] truncate">{p.shopify_variant_id || "—"}</TableCell>
                   <TableCell>
-                    <Badge variant={p.ativo ? "default" : "secondary"} className="font-mono text-[10px]">
-                      {p.ativo ? "Sim" : "Não"}
+                    <Badge variant={p.active ? "default" : "secondary"} className="font-mono text-[10px]">
+                      {p.active ? "Sim" : "Não"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-1">
@@ -211,7 +237,7 @@ const ProdutosPage = () => {
               ))}
               {produtos.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground font-mono text-sm py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground font-mono text-sm py-8">
                     Nenhum produto cadastrado.
                   </TableCell>
                 </TableRow>
