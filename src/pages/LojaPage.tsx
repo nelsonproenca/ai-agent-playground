@@ -10,13 +10,15 @@ import { redirectToCheckout } from "@/lib/shopify";
 
 interface Produto {
   id: string;
-  nome: string;
-  descricao: string | null;
-  preco: number;
-  preco_comparativo: number | null;
-  imagem_url: string | null;
+  name: string;
+  description: string | null;
+  descriptionhtml: string | null;
+  price: number;
+  image_url: string | null;
+  shopify_id: string | null;
   shopify_variant_id: string | null;
-  ativo: boolean;
+  producttype: string | null;
+  active: boolean;
 }
 
 const fadeUp = {
@@ -24,7 +26,6 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.5 } }),
 };
 
-// Countdown timer fake
 function useCountdown() {
   const [time, setTime] = useState({ h: 2, m: 47, s: 33 });
   useEffect(() => {
@@ -34,7 +35,7 @@ function useCountdown() {
         if (s > 0) s--;
         else if (m > 0) { m--; s = 59; }
         else if (h > 0) { h--; m = 59; s = 59; }
-        else { h = 2; m = 47; s = 33; } // reset
+        else { h = 2; m = 47; s = 33; }
         return { h, m, s };
       });
     }, 1000);
@@ -52,7 +53,7 @@ const LojaPage = () => {
     supabase
       .from("produtos_dtc")
       .select("*")
-      .eq("ativo", true)
+      .eq("active", true)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (data) setProdutos(data as Produto[]);
@@ -61,11 +62,6 @@ const LojaPage = () => {
 
   const scrollToProdutos = () => {
     produtosRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const discount = (p: Produto) => {
-    if (!p.preco_comparativo || p.preco_comparativo <= p.preco) return 0;
-    return Math.round(((p.preco_comparativo - p.preco) / p.preco_comparativo) * 100);
   };
 
   const testimonials = [
@@ -166,7 +162,6 @@ const LojaPage = () => {
               </motion.div>
             ))}
           </div>
-          {/* Trust logos */}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-8 opacity-50">
             {["Compra Segura", "SSL Certificado", "Shopify Checkout", "Garantia 7 dias"].map((label) => (
               <span key={label} className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
@@ -199,30 +194,28 @@ const LojaPage = () => {
                   initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} variants={fadeUp}
                 >
                   <div className="relative aspect-square bg-muted">
-                    {p.imagem_url ? (
-                      <img src={p.imagem_url} alt={p.nome} className="w-full h-full object-cover" />
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
                       </div>
                     )}
-                    {discount(p) > 0 && (
-                      <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground font-mono text-xs">
-                        -{discount(p)}%
+                    {p.producttype && (
+                      <Badge variant="secondary" className="absolute top-3 left-3 font-mono text-[10px]">
+                        {p.producttype}
                       </Badge>
                     )}
                   </div>
                   <div className="p-4 space-y-3">
-                    <h3 className="font-mono font-bold text-foreground text-sm line-clamp-2">{p.nome}</h3>
+                    <h3 className="font-mono font-bold text-foreground text-sm line-clamp-2">{p.name}</h3>
+                    {p.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p>
+                    )}
                     <div className="flex items-baseline gap-2">
                       <span className="text-lg font-extrabold text-primary font-mono">
-                        R$ {p.preco.toFixed(2).replace(".", ",")}
+                        R$ {p.price.toFixed(2).replace(".", ",")}
                       </span>
-                      {p.preco_comparativo && p.preco_comparativo > p.preco && (
-                        <span className="text-xs text-muted-foreground line-through font-mono">
-                          R$ {p.preco_comparativo.toFixed(2).replace(".", ",")}
-                        </span>
-                      )}
                     </div>
                     <Button
                       className="w-full font-mono gap-2 text-xs"

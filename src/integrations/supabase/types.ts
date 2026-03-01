@@ -255,36 +255,42 @@ export type Database = {
       }
       produtos_dtc: {
         Row: {
-          ativo: boolean
+          active: boolean
           created_at: string
-          descricao: string | null
+          description: string | null
+          descriptionhtml: string | null
           id: string
-          imagem_url: string | null
-          nome: string
-          preco: number
-          preco_comparativo: number | null
+          image_url: string | null
+          name: string
+          price: number
+          producttype: string | null
+          shopify_id: string | null
           shopify_variant_id: string | null
         }
         Insert: {
-          ativo?: boolean
+          active?: boolean
           created_at?: string
-          descricao?: string | null
+          description?: string | null
+          descriptionhtml?: string | null
           id?: string
-          imagem_url?: string | null
-          nome: string
-          preco: number
-          preco_comparativo?: number | null
+          image_url?: string | null
+          name: string
+          price: number
+          producttype?: string | null
+          shopify_id?: string | null
           shopify_variant_id?: string | null
         }
         Update: {
-          ativo?: boolean
+          active?: boolean
           created_at?: string
-          descricao?: string | null
+          description?: string | null
+          descriptionhtml?: string | null
           id?: string
-          imagem_url?: string | null
-          nome?: string
-          preco?: number
-          preco_comparativo?: number | null
+          image_url?: string | null
+          name?: string
+          price?: number
+          producttype?: string | null
+          shopify_id?: string | null
           shopify_variant_id?: string | null
         }
         Relationships: []
