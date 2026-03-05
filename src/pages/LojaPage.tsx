@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
-import { redirectToCheckout, resolveShopifyImageUrls } from "@/lib/shopify";
+import { redirectToCheckout } from "@/lib/shopify";
 
 interface Produto {
   id: string;
