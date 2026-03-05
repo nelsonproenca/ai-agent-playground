@@ -207,13 +207,18 @@ const LojaPage = () => {
                   initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} variants={fadeUp}
                 >
                   <div className="relative aspect-square bg-muted">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
-                      </div>
-                    )}
+                    {(() => {
+                      const realUrl = p.image_url?.startsWith("gid://")
+                        ? imageMap[p.image_url]
+                        : p.image_url;
+                      return realUrl ? (
+                        <img src={realUrl} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                        </div>
+                      );
+                    })()}
                     {p.producttype && (
                       <Badge variant="secondary" className="absolute top-3 left-3 font-mono text-[10px]">
                         {p.producttype}
