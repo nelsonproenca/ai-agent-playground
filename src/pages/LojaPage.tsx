@@ -194,18 +194,13 @@ const LojaPage = () => {
                   initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} variants={fadeUp}
                 >
                   <div className="relative aspect-square bg-muted">
-                    {(() => {
-                      // Use shopify_id to look up CDN URL, fallback to image_url if it's a real URL
-                      const cdnUrl = p.shopify_id ? imageMap[p.shopify_id] : null;
-                      const realUrl = cdnUrl || (p.image_url && !p.image_url.startsWith("gid://") ? p.image_url : null);
-                      return realUrl ? (
-                        <img src={realUrl} alt={p.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
-                        </div>
-                      );
-                    })()}
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                      </div>
+                    )}
                     {p.producttype && (
                       <Badge variant="secondary" className="absolute top-3 left-3 font-mono text-[10px]">
                         {p.producttype}
