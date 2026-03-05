@@ -61,13 +61,10 @@ const LojaPage = () => {
           const items = data as Produto[];
           setProdutos(items);
 
-          // Collect GIDs to resolve
-          const gids = items
-            .map((p) => p.image_url)
-            .filter((url): url is string => !!url && url.startsWith("gid://"));
-
-          if (gids.length > 0) {
-            resolveShopifyImageUrls(gids).then(setImageMap);
+          // Resolve images via edge function (keyed by shopify_id)
+          const hasShopifyProducts = items.some((p) => p.shopify_id);
+          if (hasShopifyProducts) {
+            resolveShopifyImageUrls().then(setImageMap);
           }
         }
       });
