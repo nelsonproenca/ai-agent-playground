@@ -61,13 +61,10 @@ const LojaPage = () => {
           const items = data as Produto[];
           setProdutos(items);
 
-          // Collect GIDs to resolve
-          const gids = items
-            .map((p) => p.image_url)
-            .filter((url): url is string => !!url && url.startsWith("gid://"));
-
-          if (gids.length > 0) {
-            resolveShopifyImageUrls(gids).then(setImageMap);
+          // Resolve images via edge function (keyed by shopify_id)
+          const hasShopifyProducts = items.some((p) => p.shopify_id);
+          if (hasShopifyProducts) {
+            resolveShopifyImageUrls().then(setImageMap);
           }
         }
       });
@@ -208,9 +205,9 @@ const LojaPage = () => {
                 >
                   <div className="relative aspect-square bg-muted">
                     {(() => {
-                      const realUrl = p.image_url?.startsWith("gid://")
-                        ? imageMap[p.image_url]
-                        : p.image_url;
+                      // Use shopify_id to look up CDN URL, fallback to image_url if it's a real URL
+                      const cdnUrl = p.shopify_id ? imageMap[p.shopify_id] : null;
+                      const realUrl = cdnUrl || (p.image_url && !p.image_url.startsWith("gid://") ? p.image_url : null);
                       return realUrl ? (
                         <img src={realUrl} alt={p.name} className="w-full h-full object-cover" />
                       ) : (
