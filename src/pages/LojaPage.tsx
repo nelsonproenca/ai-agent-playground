@@ -46,6 +46,7 @@ function useCountdown() {
 
 const LojaPage = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
   const produtosRef = useRef<HTMLDivElement>(null);
   const countdown = useCountdown();
 
@@ -56,7 +57,19 @@ const LojaPage = () => {
       .eq("active", true)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        if (data) setProdutos(data as Produto[]);
+        if (data) {
+          const items = data as Produto[];
+          setProdutos(items);
+
+          // Collect GIDs to resolve
+          const gids = items
+            .map((p) => p.image_url)
+            .filter((url): url is string => !!url && url.startsWith("gid://"));
+
+          if (gids.length > 0) {
+            resolveShopifyImageUrls(gids).then(setImageMap);
+          }
+        }
       });
   }, []);
 
