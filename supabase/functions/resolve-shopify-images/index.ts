@@ -22,46 +22,29 @@ async function getAccessToken(): Promise<string> {
 }
 
 async function fetchProductImages(token: string): Promise<Record<string, string>> {
-  const query = `{
-    products(first: 250) {
-      edges {
-        node {
-          media(first: 10) {
-            edges {
-              node {
-                ... on MediaImage {
-                  id
-                  image { url }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }`;
-
-  const res = await fetch(`https://${SHOPIFY_STORE}/api/2024-01/graphql.json`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": token,
-    },
-    body: JSON.stringify({ query }),
-  });
-
-  if (!res.ok) throw new Error(`GraphQL failed: ${res.status}`);
-  const json = await res.json();
   const map: Record<string, string> = {};
+  let url: string | null = `https://${SHOPIFY_STORE}/admin/api/2024-01/products.json?limit=250&fields=id,images`;
 
-  for (const edge of json?.data?.products?.edges ?? []) {
-    for (const mediaEdge of edge?.node?.media?.edges ?? []) {
-      const node = mediaEdge?.node;
-      if (node?.id && node?.image?.url) {
-        map[node.id] = node.image.url;
+  while (url) {
+    const res = await fetch(url, {
+      headers: { "X-Shopify-Access-Token": token },
+    });
+    if (!res.ok) throw new Error(`Admin API failed: ${res.status} ${await res.text()}`);
+    const json = await res.json();
+
+    for (const product of json?.products ?? []) {
+      for (const img of product?.images ?? []) {
+        const gid = `gid://shopify/MediaImage/${img.id}`;
+        if (img.src) map[gid] = img.src;
       }
     }
+
+    // Check for pagination
+    const linkHeader = res.headers.get("link");
+    const nextMatch = linkHeader?.match(/<([^>]+)>;\s*rel="next"/);
+    url = nextMatch ? nextMatch[1] : null;
   }
+
   return map;
 }
 
