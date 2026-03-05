@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,7 +29,6 @@ serve(async (req) => {
   try {
     const token = await getAccessToken();
 
-    // Fetch products with their first image URL, keyed by product GID
     const query = `{
       products(first: 250) {
         edges {
@@ -54,20 +54,31 @@ serve(async (req) => {
     if (!res.ok) throw new Error(`GraphQL failed: ${res.status}`);
     const json = await res.json();
 
-    // Map: shopify_id (numeric) -> image CDN URL
-    const map: Record<string, string> = {};
+    // Map: shopify_id (numeric) -> CDN URL
+    const imageMap: Record<string, string> = {};
     for (const edge of json?.data?.products?.edges ?? []) {
       const node = edge?.node;
       if (node?.id && node?.featuredImage?.url) {
-        // Extract numeric ID from gid://shopify/Product/123456
         const numericId = node.id.split("/").pop();
-        if (numericId) {
-          map[numericId] = node.featuredImage.url;
-        }
+        if (numericId) imageMap[numericId] = node.featuredImage.url;
       }
     }
 
-    return new Response(JSON.stringify(map), {
+    // Update database
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    let updated = 0;
+    for (const [shopifyId, cdnUrl] of Object.entries(imageMap)) {
+      const { error } = await supabase
+        .from("produtos_dtc")
+        .update({ image_url: cdnUrl })
+        .eq("shopify_id", shopifyId);
+      if (!error) updated++;
+    }
+
+    return new Response(JSON.stringify({ updated, total: Object.keys(imageMap).length, imageMap }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
