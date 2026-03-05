@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
-import { redirectToCheckout } from "@/lib/shopify";
+import { redirectToCheckout, resolveShopifyImageUrls } from "@/lib/shopify";
 
 interface Produto {
   id: string;
@@ -46,6 +46,7 @@ function useCountdown() {
 
 const LojaPage = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
   const produtosRef = useRef<HTMLDivElement>(null);
   const countdown = useCountdown();
 
@@ -56,7 +57,19 @@ const LojaPage = () => {
       .eq("active", true)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        if (data) setProdutos(data as Produto[]);
+        if (data) {
+          const items = data as Produto[];
+          setProdutos(items);
+
+          // Collect GIDs to resolve
+          const gids = items
+            .map((p) => p.image_url)
+            .filter((url): url is string => !!url && url.startsWith("gid://"));
+
+          if (gids.length > 0) {
+            resolveShopifyImageUrls(gids).then(setImageMap);
+          }
+        }
       });
   }, []);
 
@@ -194,13 +207,18 @@ const LojaPage = () => {
                   initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} variants={fadeUp}
                 >
                   <div className="relative aspect-square bg-muted">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
-                      </div>
-                    )}
+                    {(() => {
+                      const realUrl = p.image_url?.startsWith("gid://")
+                        ? imageMap[p.image_url]
+                        : p.image_url;
+                      return realUrl ? (
+                        <img src={realUrl} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                        </div>
+                      );
+                    })()}
                     {p.producttype && (
                       <Badge variant="secondary" className="absolute top-3 left-3 font-mono text-[10px]">
                         {p.producttype}
