@@ -7,14 +7,16 @@ const corsHeaders = {
 };
 
 const SHOPIFY_STORE = "nelson-proenca-informatica.myshopify.com";
-const CLIENT_ID = "f0a0a8efe3f42a361f44af7076653f11";
-const CLIENT_SECRET = "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";
 
 async function getAccessToken(): Promise<string> {
+  const clientId = Deno.env.get("SHOPIFY_CLIENT_ID");
+  const clientSecret = Deno.env.get("SHOPIFY_CLIENT_SECRET");
+  if (!clientId || !clientSecret) throw new Error("Missing SHOPIFY_CLIENT_ID or SHOPIFY_CLIENT_SECRET");
+
   const res = await fetch(`https://${SHOPIFY_STORE}/admin/oauth/access_token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, grant_type: "client_credentials" }),
+    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, grant_type: "client_credentials" }),
   });
   if (!res.ok) throw new Error(`Token request failed: ${res.status}`);
   const data = await res.json();

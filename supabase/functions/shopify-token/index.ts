@@ -11,12 +11,20 @@ serve(async (req) => {
   }
 
   try {
+    const clientId = Deno.env.get("SHOPIFY_CLIENT_ID");
+    const clientSecret = Deno.env.get("SHOPIFY_CLIENT_SECRET");
+    if (!clientId || !clientSecret) {
+      return new Response(JSON.stringify({ error: "Missing SHOPIFY_CLIENT_ID or SHOPIFY_CLIENT_SECRET" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const res = await fetch("https://nelson-proenca-informatica.myshopify.com/admin/oauth/access_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        client_id: "f0a0a8efe3f42a361f44af7076653f11",
-        client_secret: "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",
+        client_id: clientId,
+        client_secret: clientSecret,
         grant_type: "client_credentials"
       }),
     });
