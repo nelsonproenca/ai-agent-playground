@@ -133,6 +133,17 @@ const Playground = () => {
         >
           <LeadEnricher />
         </motion.div>
+
+        {/* Section: Novas Atividades */}
+        <motion.div
+          ref={(el) => { sectionRefs.current["novas-atividades"] = el; }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+        >
+          <NovasAtividades />
+        </motion.div>
       </main>
 
       <footer className="border-t border-border py-8 text-center">
