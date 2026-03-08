@@ -1,18 +1,20 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Terminal, ArrowLeft, Cpu, FlaskConical, Globe, Code2, ChevronRight } from "lucide-react";
+import { Terminal, ArrowLeft, Cpu, FlaskConical, Globe, Code2, ChevronRight, Bot } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LeadForm from "@/components/LeadForm";
 import SuccessMessage from "@/components/SuccessMessage";
 import TechPlayground from "@/components/TechPlayground";
 import LeadEnricher from "@/components/LeadEnricher";
+import NovasAtividades from "@/components/NovasAtividades";
 
 const NAV_ITEMS = [
   { id: "novo-desafio", label: "Novo Desafio", icon: Code2 },
   { id: "tech-playground", label: "Consultoria IA", icon: FlaskConical },
   { id: "lead-enricher", label: "Enriquecimento de Leads", icon: Globe },
+  { id: "novas-atividades", label: "Novas Atividades", icon: Bot },
 ];
 
 const Playground = () => {
@@ -130,6 +132,17 @@ const Playground = () => {
           className="mb-12"
         >
           <LeadEnricher />
+        </motion.div>
+
+        {/* Section: Novas Atividades */}
+        <motion.div
+          ref={(el) => { sectionRefs.current["novas-atividades"] = el; }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+        >
+          <NovasAtividades />
         </motion.div>
       </main>
 
