@@ -76,7 +76,7 @@ const NovasAtividades = () => {
         </Card>
 
         {/* Card Telegram */}
-        <Card className="border-primary/30 bg-primary/5">
+        <Card className="border-primary/30 bg-primary/5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-primary/10">
           <CardContent className="flex flex-col sm:flex-row items-center gap-5 p-6">
             <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-primary/10 shrink-0">
               <Send className="h-7 w-7 text-primary" />
