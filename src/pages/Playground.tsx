@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Terminal, ArrowLeft, Cpu, FlaskConical, Globe, Code2, ChevronRight } from "lucide-react";
+import { Terminal, ArrowLeft, Cpu, FlaskConical, Globe, Code2, ChevronRight, Bot } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LeadForm from "@/components/LeadForm";
