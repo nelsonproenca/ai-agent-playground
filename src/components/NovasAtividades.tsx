@@ -41,7 +41,7 @@ const NovasAtividades = () => {
 
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Tabela de Comandos */}
-        <Card className="bg-blue-50/60 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-800/30">
+        <Card className="bg-blue-50/60 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-800/30 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/40">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary" />
@@ -76,7 +76,7 @@ const NovasAtividades = () => {
         </Card>
 
         {/* Card Telegram */}
-        <Card className="border-primary/30 bg-primary/5">
+        <Card className="border-primary/30 bg-primary/5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-primary/10">
           <CardContent className="flex flex-col sm:flex-row items-center gap-5 p-6">
             <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-primary/10 shrink-0">
               <Send className="h-7 w-7 text-primary" />
