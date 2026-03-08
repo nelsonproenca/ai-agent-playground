@@ -8,6 +8,7 @@ import LeadForm from "@/components/LeadForm";
 import SuccessMessage from "@/components/SuccessMessage";
 import TechPlayground from "@/components/TechPlayground";
 import LeadEnricher from "@/components/LeadEnricher";
+import NovasAtividades from "@/components/NovasAtividades";
 
 const NAV_ITEMS = [
   { id: "novo-desafio", label: "Novo Desafio", icon: Code2 },
