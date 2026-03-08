@@ -95,7 +95,7 @@ const Playground = () => {
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="max-w-2xl mx-auto mb-20">
+          <Card className="max-w-2xl mx-auto mb-20 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/40">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Code2 className="h-5 w-5 text-primary" />
