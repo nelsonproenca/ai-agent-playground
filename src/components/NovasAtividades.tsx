@@ -1,5 +1,4 @@
 import { Bot, Send } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -24,7 +23,7 @@ const COMANDOS = [
 
 const NovasAtividades = () => {
   return (
-    <section className="mt-20 mb-12">
+    <section className="mt-20">
       <div className="text-center mb-10 space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/5 px-4 py-1.5 text-sm font-mono text-accent-foreground">
           <Bot className="h-4 w-4 text-accent" />
@@ -33,51 +32,47 @@ const NovasAtividades = () => {
         <h2 className="text-3xl md:text-4xl font-extrabold text-foreground">
           Agente de IA: <span className="text-gradient-primary">Ajudante de Cadastro</span>
         </h2>
-        <p className="text-muted-foreground max-w-xl mx-auto">
+        <p className="text-muted-foreground max-w-lg mx-auto">
           Este novo item possui um agente de IA integrado que funciona como um ajudante inteligente
           para realizar o cadastro e a gestão de atividades diretamente via comandos.
         </p>
       </div>
 
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-5">
         {/* Tabela de Comandos */}
-        <Card className="bg-blue-50/60 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-800/30 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/40">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-primary" />
-              <CardTitle className="font-mono text-lg">Comandos do Agente</CardTitle>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Envie um destes comandos no chat do Telegram para interagir com o bot.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg border border-border overflow-hidden bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="font-mono">Comando</TableHead>
-                    <TableHead>Função</TableHead>
+        <div className="rounded-xl border border-border bg-card p-5 space-y-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/40">
+          <div className="flex items-center gap-2 pb-3 border-b border-border">
+            <Bot className="h-4 w-4 text-primary" />
+            <span className="font-mono text-sm text-muted-foreground">comandos_agente.sh</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Envie um destes comandos no chat do Telegram para interagir com o bot.
+          </p>
+          <div className="rounded-lg border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-mono">Comando</TableHead>
+                  <TableHead>Função</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {COMANDOS.map((item) => (
+                  <TableRow key={item.comando}>
+                    <TableCell className="font-mono font-semibold text-primary">
+                      {item.comando}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{item.descricao}</TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {COMANDOS.map((item) => (
-                    <TableRow key={item.comando}>
-                      <TableCell className="font-mono font-semibold text-primary">
-                        {item.comando}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{item.descricao}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
 
         {/* Card Telegram */}
-        <Card className="border-primary/30 bg-primary/5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-primary/10">
-          <CardContent className="flex flex-col sm:flex-row items-center gap-5 p-6">
+        <div className="rounded-xl border border-primary/30 bg-card p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+          <div className="flex flex-col sm:flex-row items-center gap-5">
             <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-primary/10 shrink-0">
               <Send className="h-7 w-7 text-primary" />
             </div>
@@ -96,8 +91,8 @@ const NovasAtividades = () => {
                 Abrir Telegram
               </a>
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </section>
   );
