@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { id: "novo-desafio", label: "Novo Desafio", icon: Code2 },
   { id: "tech-playground", label: "Consultoria IA", icon: FlaskConical },
   { id: "lead-enricher", label: "Enriquecimento de Leads", icon: Globe },
+  { id: "novas-atividades", label: "Novas Atividades", icon: Bot },
 ];
 
 const Playground = () => {
