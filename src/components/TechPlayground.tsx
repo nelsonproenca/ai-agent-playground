@@ -122,7 +122,7 @@ const TechPlayground = () => {
 
       <div className="max-w-2xl mx-auto space-y-5">
         {/* Input */}
-        <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <div className="rounded-xl border border-border bg-card p-5 space-y-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/40">
           <div className="flex items-center gap-2 pb-3 border-b border-border">
             <Terminal className="h-4 w-4 text-primary" />
             <span className="font-mono text-sm text-muted-foreground">playground.sh</span>
