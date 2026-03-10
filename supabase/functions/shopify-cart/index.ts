@@ -8,21 +8,6 @@ const corsHeaders = {
 const SHOPIFY_STORE = "nelson-proenca-informatica.myshopify.com";
 const STOREFRONT_API = `https://${SHOPIFY_STORE}/api/2026-01/graphql.json`;
 
-async function getStorefrontToken(): Promise<string> {
-  const clientId = Deno.env.get("SHOPIFY_CLIENT_ID");
-  const clientSecret = Deno.env.get("SHOPIFY_CLIENT_SECRET");
-  if (!clientId || !clientSecret) throw new Error("Missing Shopify credentials");
-
-  const res = await fetch(`https://${SHOPIFY_STORE}/admin/oauth/access_token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, grant_type: "client_credentials" }),
-  });
-  if (!res.ok) throw new Error(`Token request failed: ${res.status}`);
-  const data = await res.json();
-  return data.access_token;
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -38,12 +23,12 @@ serve(async (req) => {
       });
     }
 
-    // Build the full GID from numeric variant ID
     const merchandiseId = variantId.startsWith("gid://")
       ? variantId
       : `gid://shopify/ProductVariant/${variantId}`;
 
-    const token = await getStorefrontToken();
+    const token = Deno.env.get("SHOPIFY_STOREFRONT_TOKEN");
+    if (!token) throw new Error("Missing SHOPIFY_STOREFRONT_TOKEN");
 
     const mutation = `
       mutation cartCreate($input: CartInput!) {
