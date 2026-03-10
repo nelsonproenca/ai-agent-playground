@@ -1,1 +1,4 @@
 project_id = "nsdektdgohfqfioonosc"
+
+[functions.shopify-cart]
+verify_jwt = false
