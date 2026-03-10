@@ -221,15 +221,29 @@ const LojaPage = () => {
                     <Button
                       className="w-full font-mono gap-2 text-xs"
                       size="sm"
-                      onClick={() => {
-                        if (p.shopify_variant_id) {
-                          redirectToCheckout(p.shopify_variant_id);
+                      onClick={async () => {
+                        if (!p.shopify_variant_id) return;
+                        setBuyingId(p.id);
+                        try {
+                          await createCartAndRedirect(p.shopify_variant_id);
+                        } catch (err: any) {
+                          toast({
+                            title: "Erro ao processar compra",
+                            description: err.message || "Tente novamente em alguns instantes.",
+                            variant: "destructive",
+                          });
+                        } finally {
+                          setBuyingId(null);
                         }
                       }}
-                      disabled={!p.shopify_variant_id}
+                      disabled={!p.shopify_variant_id || buyingId === p.id}
                     >
-                      <ShoppingBag className="h-3.5 w-3.5" />
-                      Comprar Agora
+                      {buyingId === p.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <ShoppingBag className="h-3.5 w-3.5" />
+                      )}
+                      {buyingId === p.id ? "Processando..." : "Comprar Agora"}
                     </Button>
                   </div>
                 </motion.div>
