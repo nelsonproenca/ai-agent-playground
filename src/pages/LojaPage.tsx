@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShoppingBag, Shield, Zap, RotateCcw, Star, ChevronRight, Timer, ArrowUp } from "lucide-react";
+import { ShoppingBag, Shield, Zap, RotateCcw, Star, ChevronRight, Timer, ArrowUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
-import { redirectToCheckout } from "@/lib/shopify";
+import { createCartAndRedirect } from "@/lib/shopify";
+import { toast } from "@/hooks/use-toast";
 
 interface Produto {
   id: string;
@@ -46,6 +47,7 @@ function useCountdown() {
 
 const LojaPage = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [buyingId, setBuyingId] = useState<string | null>(null);
   const produtosRef = useRef<HTMLDivElement>(null);
   const countdown = useCountdown();
 
@@ -220,15 +222,29 @@ const LojaPage = () => {
                     <Button
                       className="w-full font-mono gap-2 text-xs"
                       size="sm"
-                      onClick={() => {
-                        if (p.shopify_variant_id) {
-                          redirectToCheckout(p.shopify_variant_id);
+                      onClick={async () => {
+                        if (!p.shopify_variant_id) return;
+                        setBuyingId(p.id);
+                        try {
+                          await createCartAndRedirect(p.shopify_variant_id);
+                        } catch (err: any) {
+                          toast({
+                            title: "Erro ao processar compra",
+                            description: err.message || "Tente novamente em alguns instantes.",
+                            variant: "destructive",
+                          });
+                        } finally {
+                          setBuyingId(null);
                         }
                       }}
-                      disabled={!p.shopify_variant_id}
+                      disabled={!p.shopify_variant_id || buyingId === p.id}
                     >
-                      <ShoppingBag className="h-3.5 w-3.5" />
-                      Comprar Agora
+                      {buyingId === p.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <ShoppingBag className="h-3.5 w-3.5" />
+                      )}
+                      {buyingId === p.id ? "Processando..." : "Comprar Agora"}
                     </Button>
                   </div>
                 </motion.div>

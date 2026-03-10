@@ -1,15 +1,21 @@
-// Shopify Headless Checkout via Permalinks
-const SHOPIFY_STORE_DOMAIN = "nelson-proenca-informatica.myshopify.com";
+import { supabase } from "@/integrations/supabase/client";
 
-export function buildCheckoutUrl(variantId: string, quantity = 1, discountCode?: string): string {
-  let url = `https://${SHOPIFY_STORE_DOMAIN}/cart/${variantId}:${quantity}`;
-  if (discountCode) {
-    url += `?discount=${encodeURIComponent(discountCode)}`;
+export async function createCartAndRedirect(variantId: string, quantity = 1): Promise<void> {
+  const { data, error } = await supabase.functions.invoke("shopify-cart", {
+    body: { variantId, quantity },
+  });
+
+  if (error) {
+    throw new Error(error.message || "Erro ao criar carrinho");
   }
-  return url;
-}
 
-export function redirectToCheckout(variantId: string, quantity = 1, discountCode?: string) {
-  const url = buildCheckoutUrl(variantId, quantity, discountCode);
-  window.open(url, "_blank");
+  if (data?.error) {
+    throw new Error(data.error);
+  }
+
+  if (!data?.checkoutUrl) {
+    throw new Error("URL de checkout não encontrada");
+  }
+
+  window.open(data.checkoutUrl, "_blank");
 }
