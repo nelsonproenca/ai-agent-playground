@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShoppingBag, Shield, Zap, RotateCcw, Star, ChevronRight, Timer, ArrowUp } from "lucide-react";
+import { ShoppingBag, Shield, Zap, RotateCcw, Star, ChevronRight, Timer, ArrowUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
-import { redirectToCheckout } from "@/lib/shopify";
+import { createCartAndRedirect } from "@/lib/shopify";
+import { toast } from "@/hooks/use-toast";
 
 interface Produto {
   id: string;
