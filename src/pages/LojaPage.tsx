@@ -46,7 +46,8 @@ function useCountdown() {
 
 const LojaPage = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [buyingId, setBuyingId] = useState<string | null>(null);
+  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
+  const [pixOpen, setPixOpen] = useState(false);
   const produtosRef = useRef<HTMLDivElement>(null);
   const countdown = useCountdown();
 
