@@ -305,6 +305,9 @@ const LojaPage = () => {
           &copy; {new Date().getFullYear()} NPStore — Todos os direitos reservados
         </p>
       </footer>
+
+      <PixPaymentDialog produto={selectedProduto} open={pixOpen} onOpenChange={setPixOpen} />
+    </div>
     </div>
   );
 };
