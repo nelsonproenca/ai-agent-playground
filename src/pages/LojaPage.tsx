@@ -308,7 +308,6 @@ const LojaPage = () => {
 
       <PixPaymentDialog produto={selectedProduto} open={pixOpen} onOpenChange={setPixOpen} />
     </div>
-    </div>
   );
 };
 
