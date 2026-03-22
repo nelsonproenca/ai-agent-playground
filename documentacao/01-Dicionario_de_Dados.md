@@ -1,6 +1,7 @@
 # Dicionário de Dados - Ecossistema Nelson Proença Info
 
 ## Visão Geral
+O sistema utiliza o Supabase (PostgreSQL) com 13 tabelas principais, divididas entre o site institucional e o módulo Watchtower Hub.
 O sistema utiliza o Supabase (PostgreSQL) com 8 tabelas principais.
 
 ## Tabelas e Esquemas
@@ -98,6 +99,83 @@ Armazena os dados de um desafio que o Agente de IA recebe um erro e gera uma sol
   constraint playground_analise_pkey primary key (id)
 
 
-## Relacionamentos Chave
+## Relacionamentos Chave (Site Principal)
 - `agendamentos.indicado_por` -> `colaboradores.nome`
 - `contatos_clientes.cliente_id` -> `clientes.id`
+
+---
+
+## Tabelas do Módulo Watchtower Hub
+
+### 8. profiles
+Perfil do usuário autenticado, criado automaticamente no signup via trigger.
+
+  id uuid not null default gen_random_uuid(),
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  display_name text null,
+  avatar_url text null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint profiles_pkey primary key (id)
+
+RLS: Usuário vê/insere/atualiza apenas seu próprio perfil.
+
+### 9. cameras
+Cadastro das câmeras disponíveis para monitoramento.
+
+  id uuid not null default gen_random_uuid(),
+  display_name text not null,
+  internal_stream_key text not null,
+  location text null,
+  created_at timestamp with time zone not null default now(),
+  constraint cameras_pkey primary key (id)
+
+RLS: Qualquer usuário autenticado pode visualizar.
+
+### 10. subscriptions
+Assinaturas de acesso dos usuários às câmeras.
+
+  id uuid not null default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  camera_id uuid not null references cameras(id) on delete cascade,
+  plan_type text not null,
+  expires_at timestamp with time zone not null,
+  created_at timestamp with time zone not null default now(),
+  constraint subscriptions_pkey primary key (id),
+  constraint subscriptions_user_id_camera_id_key unique (user_id, camera_id)
+
+Valores válidos para `plan_type`: '24h', 'bronze', 'prata', 'ouro' (validado via trigger).
+RLS: Usuário vê/insere apenas suas próprias assinaturas.
+
+### 11. pending_payments
+Registros de pagamentos Pix pendentes de confirmação.
+
+  id uuid not null default gen_random_uuid(),
+  created_at timestamp with time zone not null default now(),
+  user_id uuid not null,
+  camera_id uuid not null references cameras(id),
+  plan_sku text not null,
+  plan_name text not null,
+  status text not null default 'pending',
+  receipt_url text null,
+  constraint pending_payments_pkey primary key (id)
+
+RLS: Usuário insere/vê apenas seus próprios pagamentos.
+
+### 12. contact_messages
+Mensagens enviadas pelo formulário de contato do Watchtower.
+
+  id uuid not null default gen_random_uuid(),
+  created_at timestamp with time zone not null default now(),
+  name text not null,
+  email text not null,
+  message text not null,
+  constraint contact_messages_pkey primary key (id)
+
+RLS: Qualquer pessoa (anon/authenticated) pode inserir.
+
+## Relacionamentos Chave (Watchtower)
+- `profiles.user_id` -> `auth.users.id`
+- `subscriptions.user_id` -> `auth.users.id`
+- `subscriptions.camera_id` -> `cameras.id`
+- `pending_payments.camera_id` -> `cameras.id`
