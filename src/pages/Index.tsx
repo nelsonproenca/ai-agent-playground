@@ -194,7 +194,7 @@ const Index = () => {
                     Monitoramento inteligente de câmeras.
                   </p>
                 </div>
-              </a>
+              </Link>
             </motion.div>
           </motion.div>
         </div>
