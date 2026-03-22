@@ -159,40 +159,46 @@ const Index = () => {
                 to="/loja"
                 className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
               >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-              <ShoppingBag className="h-5 w-5 text-primary" />
-            </div>
-            <div className="space-y-0.5 text-left">
-              <h3 className="text-lg font-extrabold text-foreground font-mono">
-                Nossa <span className="text-primary">Loja</span>
-              </h3>
-              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                Produtos premium com entrega rápida.
-              </p>
-            </div>
-          </Link>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+                  <ShoppingBag className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-lg font-extrabold text-foreground font-mono">
+                    Nossa <span className="text-primary">Loja</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                    Produtos premium com entrega rápida.
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Watchtower Hub */}
         <div className="max-w-4xl mx-auto mt-4">
-          <a
-            href="https://id-preview--d5f56ebe-a336-45c0-b986-5b5d56337c49.lovable.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
-          >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-              <Eye className="h-5 w-5 text-primary" />
-            </div>
-            <div className="space-y-0.5 text-left">
-              <h3 className="text-lg font-extrabold text-foreground font-mono">
-                Watchtower <span className="text-primary">Hub</span>
-              </h3>
-              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                Monitoramento inteligente de câmeras.
-              </p>
-            </div>
-          </a>
+          <motion.div variants={hoverCard} initial="rest" whileHover="hover">
+            <motion.div variants={glowCard}>
+              <a
+                href="https://id-preview--d5f56ebe-a336-45c0-b986-5b5d56337c49.lovable.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+                  <Eye className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-lg font-extrabold text-foreground font-mono">
+                    Watchtower <span className="text-primary">Hub</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                    Monitoramento inteligente de câmeras.
+                  </p>
+                </div>
+              </a>
+            </motion.div>
+          </motion.div>
         </div>
       </main>
 
