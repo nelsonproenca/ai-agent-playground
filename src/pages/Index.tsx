@@ -1,9 +1,20 @@
 import { Link } from "react-router-dom";
 import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard, ShoppingBag, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
 import ProfessionalAuthority from "@/components/ProfessionalAuthority";
+
+const hoverCard = {
+  rest: { scale: 1, y: 0 },
+  hover: { scale: 1.02, y: -4, transition: { type: "spring", stiffness: 300, damping: 20 } },
+};
+
+const glowCard = {
+  rest: { boxShadow: "0 0 0 rgba(0,0,0,0)" },
+  hover: { boxShadow: "0 8px 30px -10px hsl(var(--primary) / 0.25)", transition: { duration: 0.3 } },
+};
 
 const Index = () => {
   return (
