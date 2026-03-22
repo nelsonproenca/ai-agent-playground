@@ -1,9 +1,20 @@
 import { Link } from "react-router-dom";
 import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard, ShoppingBag, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import InstagramCTA from "@/components/InstagramCTA";
 import InternationalSection from "@/components/InternationalSection";
 import ProfessionalAuthority from "@/components/ProfessionalAuthority";
+
+const hoverCard = {
+  rest: { scale: 1, y: 0 },
+  hover: { scale: 1.02, y: -4, transition: { type: "spring" as const, stiffness: 300, damping: 20 } },
+};
+
+const glowCard = {
+  rest: { boxShadow: "0 0 0 rgba(0,0,0,0)" },
+  hover: { boxShadow: "0 8px 30px -10px hsl(var(--primary) / 0.25)", transition: { duration: 0.3 } },
+};
 
 const Index = () => {
   return (
@@ -97,81 +108,97 @@ const Index = () => {
 
         {/* Fale Comigo + Área Restrita (Final da Página) */}
         <div className="grid lg:grid-cols-2 gap-4 max-w-4xl mx-auto mt-8">
-          <Link
-            to="/contato"
-            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
-          >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-              <MessageSquarePlus className="h-5 w-5 text-primary" />
-            </div>
-            <div className="space-y-0.5 text-left">
-              <h3 className="text-lg font-extrabold text-foreground font-mono">
-                Fale <span className="text-primary">Comigo</span>
-              </h3>
-              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                Envie seu desafio técnico.
-              </p>
-            </div>
-          </Link>
+          <motion.div variants={hoverCard} initial="rest" whileHover="hover">
+            <motion.div variants={glowCard}>
+              <Link
+                to="/contato"
+                className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+                  <MessageSquarePlus className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-lg font-extrabold text-foreground font-mono">
+                    Fale <span className="text-primary">Comigo</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                    Envie seu desafio técnico.
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          </motion.div>
 
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
-          >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-              <Lock className="h-5 w-5 text-primary" />
-            </div>
-            <div className="space-y-0.5 text-left">
-              <h3 className="text-lg font-extrabold text-foreground font-mono">
-                Área <span className="text-primary">Restrita</span>
-              </h3>
-              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                Gerenciamento do site.
-              </p>
-            </div>
-          </Link>
+          <motion.div variants={hoverCard} initial="rest" whileHover="hover">
+            <motion.div variants={glowCard}>
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+                  <Lock className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-lg font-extrabold text-foreground font-mono">
+                    Área <span className="text-primary">Restrita</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                    Gerenciamento do site.
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Loja DTC */}
         <div className="max-w-4xl mx-auto mt-4">
-          <Link
-            to="/loja"
-            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
-          >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-              <ShoppingBag className="h-5 w-5 text-primary" />
-            </div>
-            <div className="space-y-0.5 text-left">
-              <h3 className="text-lg font-extrabold text-foreground font-mono">
-                Nossa <span className="text-primary">Loja</span>
-              </h3>
-              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                Produtos premium com entrega rápida.
-              </p>
-            </div>
-          </Link>
+          <motion.div variants={hoverCard} initial="rest" whileHover="hover">
+            <motion.div variants={glowCard}>
+              <Link
+                to="/loja"
+                className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+                  <ShoppingBag className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-lg font-extrabold text-foreground font-mono">
+                    Nossa <span className="text-primary">Loja</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                    Produtos premium com entrega rápida.
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Watchtower Hub */}
         <div className="max-w-4xl mx-auto mt-4">
-          <a
-            href="https://id-preview--d5f56ebe-a336-45c0-b986-5b5d56337c49.lovable.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 w-full"
-          >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-              <Eye className="h-5 w-5 text-primary" />
-            </div>
-            <div className="space-y-0.5 text-left">
-              <h3 className="text-lg font-extrabold text-foreground font-mono">
-                Watchtower <span className="text-primary">Hub</span>
-              </h3>
-              <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                Monitoramento inteligente de câmeras.
-              </p>
-            </div>
-          </a>
+          <motion.div variants={hoverCard} initial="rest" whileHover="hover">
+            <motion.div variants={glowCard}>
+              <a
+                href="https://id-preview--d5f56ebe-a336-45c0-b986-5b5d56337c49.lovable.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+                  <Eye className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-lg font-extrabold text-foreground font-mono">
+                    Watchtower <span className="text-primary">Hub</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
+                    Monitoramento inteligente de câmeras.
+                  </p>
+                </div>
+              </a>
+            </motion.div>
+          </motion.div>
         </div>
       </main>
 
