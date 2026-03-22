@@ -179,10 +179,8 @@ const Index = () => {
         <div className="max-w-4xl mx-auto mt-4">
           <motion.div variants={hoverCard} initial="rest" whileHover="hover">
             <motion.div variants={glowCard}>
-              <a
-                href="https://id-preview--d5f56ebe-a336-45c0-b986-5b5d56337c49.lovable.app"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/watchtower"
                 className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
@@ -196,7 +194,7 @@ const Index = () => {
                     Monitoramento inteligente de câmeras.
                   </p>
                 </div>
-              </a>
+              </Link>
             </motion.div>
           </motion.div>
         </div>
