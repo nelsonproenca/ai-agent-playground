@@ -215,7 +215,23 @@ const PixPaymentDialog = ({ produto, open, onOpenChange }: PixPaymentDialogProps
                 id="pix-doc"
                 placeholder="000.000.000-00"
                 value={documento}
-                onChange={(e) => setDocumento(e.target.value)}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 14);
+                  let masked = digits;
+                  if (digits.length <= 11) {
+                    masked = digits
+                      .replace(/(\d{3})(\d)/, "$1.$2")
+                      .replace(/(\d{3})(\d)/, "$1.$2")
+                      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                  } else {
+                    masked = digits
+                      .replace(/(\d{2})(\d)/, "$1.$2")
+                      .replace(/(\d{3})(\d)/, "$1.$2")
+                      .replace(/(\d{3})(\d)/, "$1/$2")
+                      .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+                  }
+                  setDocumento(masked);
+                }}
                 disabled={status === "sending"}
                 maxLength={18}
               />
