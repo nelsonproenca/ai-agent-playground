@@ -62,6 +62,30 @@ export type Database = {
         }
         Relationships: []
       }
+      cameras: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          internal_stream_key: string
+          location: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          internal_stream_key: string
+          location?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          internal_stream_key?: string
+          location?: string | null
+        }
+        Relationships: []
+      }
       clientes: {
         Row: {
           created_at: string
@@ -125,6 +149,30 @@ export type Database = {
           foto_url?: string | null
           id?: string
           nome?: string
+        }
+        Relationships: []
+      }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
         }
         Relationships: []
       }
@@ -226,6 +274,47 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_payments: {
+        Row: {
+          camera_id: string
+          created_at: string
+          id: string
+          plan_name: string
+          plan_sku: string
+          receipt_url: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          camera_id: string
+          created_at?: string
+          id?: string
+          plan_name: string
+          plan_sku: string
+          receipt_url?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          camera_id?: string
+          created_at?: string
+          id?: string
+          plan_name?: string
+          plan_sku?: string
+          receipt_url?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_payments_camera_id_fkey"
+            columns: ["camera_id"]
+            isOneToOne: false
+            referencedRelation: "cameras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playground_analise: {
         Row: {
           created_at: string
@@ -294,6 +383,68 @@ export type Database = {
           shopify_variant_id?: string | null
         }
         Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          camera_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          plan_type: string
+          user_id: string
+        }
+        Insert: {
+          camera_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          plan_type: string
+          user_id: string
+        }
+        Update: {
+          camera_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          plan_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_camera_id_fkey"
+            columns: ["camera_id"]
+            isOneToOne: false
+            referencedRelation: "cameras"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
