@@ -1,6 +1,7 @@
 # Dicionário de Dados - Ecossistema Nelson Proença Info
 
 ## Visão Geral
+O sistema utiliza o Supabase (PostgreSQL) com 13 tabelas principais, divididas entre o site institucional e o módulo Watchtower Hub.
 O sistema utiliza o Supabase (PostgreSQL) com 8 tabelas principais.
 
 ## Tabelas e Esquemas
