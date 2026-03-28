@@ -1,0 +1,547 @@
+{
+  "name": "Validação Comprovante PIX - Supabase",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "validar-pagamento",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000001",
+      "name": "Receber Dados",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "validar-pagamento"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "profiles",
+        "returnAll": false,
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.email.toLowerCase().trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000015",
+      "name": "Buscar Usuário por Email",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "notes": "Busca na tabela profiles pelo email. Retorna user_id e document_number (CPF).",
+      "credentials": {
+        "supabaseApi": {
+          "id": "CONFIGURE_CREDENCIAL_SUPABASE",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "cond-user-found",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000016",
+      "name": "Usuário Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"sucesso\": false, \"mensagem\": \"Usuário não encontrado com o email informado\" }",
+        "options": { "responseCode": 404 }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000017",
+      "name": "Resposta - Usuário Não Encontrado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 440]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "list",
+        "driveId": {
+          "__rl": true,
+          "value": "MyDrive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "COLE_AQUI_O_ID_DA_PASTA_DO_DRIVE",
+          "mode": "id"
+        },
+        "queryFilters": {
+          "conditions": [
+            {
+              "field": "mimeType",
+              "filter": "equals",
+              "value": "application/pdf"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000002",
+      "name": "Listar PDFs no Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [460, 300],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "CONFIGURE_CREDENCIAL_GOOGLE_DRIVE",
+          "name": "Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000003",
+      "name": "Loop por PDFs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000004",
+      "name": "Baixar PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [900, 220],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "CONFIGURE_CREDENCIAL_GOOGLE_DRIVE",
+          "name": "Google Drive"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000005",
+      "name": "Extrair Texto do PDF",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [1120, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dados recebidos pelo webhook\nconst webhookData = $('Receber Dados').first().json.body;\nconst nome = (webhookData.nome || '').toLowerCase().trim();\nconst email = (webhookData.email || '').toLowerCase().trim();\n\n// CPF vem do webhook OU do document_number da tabela profiles (numeric = sem formatação)\nconst cpfWebhook = (webhookData.cpf || '').replace(/\\D/g, '');\nconst cpfProfile = String($('Buscar Usuário por Email').first().json.document_number || '').replace(/\\D/g, '');\nconst cpf = cpfWebhook || cpfProfile;\n\n// Texto extraído do PDF\nconst textoPDF = ($input.first().json.text || '').toLowerCase();\n\n// ─── Funções auxiliares ───────────────────────────────────────────────────\n\nfunction normalizarTexto(t) {\n  return t\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase();\n}\n\nfunction cpfEncontrado(texto, cpf) {\n  if (!cpf || cpf.length !== 11) return false;\n  const cpfFormatado = cpf.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/, '$1.$2.$3-$4');\n  const cpfMascarado = cpf.replace(/(\\d{3})\\d{3}(\\d{3})(\\d{2})/, '$1.***.$3-$4');\n  return (\n    texto.includes(cpf) ||\n    texto.includes(cpfFormatado) ||\n    texto.includes(cpfMascarado)\n  );\n}\n\nfunction nomeEncontrado(texto, nome) {\n  if (!nome) return false;\n  const nomeNorm = normalizarTexto(nome);\n  const textoNorm = normalizarTexto(texto);\n  // Verifica se pelo menos o primeiro e último nome constam no texto\n  const partes = nomeNorm.split(' ').filter(p => p.length > 2);\n  if (partes.length === 0) return false;\n  // Precisa encontrar ao menos 2 partes do nome (primeiro + último) OU CPF\n  const encontradas = partes.filter(p => textoNorm.includes(p));\n  return encontradas.length >= Math.min(2, partes.length);\n}\n\nfunction extrairValorPix(texto, indice) {\n  // Tenta extrair o valor R$ próximo ao índice encontrado (janela de 300 chars)\n  const janela = texto.substring(Math.max(0, indice - 100), indice + 300);\n  const regex = /r\\$\\s?([\\d.]+,[\\d]{2})/gi;\n  const match = regex.exec(janela);\n  return match ? match[1] : null;\n}\n\nfunction extrairData(texto, indice) {\n  const janela = texto.substring(Math.max(0, indice - 50), indice + 200);\n  const regex = /(\\d{2}[/\\-]\\d{2}[/\\-]\\d{2,4})/g;\n  const match = regex.exec(janela);\n  return match ? match[1] : null;\n}\n\n// ─── Busca do PIX enviado ─────────────────────────────────────────────────\n\nconst textoPDFNorm = normalizarTexto(textoPDF);\n\n// Palavras-chave de PIX enviado em extratos bancários brasileiros\nconst keywordsPix = [\n  'pix enviado',\n  'pix-enviado',\n  'transferencia pix',\n  'transferência pix',\n  'pix transf',\n  'enviado pix',\n  'pix out',\n  'pag pix',\n  'pagamento pix'\n];\n\nlet pixEncontrado = false;\nlet detalhes = null;\n\nfor (const keyword of keywordsPix) {\n  const indice = textoPDFNorm.indexOf(normalizarTexto(keyword));\n  if (indice === -1) continue;\n\n  // Verifica se o nome ou CPF do pagante aparecem próximos ao PIX\n  const janela = textoPDFNorm.substring(Math.max(0, indice - 200), indice + 500);\n\n  const temNome = nomeEncontrado(janela, nome);\n  const temCPF = cpfEncontrado(janela, cpf);\n\n  if (temNome || temCPF) {\n    pixEncontrado = true;\n    detalhes = {\n      keyword_encontrada: keyword,\n      nome_encontrado: temNome,\n      cpf_encontrado: temCPF,\n      valor: extrairValorPix(textoPDFNorm, indice),\n      data: extrairData(textoPDFNorm, indice),\n      trecho: textoPDF.substring(Math.max(0, indice - 100), indice + 300).trim()\n    };\n    break;\n  }\n}\n\n// Fallback: busca apenas CPF no PDF inteiro se não achou junto ao PIX\nif (!pixEncontrado && cpfEncontrado(textoPDFNorm, cpf)) {\n  const temPix = keywordsPix.some(k => textoPDFNorm.includes(normalizarTexto(k)));\n  if (temPix) {\n    pixEncontrado = true;\n    detalhes = {\n      keyword_encontrada: 'pix (cpf encontrado globalmente)',\n      nome_encontrado: false,\n      cpf_encontrado: true,\n      valor: null,\n      data: null,\n      trecho: null\n    };\n  }\n}\n\nreturn {\n  pix_encontrado: pixEncontrado,\n  nome: webhookData.nome,\n  cpf: webhookData.cpf,\n  email: email,\n  detalhes: detalhes\n};"
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000006",
+      "name": "Buscar PIX no Extrato",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 220]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-pix-found",
+              "leftValue": "={{ $json.pix_encontrado }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000007",
+      "name": "PIX Encontrado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1560, 220]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "subscriptions",
+        "returnAll": false,
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Buscar Usuário por Email').first().json.user_id }}"
+            }
+          ]
+        },
+        "options": {
+          "sort": {
+            "values": [
+              {
+                "column": "expires_at",
+                "direction": "DESC"
+              }
+            ]
+          }
+        }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000013",
+      "name": "Buscar Subscription Atual",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1780, 60],
+      "credentials": {
+        "supabaseApi": {
+          "id": "CONFIGURE_CREDENCIAL_SUPABASE",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sub = $('Buscar Subscription Atual').first().json;\n// plan_type vem do webhook — obrigatório\nconst planType = $('Receber Dados').first().json.body.plan_type;\n\n// Calcula nova data de expiração\nconst hoje = new Date();\nlet novaExpiracao;\n\nif (planType === 'anual') {\n  novaExpiracao = new Date(hoje.setFullYear(hoje.getFullYear() + 1));\n} else if (planType === 'semestral') {\n  novaExpiracao = new Date(hoje.setMonth(hoje.getMonth() + 6));\n} else {\n  // mensal (padrão)\n  novaExpiracao = new Date(hoje.setMonth(hoje.getMonth() + 1));\n}\n\nreturn {\n  subscription_id: sub.id,\n  user_id: sub.user_id,\n  camera_id: sub.camera_id,\n  plan_type: planType,\n  nova_expiracao: novaExpiracao.toISOString(),\n  valor_pix: $('Buscar PIX no Extrato').first().json.detalhes?.valor,\n  data_pix: $('Buscar PIX no Extrato').first().json.detalhes?.data\n};"
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000014",
+      "name": "Calcular Nova Expiração",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1980, 60]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "subscriptions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.subscription_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "expires_at",
+              "fieldValue": "={{ $json.nova_expiracao }}"
+            },
+            {
+              "fieldId": "plan_type",
+              "fieldValue": "={{ $json.plan_type }}"
+            }
+          ]
+        }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000008",
+      "name": "Atualizar Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2180, 60],
+      "credentials": {
+        "supabaseApi": {
+          "id": "CONFIGURE_CREDENCIAL_SUPABASE",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"sucesso\": true,\n  \"mensagem\": \"Pagamento PIX validado e assinatura renovada com sucesso\",\n  \"dados\": {\n    \"nome\": \"{{ $('Receber Dados').first().json.body.nome }}\",\n    \"email\": \"{{ $('Receber Dados').first().json.body.email }}\",\n    \"plano\": \"{{ $('Calcular Nova Expiração').first().json.plan_type }}\",\n    \"valor_pix\": \"{{ $('Calcular Nova Expiração').first().json.valor_pix }}\",\n    \"data_pix\": \"{{ $('Calcular Nova Expiração').first().json.data_pix }}\",\n    \"nova_expiracao\": \"{{ $('Calcular Nova Expiração').first().json.nova_expiracao }}\"\n  }\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000009",
+      "name": "Resposta - Sucesso",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2380, 60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-loop-done",
+              "leftValue": "={{ $('Loop por PDFs').context.noItemsLeft }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000010",
+      "name": "Loop Terminou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1780, 380]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"sucesso\": false,\n  \"mensagem\": \"Nenhum lançamento PIX encontrado no extrato para os dados informados\",\n  \"dados\": {\n    \"nome\": \"{{ $('Receber Dados').first().json.body.nome }}\",\n    \"cpf\": \"{{ $('Receber Dados').first().json.body.cpf }}\"\n  }\n}",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000011",
+      "name": "Resposta - Não Encontrado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2000, 440]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"sucesso\": false,\n  \"mensagem\": \"Erro interno ao processar a validação\",\n  \"erro\": \"{{ $json.message }}\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "1a2b3c4d-0001-0001-0001-000000000012",
+      "name": "Resposta - Erro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2000, 580]
+    }
+  ],
+  "connections": {
+    "Receber Dados": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuário por Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuário por Email": {
+      "main": [
+        [
+          {
+            "node": "Usuário Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usuário Existe?": {
+      "main": [
+        [
+          {
+            "node": "Listar PDFs no Drive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resposta - Usuário Não Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar PDFs no Drive": {
+      "main": [
+        [
+          {
+            "node": "Loop por PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop por PDFs": {
+      "main": [
+        [
+          {
+            "node": "Baixar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar PDF": {
+      "main": [
+        [
+          {
+            "node": "Extrair Texto do PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Texto do PDF": {
+      "main": [
+        [
+          {
+            "node": "Buscar PIX no Extrato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar PIX no Extrato": {
+      "main": [
+        [
+          {
+            "node": "PIX Encontrado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PIX Encontrado?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Subscription Atual",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Terminou?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Subscription Atual": {
+      "main": [
+        [
+          {
+            "node": "Calcular Nova Expiração",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular Nova Expiração": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Supabase": {
+      "main": [
+        [
+          {
+            "node": "Resposta - Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Terminou?": {
+      "main": [
+        [
+          {
+            "node": "Resposta - Não Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop por PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "pinData": {},
+  "versionId": "",
+  "triggerCount": 0,
+  "tags": [
+    { "name": "pagamento" },
+    { "name": "pix" },
+    { "name": "validacao" }
+  ]
+}
