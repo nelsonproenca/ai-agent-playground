@@ -1,4 +1,4 @@
-import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home } from "lucide-react";
+import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity } from "lucide-react";
 import { WatchtowerNavLink } from "./WatchtowerNavLink";
 import { useLocation } from "react-router-dom";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
@@ -14,6 +14,7 @@ const menuItems = [
   { title: "Faturas", url: "/watchtower/dashboard/billing", icon: FileText },
   { title: "Suporte", url: "/watchtower/dashboard/support", icon: Headphones },
   { title: "Configurações", url: "/watchtower/dashboard/settings", icon: Settings },
+  { title: "Health Check", url: "/watchtower/dashboard/health", icon: Activity },
 ];
 
 export function WatchtowerAppSidebar() {
