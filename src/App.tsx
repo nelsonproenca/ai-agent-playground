@@ -36,6 +36,7 @@ import WatchtowerSettings from "./watchtower/pages/WatchtowerSettings";
 import WatchtowerAbout from "./watchtower/pages/WatchtowerAbout";
 import WatchtowerContact from "./watchtower/pages/WatchtowerContact";
 import WatchtowerBlog from "./watchtower/pages/WatchtowerBlog";
+import WatchtowerHealthCheck from "./watchtower/pages/WatchtowerHealthCheck";
 
 const queryClient = new QueryClient();
 
@@ -94,6 +95,7 @@ const App = () => (
               <Route path="/watchtower/dashboard/billing" element={<WatchtowerProtectedRoute><WatchtowerBilling /></WatchtowerProtectedRoute>} />
               <Route path="/watchtower/dashboard/support" element={<WatchtowerProtectedRoute><WatchtowerSupport /></WatchtowerProtectedRoute>} />
               <Route path="/watchtower/dashboard/settings" element={<WatchtowerProtectedRoute><WatchtowerSettings /></WatchtowerProtectedRoute>} />
+              <Route path="/watchtower/dashboard/health" element={<WatchtowerProtectedRoute><WatchtowerHealthCheck /></WatchtowerProtectedRoute>} />
               <Route path="/watchtower/about" element={<WatchtowerAbout />} />
               <Route path="/watchtower/contact" element={<WatchtowerContact />} />
               <Route path="/watchtower/blog" element={<WatchtowerBlog />} />
