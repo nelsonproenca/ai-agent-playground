@@ -1,8 +1,7 @@
 # Dicionário de Dados - Ecossistema Nelson Proença Info
 
 ## Visão Geral
-O sistema utiliza o Supabase (PostgreSQL) com 13 tabelas principais, divididas entre o site institucional e o módulo Watchtower Hub.
-O sistema utiliza o Supabase (PostgreSQL) com 8 tabelas principais.
+O sistema utiliza o Supabase (PostgreSQL) com 15 tabelas principais, divididas entre o site institucional e o módulo Watchtower Hub.
 
 ## Tabelas e Esquemas
 ### 1. agendamentos
@@ -174,8 +173,39 @@ Mensagens enviadas pelo formulário de contato do Watchtower.
 
 RLS: Qualquer pessoa (anon/authenticated) pode inserir.
 
+### 13. camera_health_logs
+Registros de verificações de status (health check) das câmeras.
+
+  id uuid not null default gen_random_uuid(),
+  camera_id uuid not null references cameras(id) on delete cascade,
+  status text not null default 'unknown',
+  response_time_ms integer null,
+  error_message text null,
+  checked_at timestamp with time zone not null default now(),
+  constraint camera_health_logs_pkey primary key (id)
+
+Índices: `camera_id`, `checked_at DESC`.
+RLS: Usuários autenticados podem visualizar e inserir.
+
+### 14. camera_health_config
+Configurações de alertas do sistema de health check (tabela de linha única).
+
+  id uuid not null default gen_random_uuid(),
+  admin_email text null,
+  admin_phone text null,
+  admin_whatsapp text null,
+  check_interval_minutes integer not null default 5,
+  notify_after_failures integer not null default 2,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint camera_health_config_pkey primary key (id)
+
+RLS: Usuários autenticados podem visualizar e atualizar.
+Trigger: `updated_at` atualizado automaticamente.
+
 ## Relacionamentos Chave (Watchtower)
 - `profiles.user_id` -> `auth.users.id`
 - `subscriptions.user_id` -> `auth.users.id`
 - `subscriptions.camera_id` -> `cameras.id`
 - `pending_payments.camera_id` -> `cameras.id`
+- `camera_health_logs.camera_id` -> `cameras.id`
