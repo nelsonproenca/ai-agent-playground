@@ -62,6 +62,74 @@ export type Database = {
         }
         Relationships: []
       }
+      camera_health_config: {
+        Row: {
+          admin_email: string | null
+          admin_phone: string | null
+          admin_whatsapp: string | null
+          check_interval_minutes: number
+          created_at: string
+          id: string
+          notify_after_failures: number
+          updated_at: string
+        }
+        Insert: {
+          admin_email?: string | null
+          admin_phone?: string | null
+          admin_whatsapp?: string | null
+          check_interval_minutes?: number
+          created_at?: string
+          id?: string
+          notify_after_failures?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_email?: string | null
+          admin_phone?: string | null
+          admin_whatsapp?: string | null
+          check_interval_minutes?: number
+          created_at?: string
+          id?: string
+          notify_after_failures?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      camera_health_logs: {
+        Row: {
+          camera_id: string
+          checked_at: string
+          error_message: string | null
+          id: string
+          response_time_ms: number | null
+          status: string
+        }
+        Insert: {
+          camera_id: string
+          checked_at?: string
+          error_message?: string | null
+          id?: string
+          response_time_ms?: number | null
+          status?: string
+        }
+        Update: {
+          camera_id?: string
+          checked_at?: string
+          error_message?: string | null
+          id?: string
+          response_time_ms?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "camera_health_logs_camera_id_fkey"
+            columns: ["camera_id"]
+            isOneToOne: false
+            referencedRelation: "cameras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cameras: {
         Row: {
           created_at: string
