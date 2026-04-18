@@ -6,7 +6,7 @@ import { ChevronLeft, Mail, Phone, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { contactService } from "@/watchtower/services";
 
 const contactInfo = [
   { icon: Mail, label: "EMAIL", value: "contato@vigiliacam.com.br" },
@@ -28,13 +28,14 @@ export default function WatchtowerContact() {
     const email = (formData.get("email") as string).trim();
     const message = (formData.get("message") as string).trim();
 
-    const { error } = await (supabase as any).from("contact_messages").insert({ name, email, message });
-    setSending(false);
-    if (error) {
-      toast({ title: "Erro ao enviar", description: "Tente novamente mais tarde.", variant: "destructive" });
-    } else {
+    try {
+      await contactService.submit({ name, email, message });
       toast({ title: "Mensagem enviada!", description: "Retornaremos em até 24 horas." });
       form.reset();
+    } catch {
+      toast({ title: "Erro ao enviar", description: "Tente novamente mais tarde.", variant: "destructive" });
+    } finally {
+      setSending(false);
     }
   };
 

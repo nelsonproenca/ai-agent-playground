@@ -3,14 +3,13 @@ import Hls from "hls.js";
 import { useToast } from "@/hooks/use-toast";
 
 interface HLSPlayerProps {
-  streamKey: string;
-  serverUrl?: string;
+  streamUrl: string;
 }
 
-export function WatchtowerHLSPlayer({ streamKey, serverUrl = "https://seu-servidor-mediamtx.com" }: HLSPlayerProps) {
+export function WatchtowerHLSPlayer({ streamUrl }: HLSPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
-  const url = `${serverUrl}/${streamKey}/index.m3u8`;
+  const url = streamUrl;
 
   useEffect(() => {
     const video = videoRef.current;
