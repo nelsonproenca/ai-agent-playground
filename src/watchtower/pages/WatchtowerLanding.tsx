@@ -1,12 +1,26 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Camera, Shield, Monitor, UserPlus, Star, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Camera, Shield, Monitor, UserPlus, Star, ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import cctvBackground from "@/assets/watchtower/cctv-background.jpg";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+type Plan = {
+  id: string;
+  sku: string;
+  num: string;
+  name: string;
+  period: string;
+  price: string;
+  suffix: string;
+  features: string[];
+  cta: string;
+  highlight: boolean;
+};
 
 const stats = (cameraCount: number) => [
   { icon: Camera, label: "CÂMERAS ATIVAS", useNumberFlow: true, value: cameraCount, suffix: "+" },
@@ -18,13 +32,6 @@ const steps = [
   { num: "01", icon: UserPlus, title: "CADASTRE-SE", subtitle: "Crie sua Conta", desc: "Crie seu perfil e configure seu painel de monitoramento em poucos minutos." },
   { num: "02", icon: Camera, title: "CONECTE CÂMERAS", subtitle: "Adicione seus Dispositivos", desc: "Conecte suas câmeras facilmente usando a cloud de qualquer web browser." },
   { num: "03", icon: Monitor, title: "MONITORE", subtitle: "Acompanhe em Tempo Real", desc: "Acesse sua feed ao vivo e acesse gravações de qualquer lugar, a hora que quiser." },
-];
-
-const plans = [
-  { id: "24h", num: "01", name: "ACESSO PONTUAL", period: "24 HORAS", price: "R$ 9,90", suffix: "/único", features: ["Visualização ao vivo", "Alternância horária", "Sem gravações", "Sem reembolso"], cta: "COMPRAR ACESSO", highlight: false },
-  { id: "bronze", num: "02", name: "PLANO BRONZE", period: "AO VIVO", price: "R$ 29,90", suffix: "/mês", features: ["Streaming em tempo real", "Alertas de movimento", "Sem histórico de gravação", "Sem taxas adicionais"], cta: "ASSINAR BRONZE", highlight: false },
-  { id: "prata", num: "03", name: "PLANO PRATA", period: "7 DIAS DE HISTÓRICO", price: "R$ 49,90", suffix: "/mês", features: ["Streaming em tempo real", "Histórico de 7 dias (VOD)", "Busca por data e hora", "Alertas de movimento"], cta: "ASSINAR PRATA", highlight: true },
-  { id: "ouro", num: "04", name: "PLANO OURO", period: "30 DIAS DE HISTÓRICO", price: "R$ 79,90", suffix: "/mês", features: ["Streaming em tempo real", "Histórico completo 30 dias", "Download de gravações", "Suporte prioritário"], cta: "ASSINAR OURO", highlight: false },
 ];
 
 const testimonials = [
