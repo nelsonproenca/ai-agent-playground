@@ -37,6 +37,11 @@ import WatchtowerAbout from "./watchtower/pages/WatchtowerAbout";
 import WatchtowerContact from "./watchtower/pages/WatchtowerContact";
 import WatchtowerBlog from "./watchtower/pages/WatchtowerBlog";
 import WatchtowerHealthCheck from "./watchtower/pages/WatchtowerHealthCheck";
+import WatchtowerAdminUsers from "./watchtower/pages/WatchtowerAdminUsers";
+import WatchtowerAdminPlans from "./watchtower/pages/WatchtowerAdminPlans";
+import WatchtowerAdminCameras from "./watchtower/pages/WatchtowerAdminCameras";
+import WatchtowerAdminPayments from "./watchtower/pages/WatchtowerAdminPayments";
+import WatchtowerResetPassword from "./watchtower/pages/WatchtowerResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +101,11 @@ const App = () => (
               <Route path="/watchtower/dashboard/support" element={<WatchtowerProtectedRoute><WatchtowerSupport /></WatchtowerProtectedRoute>} />
               <Route path="/watchtower/dashboard/settings" element={<WatchtowerProtectedRoute><WatchtowerSettings /></WatchtowerProtectedRoute>} />
               <Route path="/watchtower/dashboard/health" element={<WatchtowerProtectedRoute><WatchtowerHealthCheck /></WatchtowerProtectedRoute>} />
+              <Route path="/watchtower/dashboard/admin/users" element={<WatchtowerProtectedRoute><WatchtowerAdminUsers /></WatchtowerProtectedRoute>} />
+              <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerProtectedRoute><WatchtowerAdminPlans /></WatchtowerProtectedRoute>} />
+              <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerProtectedRoute><WatchtowerAdminCameras /></WatchtowerProtectedRoute>} />
+              <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerProtectedRoute><WatchtowerAdminPayments /></WatchtowerProtectedRoute>} />
+              <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
               <Route path="/watchtower/about" element={<WatchtowerAbout />} />
               <Route path="/watchtower/contact" element={<WatchtowerContact />} />
               <Route path="/watchtower/blog" element={<WatchtowerBlog />} />

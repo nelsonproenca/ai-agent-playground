@@ -1,14 +1,15 @@
-import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity } from "lucide-react";
+import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity, Shield, Layers, CameraIcon, CreditCard } from "lucide-react";
 import { WatchtowerNavLink } from "./WatchtowerNavLink";
 import { useLocation } from "react-router-dom";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
+import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 
-const menuItems = [
+const baseItems = [
   { title: "Câmeras", url: "/watchtower/dashboard", icon: LayoutGrid },
   { title: "Ao Vivo", url: "/watchtower/dashboard/live", icon: Video },
   { title: "Faturas", url: "/watchtower/dashboard/billing", icon: FileText },
@@ -17,9 +18,19 @@ const menuItems = [
   { title: "Health Check", url: "/watchtower/dashboard/health", icon: Activity },
 ];
 
+const adminItems = [
+  { title: "Admin: Câmeras", url: "/watchtower/dashboard/admin/cameras", icon: CameraIcon },
+  { title: "Admin: Planos", url: "/watchtower/dashboard/admin/plans", icon: Layers },
+  { title: "Admin: Pagamentos", url: "/watchtower/dashboard/admin/payments", icon: CreditCard },
+  { title: "Admin: Usuários", url: "/watchtower/dashboard/admin/users", icon: Shield },
+];
+
 export function WatchtowerAppSidebar() {
   const location = useLocation();
   const { signOut } = useWatchtowerAuth();
+  const { isAdmin } = useIsAdmin();
+
+  const menuItems = isAdmin ? [...baseItems, ...adminItems] : baseItems;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">

@@ -137,6 +137,7 @@ export type Database = {
           id: string
           internal_stream_key: string
           location: string | null
+          owner_user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -144,6 +145,7 @@ export type Database = {
           id?: string
           internal_stream_key: string
           location?: string | null
+          owner_user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -151,6 +153,7 @@ export type Database = {
           id?: string
           internal_stream_key?: string
           location?: string | null
+          owner_user_id?: string | null
         }
         Relationships: []
       }
@@ -344,6 +347,8 @@ export type Database = {
       }
       pending_payments: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           camera_id: string
           created_at: string
           id: string
@@ -354,6 +359,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           camera_id: string
           created_at?: string
           id?: string
@@ -364,6 +371,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           camera_id?: string
           created_at?: string
           id?: string
@@ -382,6 +391,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          cta: string
+          display_order: number
+          features: Json
+          highlight: boolean
+          id: string
+          name: string
+          num: string
+          period: string
+          price: string
+          sku: string
+          suffix: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          cta: string
+          display_order?: number
+          features?: Json
+          highlight?: boolean
+          id?: string
+          name: string
+          num: string
+          period: string
+          price: string
+          sku: string
+          suffix: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          cta?: string
+          display_order?: number
+          features?: Json
+          highlight?: boolean
+          id?: string
+          name?: string
+          num?: string
+          period?: string
+          price?: string
+          sku?: string
+          suffix?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       playground_analise: {
         Row: {
@@ -520,15 +580,77 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      approve_pending_payment: {
+        Args: { _payment_id: string }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      list_pending_payments_admin: {
+        Args: never
+        Returns: {
+          approved_at: string
+          camera_id: string
+          camera_name: string
+          created_at: string
+          id: string
+          plan_name: string
+          plan_sku: string
+          receipt_url: string
+          status: string
+          user_display_name: string
+          user_email: string
+          user_id: string
+        }[]
+      }
+      list_users_with_admin_status: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          is_admin: boolean
+          user_id: string
+        }[]
+      }
+      reject_pending_payment: {
+        Args: { _payment_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -655,6 +777,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
