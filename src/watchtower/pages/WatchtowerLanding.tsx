@@ -45,6 +45,8 @@ export default function WatchtowerLanding() {
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const [cameraCount, setCameraCount] = useState(0);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 150]);
 
@@ -56,6 +58,25 @@ export default function WatchtowerLanding() {
   useEffect(() => {
     const timer = setTimeout(() => setCameraCount(500), 500);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("plans")
+        .select("id, sku, num, name, period, price, suffix, features, cta, highlight")
+        .eq("active", true)
+        .order("display_order", { ascending: true });
+      if (!error && data) {
+        setPlans(
+          data.map((p) => ({
+            ...p,
+            features: Array.isArray(p.features) ? (p.features as string[]) : [],
+          }))
+        );
+      }
+      setPlansLoading(false);
+    })();
   }, []);
 
   return (
