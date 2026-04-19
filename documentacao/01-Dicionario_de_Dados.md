@@ -1,7 +1,7 @@
 # Dicionário de Dados - Ecossistema Nelson Proença Info
 
 ## Visão Geral
-O sistema utiliza o Supabase (PostgreSQL) com 15 tabelas principais, divididas entre o site institucional e o módulo Watchtower Hub.
+O sistema utiliza o Supabase (PostgreSQL) com 17 tabelas principais, divididas entre o site institucional e o módulo Watchtower Hub.
 
 ## Tabelas e Esquemas
 ### 1. agendamentos
@@ -120,16 +120,19 @@ Perfil do usuário autenticado, criado automaticamente no signup via trigger.
 RLS: Usuário vê/insere/atualiza apenas seu próprio perfil.
 
 ### 9. cameras
-Cadastro das câmeras disponíveis para monitoramento.
+Cadastro das câmeras disponíveis para monitoramento. Suporta atribuição opcional a um usuário específico (câmera privada).
 
   id uuid not null default gen_random_uuid(),
   display_name text not null,
   internal_stream_key text not null,
   location text null,
+  owner_user_id uuid null,
   created_at timestamp with time zone not null default now(),
   constraint cameras_pkey primary key (id)
 
-RLS: Qualquer usuário autenticado pode visualizar.
+RLS:
+- SELECT: Usuário vê câmeras públicas (`owner_user_id IS NULL`), as suas próprias, ou todas se for admin.
+- INSERT/UPDATE/DELETE: Apenas admins (validado via `has_role(auth.uid(), 'admin')`).
 
 ### 10. subscriptions
 Assinaturas de acesso dos usuários às câmeras.
@@ -203,9 +206,60 @@ Configurações de alertas do sistema de health check (tabela de linha única).
 RLS: Usuários autenticados podem visualizar e atualizar.
 Trigger: `updated_at` atualizado automaticamente.
 
+### 15. user_roles
+Sistema RBAC (Role-Based Access Control). Armazena os papéis (admin/user) de cada usuário em tabela separada para evitar ataques de privilege escalation.
+
+  id uuid not null default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role app_role not null,
+  created_at timestamp with time zone not null default now(),
+  constraint user_roles_pkey primary key (id),
+  constraint user_roles_user_id_role_key unique (user_id, role)
+
+Enum `app_role`: `'admin' | 'user'`.
+
+Função de segurança: `has_role(_user_id uuid, _role app_role) RETURNS boolean` (SECURITY DEFINER) — usada em policies RLS para evitar recursão.
+
+RLS:
+- SELECT: Usuário vê seus próprios papéis; admins veem todos.
+- ALL: Apenas admins podem gerenciar (insert/update/delete).
+
+### 16. plans
+Catálogo dinâmico dos planos exibidos na landing page do Watchtower (substitui valores hardcoded).
+
+  id uuid not null default gen_random_uuid(),
+  sku text not null,
+  name text not null,
+  num text not null,
+  price text not null,
+  suffix text not null,
+  period text not null,
+  features jsonb not null default '[]'::jsonb,
+  cta text not null,
+  highlight boolean not null default false,
+  active boolean not null default true,
+  display_order integer not null default 0,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint plans_pkey primary key (id)
+
+RLS:
+- SELECT: Qualquer pessoa (anon/authenticated) vê planos com `active = true`; admins veem todos.
+- INSERT/UPDATE/DELETE: Apenas admins.
+
 ## Relacionamentos Chave (Watchtower)
 - `profiles.user_id` -> `auth.users.id`
 - `subscriptions.user_id` -> `auth.users.id`
 - `subscriptions.camera_id` -> `cameras.id`
 - `pending_payments.camera_id` -> `cameras.id`
+- `pending_payments.approved_by` -> `auth.users.id`
 - `camera_health_logs.camera_id` -> `cameras.id`
+- `cameras.owner_user_id` -> `auth.users.id`
+- `user_roles.user_id` -> `auth.users.id`
+
+## Funções RPC Administrativas (Watchtower)
+- `has_role(_user_id, _role)` — verifica papel do usuário (SECURITY DEFINER, anti-recursão).
+- `list_users_with_admin_status()` — lista usuários com flag `is_admin` (apenas admins).
+- `list_pending_payments_admin()` — lista pagamentos Pix pendentes com dados do usuário e câmera (apenas admins).
+- `approve_pending_payment(_payment_id)` — aprova pagamento e cria assinatura (apenas admins).
+- `reject_pending_payment(_payment_id)` — rejeita pagamento (apenas admins).
