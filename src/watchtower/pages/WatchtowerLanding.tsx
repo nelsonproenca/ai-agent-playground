@@ -1,12 +1,26 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Camera, Shield, Monitor, UserPlus, Star, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Camera, Shield, Monitor, UserPlus, Star, ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import cctvBackground from "@/assets/watchtower/cctv-background.jpg";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+type Plan = {
+  id: string;
+  sku: string;
+  num: string;
+  name: string;
+  period: string;
+  price: string;
+  suffix: string;
+  features: string[];
+  cta: string;
+  highlight: boolean;
+};
 
 const stats = (cameraCount: number) => [
   { icon: Camera, label: "CÂMERAS ATIVAS", useNumberFlow: true, value: cameraCount, suffix: "+" },
@@ -20,13 +34,6 @@ const steps = [
   { num: "03", icon: Monitor, title: "MONITORE", subtitle: "Acompanhe em Tempo Real", desc: "Acesse sua feed ao vivo e acesse gravações de qualquer lugar, a hora que quiser." },
 ];
 
-const plans = [
-  { id: "24h", num: "01", name: "ACESSO PONTUAL", period: "24 HORAS", price: "R$ 9,90", suffix: "/único", features: ["Visualização ao vivo", "Alternância horária", "Sem gravações", "Sem reembolso"], cta: "COMPRAR ACESSO", highlight: false },
-  { id: "bronze", num: "02", name: "PLANO BRONZE", period: "AO VIVO", price: "R$ 29,90", suffix: "/mês", features: ["Streaming em tempo real", "Alertas de movimento", "Sem histórico de gravação", "Sem taxas adicionais"], cta: "ASSINAR BRONZE", highlight: false },
-  { id: "prata", num: "03", name: "PLANO PRATA", period: "7 DIAS DE HISTÓRICO", price: "R$ 49,90", suffix: "/mês", features: ["Streaming em tempo real", "Histórico de 7 dias (VOD)", "Busca por data e hora", "Alertas de movimento"], cta: "ASSINAR PRATA", highlight: true },
-  { id: "ouro", num: "04", name: "PLANO OURO", period: "30 DIAS DE HISTÓRICO", price: "R$ 79,90", suffix: "/mês", features: ["Streaming em tempo real", "Histórico completo 30 dias", "Download de gravações", "Suporte prioritário"], cta: "ASSINAR OURO", highlight: false },
-];
-
 const testimonials = [
   { quote: "Desde que instalamos o Vigília Cam, a segurança no nosso condomínio melhorou significativamente. O acesso às gravações é rápido e a qualidade é impressionante.", name: "CARLOS MENDES", role: "Síndico • Residencial Nobre", stars: 5 },
   { quote: "A interface e o atendimento são intuitivos. Consigo gerenciar todas as câmeras do escritório pelo celular. O plano Ouro com download nos trouxe muita confiança.", name: "ANA BEATRIZ SILVA", role: "Gerente de Segurança • Metalwork SP", stars: 5 },
@@ -38,6 +45,8 @@ export default function WatchtowerLanding() {
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const [cameraCount, setCameraCount] = useState(0);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 150]);
 
@@ -49,6 +58,25 @@ export default function WatchtowerLanding() {
   useEffect(() => {
     const timer = setTimeout(() => setCameraCount(500), 500);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("plans")
+        .select("id, sku, num, name, period, price, suffix, features, cta, highlight")
+        .eq("active", true)
+        .order("display_order", { ascending: true });
+      if (!error && data) {
+        setPlans(
+          data.map((p) => ({
+            ...p,
+            features: Array.isArray(p.features) ? (p.features as string[]) : [],
+          }))
+        );
+      }
+      setPlansLoading(false);
+    })();
   }, []);
 
   return (
@@ -138,21 +166,29 @@ export default function WatchtowerLanding() {
           <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-xs tracking-[0.2em] text-primary font-medium text-center mb-3">PLANOS E PREÇOS</motion.p>
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display text-3xl md:text-4xl font-bold text-center mb-4">Escolha o Plano Ideal</motion.h2>
           <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="text-sm text-muted-foreground text-center mb-16">Monitore suas câmeras com o nível de acesso que você precisa</motion.p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan, i) => (
-              <motion.div key={plan.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} whileHover={{ y: -8, scale: 1.02 }} className={`rounded-lg border p-6 flex flex-col ${plan.highlight ? "border-primary bg-primary/5 shadow-glow relative" : "border-border bg-card"}`}>
-                {plan.highlight && <span className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] tracking-wider font-semibold px-3 py-1 rounded-sm">MAIS POPULAR</span>}
-                <span className="text-xs text-muted-foreground">{plan.num}</span>
-                <h3 className="font-display text-sm font-semibold tracking-wider mt-2">{plan.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1 mb-4">{plan.period}</p>
-                <div className="mb-6"><span className="font-display text-3xl font-bold">{plan.price}</span><span className="text-xs text-muted-foreground">{plan.suffix}</span></div>
-                <ul className="space-y-2 mb-8 flex-1">
-                  {plan.features.map((f) => (<li key={f} className="text-xs text-muted-foreground flex items-start gap-2"><span className="text-primary mt-0.5">•</span>{f}</li>))}
-                </ul>
-                <Button variant={plan.highlight ? "default" : "outline"} className={`w-full text-xs tracking-wider font-semibold ${plan.highlight ? "gradient-primary text-primary-foreground" : "border-border"}`} onClick={() => navigate("/watchtower/auth")}>{plan.cta}</Button>
-              </motion.div>
-            ))}
-          </div>
+          {plansLoading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            </div>
+          ) : plans.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-16">Nenhum plano disponível no momento.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {plans.map((plan, i) => (
+                <motion.div key={plan.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} whileHover={{ y: -8, scale: 1.02 }} className={`rounded-lg border p-6 flex flex-col ${plan.highlight ? "border-primary bg-primary/5 shadow-glow relative" : "border-border bg-card"}`}>
+                  {plan.highlight && <span className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] tracking-wider font-semibold px-3 py-1 rounded-sm">MAIS POPULAR</span>}
+                  <span className="text-xs text-muted-foreground">{plan.num}</span>
+                  <h3 className="font-display text-sm font-semibold tracking-wider mt-2">{plan.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 mb-4">{plan.period}</p>
+                  <div className="mb-6"><span className="font-display text-3xl font-bold">{plan.price}</span><span className="text-xs text-muted-foreground">{plan.suffix}</span></div>
+                  <ul className="space-y-2 mb-8 flex-1">
+                    {plan.features.map((f) => (<li key={f} className="text-xs text-muted-foreground flex items-start gap-2"><span className="text-primary mt-0.5">•</span>{f}</li>))}
+                  </ul>
+                  <Button variant={plan.highlight ? "default" : "outline"} className={`w-full text-xs tracking-wider font-semibold ${plan.highlight ? "gradient-primary text-primary-foreground" : "border-border"}`} onClick={() => navigate("/watchtower/auth")}>{plan.cta}</Button>
+                </motion.div>
+              ))}
+            </div>
+          )}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} className="max-w-4xl mx-auto mt-12">
             <div className="border border-primary/30 rounded-lg bg-primary/5 p-6 flex items-start gap-4">
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
