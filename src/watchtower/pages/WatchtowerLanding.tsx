@@ -166,21 +166,29 @@ export default function WatchtowerLanding() {
           <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-xs tracking-[0.2em] text-primary font-medium text-center mb-3">PLANOS E PREÇOS</motion.p>
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display text-3xl md:text-4xl font-bold text-center mb-4">Escolha o Plano Ideal</motion.h2>
           <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="text-sm text-muted-foreground text-center mb-16">Monitore suas câmeras com o nível de acesso que você precisa</motion.p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan, i) => (
-              <motion.div key={plan.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} whileHover={{ y: -8, scale: 1.02 }} className={`rounded-lg border p-6 flex flex-col ${plan.highlight ? "border-primary bg-primary/5 shadow-glow relative" : "border-border bg-card"}`}>
-                {plan.highlight && <span className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] tracking-wider font-semibold px-3 py-1 rounded-sm">MAIS POPULAR</span>}
-                <span className="text-xs text-muted-foreground">{plan.num}</span>
-                <h3 className="font-display text-sm font-semibold tracking-wider mt-2">{plan.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1 mb-4">{plan.period}</p>
-                <div className="mb-6"><span className="font-display text-3xl font-bold">{plan.price}</span><span className="text-xs text-muted-foreground">{plan.suffix}</span></div>
-                <ul className="space-y-2 mb-8 flex-1">
-                  {plan.features.map((f) => (<li key={f} className="text-xs text-muted-foreground flex items-start gap-2"><span className="text-primary mt-0.5">•</span>{f}</li>))}
-                </ul>
-                <Button variant={plan.highlight ? "default" : "outline"} className={`w-full text-xs tracking-wider font-semibold ${plan.highlight ? "gradient-primary text-primary-foreground" : "border-border"}`} onClick={() => navigate("/watchtower/auth")}>{plan.cta}</Button>
-              </motion.div>
-            ))}
-          </div>
+          {plansLoading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            </div>
+          ) : plans.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-16">Nenhum plano disponível no momento.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {plans.map((plan, i) => (
+                <motion.div key={plan.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} whileHover={{ y: -8, scale: 1.02 }} className={`rounded-lg border p-6 flex flex-col ${plan.highlight ? "border-primary bg-primary/5 shadow-glow relative" : "border-border bg-card"}`}>
+                  {plan.highlight && <span className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] tracking-wider font-semibold px-3 py-1 rounded-sm">MAIS POPULAR</span>}
+                  <span className="text-xs text-muted-foreground">{plan.num}</span>
+                  <h3 className="font-display text-sm font-semibold tracking-wider mt-2">{plan.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 mb-4">{plan.period}</p>
+                  <div className="mb-6"><span className="font-display text-3xl font-bold">{plan.price}</span><span className="text-xs text-muted-foreground">{plan.suffix}</span></div>
+                  <ul className="space-y-2 mb-8 flex-1">
+                    {plan.features.map((f) => (<li key={f} className="text-xs text-muted-foreground flex items-start gap-2"><span className="text-primary mt-0.5">•</span>{f}</li>))}
+                  </ul>
+                  <Button variant={plan.highlight ? "default" : "outline"} className={`w-full text-xs tracking-wider font-semibold ${plan.highlight ? "gradient-primary text-primary-foreground" : "border-border"}`} onClick={() => navigate("/watchtower/auth")}>{plan.cta}</Button>
+                </motion.div>
+              ))}
+            </div>
+          )}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} className="max-w-4xl mx-auto mt-12">
             <div className="border border-primary/30 rounded-lg bg-primary/5 p-6 flex items-start gap-4">
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
