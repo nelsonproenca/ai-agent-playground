@@ -94,7 +94,7 @@ export default function WatchtowerLanding() {
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
         </motion.div>
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-5xl md:text-7xl font-bold leading-tight max-w-3xl">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-3xl md:text-5xl font-bold leading-tight max-w-3xl">
             VIGILÂNCIA INTELIGENTE PARA{" "}<span className="text-primary">SUA SEGURANÇA</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-6 text-muted-foreground max-w-xl text-sm leading-relaxed">
