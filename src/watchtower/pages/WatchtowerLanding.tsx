@@ -110,18 +110,10 @@ export default function WatchtowerLanding() {
       {/* Stats bar */}
       <div className="border-y border-border/50 py-6 px-6">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-around gap-6">
-          {stats(cameraCount).map((s, i) => (
+          {stats.map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="flex items-center gap-3">
-              <s.icon className="h-5 w-5 text-primary" />
-              {s.useNumberFlow ? (
-                <span className="text-xs tracking-[0.15em] text-muted-foreground font-medium flex items-center gap-1">
-                  {s.suffix}
-                  <NumberFlow value={s.value} format={{ useGrouping: false }} className="text-xs tracking-[0.15em] text-muted-foreground font-medium" />
-                  {s.label}
-                </span>
-              ) : (
-                <span className="text-xs tracking-[0.15em] text-muted-foreground font-medium">{s.label}</span>
-              )}
+              <s.icon className="h-5 w-5 text-primary shrink-0" />
+              <span className="text-xs tracking-[0.15em] text-muted-foreground font-medium">{s.label}</span>
             </motion.div>
           ))}
         </div>
