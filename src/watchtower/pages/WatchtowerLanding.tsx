@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Camera, Shield, Monitor, UserPlus, Star, ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from "lucide-react";
+import { Camera, Shield, Monitor, UserPlus, ChevronLeft, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import NumberFlow from "@number-flow/react";
 import cctvBackground from "@/assets/watchtower/cctv-background.jpg";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,10 +21,10 @@ type Plan = {
   highlight: boolean;
 };
 
-const stats = (cameraCount: number) => [
-  { icon: Camera, label: "CÂMERAS ATIVAS", useNumberFlow: true, value: cameraCount, suffix: "+" },
-  { icon: Shield, label: "99.9% UPTIME" },
-  { icon: Monitor, label: "24/7 SUPORTE" },
+const stats = [
+  { icon: Monitor, label: "STREAMING HLS EM TEMPO REAL" },
+  { icon: Lock, label: "CONEXÕES CRIPTOGRAFADAS TLS" },
+  { icon: Shield, label: "SUPORTE 24/7" },
 ];
 
 const steps = [
@@ -34,17 +33,9 @@ const steps = [
   { num: "03", icon: Monitor, title: "MONITORE", subtitle: "Acompanhe em Tempo Real", desc: "Acesse sua feed ao vivo e acesse gravações de qualquer lugar, a hora que quiser." },
 ];
 
-const testimonials = [
-  { quote: "Desde que instalamos o Vigília Cam, a segurança no nosso condomínio melhorou significativamente. O acesso às gravações é rápido e a qualidade é impressionante.", name: "CARLOS MENDES", role: "Síndico • Residencial Nobre", stars: 5 },
-  { quote: "A interface e o atendimento são intuitivos. Consigo gerenciar todas as câmeras do escritório pelo celular. O plano Ouro com download nos trouxe muita confiança.", name: "ANA BEATRIZ SILVA", role: "Gerente de Segurança • Metalwork SP", stars: 5 },
-  { quote: "Tivemos um incidente no estacionamento e conseguimos acessar a gravação em minutos. O suporte respondeu imediatamente. Vale cada centavo do investimento.", name: "ROBERTO ALMEIDA", role: "Proprietário • Auto Peças Leal", stars: 5 },
-];
-
 export default function WatchtowerLanding() {
   const navigate = useNavigate();
-  const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [cameraCount, setCameraCount] = useState(0);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
   const { scrollY } = useScroll();
@@ -54,11 +45,6 @@ export default function WatchtowerLanding() {
     const unsubscribe = scrollY.on("change", (v) => setScrolled(v > 50));
     return unsubscribe;
   }, [scrollY]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setCameraCount(500), 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -94,7 +80,7 @@ export default function WatchtowerLanding() {
             <a href="#inicio" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">INÍCIO</a>
             <a href="#funcionalidades" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">FUNCIONALIDADES</a>
             <a href="#planos" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">PLANOS</a>
-            <a href="#depoimentos" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">DEPOIMENTOS</a>
+            
             <a href="#faq" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">FAQ</a>
             <Button size="sm" className="gradient-primary text-primary-foreground text-xs tracking-wider font-semibold" onClick={() => navigate("/watchtower/auth")}>ENTRAR</Button>
           </div>
@@ -108,7 +94,7 @@ export default function WatchtowerLanding() {
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
         </motion.div>
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-5xl md:text-7xl font-bold leading-tight max-w-3xl">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-3xl md:text-5xl font-bold leading-tight max-w-3xl">
             VIGILÂNCIA INTELIGENTE PARA{" "}<span className="text-primary">SUA SEGURANÇA</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-6 text-muted-foreground max-w-xl text-sm leading-relaxed">
@@ -124,18 +110,10 @@ export default function WatchtowerLanding() {
       {/* Stats bar */}
       <div className="border-y border-border/50 py-6 px-6">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-around gap-6">
-          {stats(cameraCount).map((s, i) => (
+          {stats.map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className="flex items-center gap-3">
-              <s.icon className="h-5 w-5 text-primary" />
-              {s.useNumberFlow ? (
-                <span className="text-xs tracking-[0.15em] text-muted-foreground font-medium flex items-center gap-1">
-                  {s.suffix}
-                  <NumberFlow value={s.value} format={{ useGrouping: false }} className="text-xs tracking-[0.15em] text-muted-foreground font-medium" />
-                  {s.label}
-                </span>
-              ) : (
-                <span className="text-xs tracking-[0.15em] text-muted-foreground font-medium">{s.label}</span>
-              )}
+              <s.icon className="h-5 w-5 text-primary shrink-0" />
+              <span className="text-xs tracking-[0.15em] text-muted-foreground font-medium">{s.label}</span>
             </motion.div>
           ))}
         </div>
@@ -203,32 +181,6 @@ export default function WatchtowerLanding() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="depoimentos" className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-xs tracking-[0.2em] text-primary font-medium mb-3">DEPOIMENTOS</motion.p>
-          <div className="flex items-center justify-between mb-12">
-            <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display text-3xl md:text-4xl font-bold">O Que Nossos Clientes Dizem</motion.h2>
-            <div className="hidden md:flex gap-2">
-              <Button size="icon" variant="outline" className="border-border" onClick={() => setTestimonialIndex(Math.max(0, testimonialIndex - 1))}><ChevronLeft className="h-4 w-4" /></Button>
-              <Button size="icon" variant="outline" className="border-border" onClick={() => setTestimonialIndex(Math.min(testimonials.length - 1, testimonialIndex + 1))}><ChevronRight className="h-4 w-4" /></Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} whileHover={{ y: -5 }} className="border border-border rounded-lg p-6 bg-card">
-                <div className="text-primary text-3xl font-serif mb-4">"</div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{t.quote}</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center"><span className="text-xs font-bold text-primary">{t.name.charAt(0)}</span></div>
-                  <div><p className="text-xs font-semibold text-foreground">{t.name}</p><p className="text-[10px] text-muted-foreground">{t.role}</p></div>
-                </div>
-                <div className="flex gap-1 mt-4">{Array.from({ length: t.stars }).map((_, j) => (<Star key={j} className="h-3 w-3 fill-primary text-primary" />))}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* FAQ */}
       <section id="faq" className="py-24 px-6 bg-secondary/30">
