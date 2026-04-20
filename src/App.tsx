@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
@@ -65,6 +65,17 @@ function WatchtowerPublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function WatchtowerThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+  const isWatchtower = pathname.startsWith("/watchtower");
+  return (
+    <div className={isWatchtower ? "watchtower-theme min-h-screen" : ""}>
+      {children}
+      {isWatchtower && <WatchtowerWhatsAppButton />}
+    </div>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -73,47 +84,48 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <WatchtowerAuthProvider>
-            <Routes>
-              {/* Main site routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/colabs" element={<Colabs />} />
-              <Route path="/clientes" element={<Clientes />} />
-              <Route path="/playground" element={<Playground />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/admin/leads" element={<LeadsPage />} />
-              <Route path="/admin/colaboradores" element={<ColabsPage />} />
-              <Route path="/admin/clientes" element={<ClientesPage />} />
-              <Route path="/convites" element={<GeradorConvites />} />
-              <Route path="/contato" element={<Contato />} />
-              <Route path="/booking-success" element={<SuccessBooking />} />
-              <Route path="/landing" element={<LandingPage />} />
-              <Route path="/admin/agendamentos" element={<DashboardAgendamentos />} />
-              <Route path="/admin/produtos" element={<ProdutosPage />} />
-              <Route path="/loja" element={<LojaPage />} />
+            <WatchtowerThemeWrapper>
+              <Routes>
+                {/* Main site routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/colabs" element={<Colabs />} />
+                <Route path="/clientes" element={<Clientes />} />
+                <Route path="/playground" element={<Playground />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/leads" element={<LeadsPage />} />
+                <Route path="/admin/colaboradores" element={<ColabsPage />} />
+                <Route path="/admin/clientes" element={<ClientesPage />} />
+                <Route path="/convites" element={<GeradorConvites />} />
+                <Route path="/contato" element={<Contato />} />
+                <Route path="/booking-success" element={<SuccessBooking />} />
+                <Route path="/landing" element={<LandingPage />} />
+                <Route path="/admin/agendamentos" element={<DashboardAgendamentos />} />
+                <Route path="/admin/produtos" element={<ProdutosPage />} />
+                <Route path="/loja" element={<LojaPage />} />
 
-              {/* Watchtower Hub routes */}
-              <Route path="/watchtower" element={<WatchtowerPublicRoute><WatchtowerLanding /></WatchtowerPublicRoute>} />
-              <Route path="/watchtower/auth" element={<WatchtowerPublicRoute><WatchtowerAuth /></WatchtowerPublicRoute>} />
-              <Route path="/watchtower/dashboard" element={<WatchtowerProtectedRoute><WatchtowerDashboard /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/live" element={<WatchtowerProtectedRoute><WatchtowerLive /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/billing" element={<WatchtowerProtectedRoute><WatchtowerBilling /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/support" element={<WatchtowerProtectedRoute><WatchtowerSupport /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/settings" element={<WatchtowerProtectedRoute><WatchtowerSettings /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/health" element={<WatchtowerProtectedRoute><WatchtowerHealthCheck /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/admin/users" element={<WatchtowerProtectedRoute><WatchtowerAdminUsers /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerProtectedRoute><WatchtowerAdminPlans /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerProtectedRoute><WatchtowerAdminCameras /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerProtectedRoute><WatchtowerAdminPayments /></WatchtowerProtectedRoute>} />
-              <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
-              <Route path="/watchtower/about" element={<WatchtowerAbout />} />
-              <Route path="/watchtower/contact" element={<WatchtowerContact />} />
-              <Route path="/watchtower/blog" element={<WatchtowerBlog />} />
+                {/* Watchtower Hub routes */}
+                <Route path="/watchtower" element={<WatchtowerPublicRoute><WatchtowerLanding /></WatchtowerPublicRoute>} />
+                <Route path="/watchtower/auth" element={<WatchtowerPublicRoute><WatchtowerAuth /></WatchtowerPublicRoute>} />
+                <Route path="/watchtower/dashboard" element={<WatchtowerProtectedRoute><WatchtowerDashboard /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/live" element={<WatchtowerProtectedRoute><WatchtowerLive /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/billing" element={<WatchtowerProtectedRoute><WatchtowerBilling /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/support" element={<WatchtowerProtectedRoute><WatchtowerSupport /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/settings" element={<WatchtowerProtectedRoute><WatchtowerSettings /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/health" element={<WatchtowerProtectedRoute><WatchtowerHealthCheck /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/admin/users" element={<WatchtowerProtectedRoute><WatchtowerAdminUsers /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerProtectedRoute><WatchtowerAdminPlans /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerProtectedRoute><WatchtowerAdminCameras /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerProtectedRoute><WatchtowerAdminPayments /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
+                <Route path="/watchtower/about" element={<WatchtowerAbout />} />
+                <Route path="/watchtower/contact" element={<WatchtowerContact />} />
+                <Route path="/watchtower/blog" element={<WatchtowerBlog />} />
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            {/* Show WhatsApp button only on watchtower routes */}
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </WatchtowerThemeWrapper>
           </WatchtowerAuthProvider>
         </BrowserRouter>
       </AuthProvider>
