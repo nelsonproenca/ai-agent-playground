@@ -80,7 +80,7 @@ export default function WatchtowerLanding() {
             <a href="#inicio" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">INÍCIO</a>
             <a href="#funcionalidades" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">FUNCIONALIDADES</a>
             <a href="#planos" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">PLANOS</a>
-            <a href="#depoimentos" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">DEPOIMENTOS</a>
+            
             <a href="#faq" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">FAQ</a>
             <Button size="sm" className="gradient-primary text-primary-foreground text-xs tracking-wider font-semibold" onClick={() => navigate("/watchtower/auth")}>ENTRAR</Button>
           </div>
