@@ -181,26 +181,8 @@ export default function WatchtowerLanding() {
         </div>
       </section>
 
-
-      {/* FAQ */}
-      <section id="faq" className="py-24 px-6 bg-secondary/30">
-        <div className="max-w-3xl mx-auto">
-          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-xs tracking-[0.2em] text-primary font-medium text-center mb-3">PERGUNTAS FREQUENTES</motion.p>
-          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display text-3xl md:text-4xl font-bold text-center mb-12">Tire Suas Dúvidas</motion.h2>
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <Accordion type="single" collapsible className="space-y-4">
-              <AccordionItem value="item-1" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Preciso de equipamento especial para usar o Vigília Cam?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Não! O Vigília Cam funciona com qualquer câmera IP compatível com RTSP ou HLS.</AccordionContent></AccordionItem>
-              <AccordionItem value="item-2" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Quanto tempo de gravação fica disponível?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Depende do plano contratado. Bronze: ao vivo. Prata: 7 dias. Ouro: 30 dias com download.</AccordionContent></AccordionItem>
-              <AccordionItem value="item-3" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">É seguro acessar minhas câmeras pela internet?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Sim! Utilizamos criptografia TLS/SSL para todas as conexões.</AccordionContent></AccordionItem>
-              <AccordionItem value="item-4" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Posso cancelar a qualquer momento?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Sim! Não há contratos de fidelidade. Cancele quando quiser.</AccordionContent></AccordionItem>
-              <AccordionItem value="item-5" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Como funciona o suporte técnico?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Suporte via chat e e-mail 24/7 para todos os clientes. Planos Ouro têm prioridade.</AccordionContent></AccordionItem>
-            </Accordion>
-          </motion.div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="py-24 px-6 bg-secondary/30">
+      <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <p className="text-xs tracking-[0.2em] text-primary font-medium mb-4">COMECE AGORA</p>
@@ -219,6 +201,23 @@ export default function WatchtowerLanding() {
             <p className="text-xs text-muted-foreground mb-6">Acesse seu painel de monitoramento</p>
             <Button className="w-full gradient-primary text-primary-foreground font-semibold text-xs tracking-wider" onClick={() => navigate("/watchtower/auth")}>ENTRAR →</Button>
             <Button variant="outline" className="w-full mt-3 border-border text-xs tracking-wider" onClick={() => navigate("/watchtower/auth?mode=signup")}>CRIAR CONTA ✎</Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-24 px-6 bg-secondary/30">
+        <div className="max-w-3xl mx-auto">
+          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-xs tracking-[0.2em] text-primary font-medium text-center mb-3">PERGUNTAS FREQUENTES</motion.p>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display text-3xl md:text-4xl font-bold text-center mb-12">Tire Suas Dúvidas</motion.h2>
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
+            <Accordion type="single" collapsible className="space-y-4">
+              <AccordionItem value="item-1" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Preciso de equipamento especial para usar o Vigília Cam?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Não! O Vigília Cam funciona com qualquer câmera IP compatível com RTSP ou HLS.</AccordionContent></AccordionItem>
+              <AccordionItem value="item-2" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Quanto tempo de gravação fica disponível?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Depende do plano contratado. Bronze: ao vivo. Prata: 7 dias. Ouro: 30 dias com download.</AccordionContent></AccordionItem>
+              <AccordionItem value="item-3" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">É seguro acessar minhas câmeras pela internet?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Sim! Utilizamos criptografia TLS/SSL para todas as conexões.</AccordionContent></AccordionItem>
+              <AccordionItem value="item-4" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Posso cancelar a qualquer momento?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Sim! Não há contratos de fidelidade. Cancele quando quiser.</AccordionContent></AccordionItem>
+              <AccordionItem value="item-5" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Como funciona o suporte técnico?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Suporte via chat e e-mail 24/7 para todos os clientes. Planos Ouro têm prioridade.</AccordionContent></AccordionItem>
+            </Accordion>
           </motion.div>
         </div>
       </section>
