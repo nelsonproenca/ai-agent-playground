@@ -93,17 +93,13 @@ export default function WatchtowerLanding() {
           <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15" style={{ backgroundImage: `url(${cctvBackground})` }} />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
         </motion.div>
-        <div className="max-w-7xl mx-auto relative z-10">
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-3xl md:text-5xl font-bold leading-tight max-w-3xl">
-            VIGILÂNCIA INTELIGENTE PARA{" "}<span className="text-primary">SUA SEGURANÇA</span>
+        <div className="max-w-7xl mx-auto relative z-10 text-center flex flex-col items-center">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-5xl md:text-7xl font-light leading-tight max-w-4xl tracking-tight">
+            VIGILÂNCIA <span className="text-accent font-semibold">INTELIGENTE</span> PARA{" "}<span className="text-primary font-semibold">SUA SEGURANÇA</span>
           </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-6 text-muted-foreground max-w-xl text-sm leading-relaxed">
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-8 text-muted-foreground max-w-2xl text-lg md:text-xl font-light leading-relaxed">
             Monitore suas câmeras em tempo real, acesse gravações e gerencie tudo em um único painel profissional.
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }} className="mt-8 flex gap-4">
-            <Button className="gradient-primary text-primary-foreground font-semibold text-xs tracking-wider px-6" onClick={() => navigate("/watchtower/auth")}>COMEÇAR AGORA</Button>
-            <Button variant="outline" className="border-primary/30 text-foreground text-xs tracking-wider px-6" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>VER PLANOS</Button>
-          </motion.div>
         </div>
       </section>
 
