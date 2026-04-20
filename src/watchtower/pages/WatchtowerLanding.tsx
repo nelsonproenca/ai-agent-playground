@@ -95,7 +95,7 @@ export default function WatchtowerLanding() {
         </motion.div>
         <div className="max-w-7xl mx-auto relative z-10 text-center flex flex-col items-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-5xl md:text-7xl font-light leading-tight max-w-4xl tracking-tight">
-            VIGILÂNCIA <span className="text-accent font-semibold">INTELIGENTE</span> PARA{" "}<span className="text-primary font-semibold">SUA SEGURANÇA</span>
+            VIGILÂNCIA <span className="text-primary font-semibold">INTELIGENTE</span> PARA{" "}<span className="text-primary font-semibold">SUA SEGURANÇA</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-8 text-muted-foreground max-w-2xl text-lg md:text-xl font-light leading-relaxed">
             Monitore suas câmeras em tempo real, acesse gravações e gerencie tudo em um único painel profissional.
