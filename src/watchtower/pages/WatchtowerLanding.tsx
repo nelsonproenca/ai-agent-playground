@@ -21,22 +21,16 @@ type Plan = {
   highlight: boolean;
 };
 
-const stats = (cameraCount: number) => [
-  { icon: Camera, label: "CÂMERAS ATIVAS", useNumberFlow: true, value: cameraCount, suffix: "+" },
-  { icon: Shield, label: "99.9% UPTIME" },
-  { icon: Monitor, label: "24/7 SUPORTE" },
+const stats = [
+  { icon: Monitor, label: "STREAMING HLS EM TEMPO REAL" },
+  { icon: Lock, label: "CONEXÕES CRIPTOGRAFADAS TLS" },
+  { icon: Shield, label: "SUPORTE 24/7" },
 ];
 
 const steps = [
   { num: "01", icon: UserPlus, title: "CADASTRE-SE", subtitle: "Crie sua Conta", desc: "Crie seu perfil e configure seu painel de monitoramento em poucos minutos." },
   { num: "02", icon: Camera, title: "CONECTE CÂMERAS", subtitle: "Adicione seus Dispositivos", desc: "Conecte suas câmeras facilmente usando a cloud de qualquer web browser." },
   { num: "03", icon: Monitor, title: "MONITORE", subtitle: "Acompanhe em Tempo Real", desc: "Acesse sua feed ao vivo e acesse gravações de qualquer lugar, a hora que quiser." },
-];
-
-const testimonials = [
-  { quote: "Desde que instalamos o Vigília Cam, a segurança no nosso condomínio melhorou significativamente. O acesso às gravações é rápido e a qualidade é impressionante.", name: "CARLOS MENDES", role: "Síndico • Residencial Nobre", stars: 5 },
-  { quote: "A interface e o atendimento são intuitivos. Consigo gerenciar todas as câmeras do escritório pelo celular. O plano Ouro com download nos trouxe muita confiança.", name: "ANA BEATRIZ SILVA", role: "Gerente de Segurança • Metalwork SP", stars: 5 },
-  { quote: "Tivemos um incidente no estacionamento e conseguimos acessar a gravação em minutos. O suporte respondeu imediatamente. Vale cada centavo do investimento.", name: "ROBERTO ALMEIDA", role: "Proprietário • Auto Peças Leal", stars: 5 },
 ];
 
 export default function WatchtowerLanding() {
