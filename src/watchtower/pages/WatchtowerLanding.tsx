@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Camera, Shield, Monitor, UserPlus, Star, ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from "lucide-react";
+import { Camera, Shield, Monitor, UserPlus, ChevronLeft, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import NumberFlow from "@number-flow/react";
 import cctvBackground from "@/assets/watchtower/cctv-background.jpg";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
