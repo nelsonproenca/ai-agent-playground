@@ -106,6 +106,78 @@ export interface RunHealthCheckResult {
   alerts: number;
 }
 
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export type PlanTier = "Acesso24h" | "Bronze" | "Silver" | "Gold";
+export type PlanFeatures = "LiveOnly" | "WithRecordings" | "WithDownloads";
+
+export interface AdminPlanDto {
+  id: string;
+  name: string;
+  description: string;
+  priceBrl: number;
+  durationDays: number;
+  planTier: PlanTier;
+  features: PlanFeatures;
+  recordingDaysLimit: number | null;
+  canDownload: boolean;
+  isActive: boolean;
+}
+
+export interface AdminCameraDto {
+  id: string;
+  ownerUserId: string;
+  name: string;
+  slug: string;
+  locationName: string;
+  isActive: boolean;
+}
+
+export interface AdminUserDto {
+  userId: string;
+  isAdmin: boolean;
+  accessStatus: UserAccessStatus | null;
+  accessExpiresAt: string | null;
+  planName: string | null;
+}
+
+export interface AdminPaymentDto {
+  id: string;
+  userId: string;
+  nome: string;
+  cpf: string;
+  planName: string | null;
+  priceBrl: number | null;
+  status: PaymentStatus;
+  comprovanteUrl: string;
+  createdAt: string;
+}
+
+export interface CreatePlanPayload {
+  name: string;
+  description: string;
+  priceBrl: number;
+  durationDays: number;
+  planTier: PlanTier;
+  features: PlanFeatures;
+  recordingDaysLimit: number | null;
+  canDownload: boolean;
+  isActive: boolean;
+}
+
+export interface CreateCameraPayload {
+  ownerUserId: string;
+  name: string;
+  slug: string;
+  locationName: string;
+  hlsBaseUrl: string;
+  isActive: boolean;
+}
+
+export interface ApprovePaymentPayload {
+  accessExpiresAt: string; // ISO 8601
+}
+
 // ─── Erros (RFC 7807 Problem Details) ────────────────────────────────────────
 
 export interface ApiProblem {

@@ -6,3 +6,4 @@ export { billingService } from "./billingService";
 export { userService } from "./userService";
 export { contactService } from "./contactService";
 export { healthCheckService } from "./healthCheckService";
+export { adminService } from "./adminService";

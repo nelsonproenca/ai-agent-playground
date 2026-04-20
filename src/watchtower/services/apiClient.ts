@@ -80,4 +80,16 @@ async function put<T>(path: string, body: unknown): Promise<T> {
   return handleResponse<T>(res);
 }
 
-export const apiClient = { get, post, postForm, put };
+async function del<T>(path: string): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(await getAuthHeader()),
+  };
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: "DELETE",
+    headers,
+  });
+  return handleResponse<T>(res);
+}
+
+export const apiClient = { get, post, postForm, put, delete: del };
