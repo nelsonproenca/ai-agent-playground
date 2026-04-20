@@ -35,9 +35,7 @@ const steps = [
 
 export default function WatchtowerLanding() {
   const navigate = useNavigate();
-  const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [cameraCount, setCameraCount] = useState(0);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
   const { scrollY } = useScroll();
@@ -47,11 +45,6 @@ export default function WatchtowerLanding() {
     const unsubscribe = scrollY.on("change", (v) => setScrolled(v > 50));
     return unsubscribe;
   }, [scrollY]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setCameraCount(500), 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     (async () => {
