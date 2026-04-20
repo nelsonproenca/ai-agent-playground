@@ -181,32 +181,6 @@ export default function WatchtowerLanding() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="depoimentos" className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-xs tracking-[0.2em] text-primary font-medium mb-3">DEPOIMENTOS</motion.p>
-          <div className="flex items-center justify-between mb-12">
-            <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display text-3xl md:text-4xl font-bold">O Que Nossos Clientes Dizem</motion.h2>
-            <div className="hidden md:flex gap-2">
-              <Button size="icon" variant="outline" className="border-border" onClick={() => setTestimonialIndex(Math.max(0, testimonialIndex - 1))}><ChevronLeft className="h-4 w-4" /></Button>
-              <Button size="icon" variant="outline" className="border-border" onClick={() => setTestimonialIndex(Math.min(testimonials.length - 1, testimonialIndex + 1))}><ChevronRight className="h-4 w-4" /></Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} whileHover={{ y: -5 }} className="border border-border rounded-lg p-6 bg-card">
-                <div className="text-primary text-3xl font-serif mb-4">"</div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{t.quote}</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center"><span className="text-xs font-bold text-primary">{t.name.charAt(0)}</span></div>
-                  <div><p className="text-xs font-semibold text-foreground">{t.name}</p><p className="text-[10px] text-muted-foreground">{t.role}</p></div>
-                </div>
-                <div className="flex gap-1 mt-4">{Array.from({ length: t.stars }).map((_, j) => (<Star key={j} className="h-3 w-3 fill-primary text-primary" />))}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* FAQ */}
       <section id="faq" className="py-24 px-6 bg-secondary/30">
