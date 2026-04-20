@@ -181,6 +181,29 @@ export default function WatchtowerLanding() {
         </div>
       </section>
 
+      {/* CTA */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+            <p className="text-xs tracking-[0.2em] text-primary font-medium mb-4">COMECE AGORA</p>
+            <h2 className="font-display text-4xl font-bold leading-tight mb-6">Proteja o Que<br />Mais Importa</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-8">Cadastre-se gratuitamente e comece a monitorar suas câmeras em minutos.</p>
+            <ul className="space-y-3">
+              {["Configuração em menos de 5 minutos", "Suporte técnico 24/7 incluído", "Sem taxa de cartão exigido"].map((text, i) => (
+                <motion.li key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />{text}
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="border border-border rounded-lg p-8 bg-card">
+            <h3 className="font-display text-xl font-bold mb-6">ENTRAR</h3>
+            <p className="text-xs text-muted-foreground mb-6">Acesse seu painel de monitoramento</p>
+            <Button className="w-full gradient-primary text-primary-foreground font-semibold text-xs tracking-wider" onClick={() => navigate("/watchtower/auth")}>ENTRAR →</Button>
+            <Button variant="outline" className="w-full mt-3 border-border text-xs tracking-wider" onClick={() => navigate("/watchtower/auth?mode=signup")}>CRIAR CONTA ✎</Button>
+          </motion.div>
+        </div>
+      </section>
 
       {/* FAQ */}
       <section id="faq" className="py-24 px-6 bg-secondary/30">
