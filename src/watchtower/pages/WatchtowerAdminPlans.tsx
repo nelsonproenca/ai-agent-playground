@@ -9,12 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Trash2, Plus, Loader2, Star } from "lucide-react";
+import { Pencil, Trash2, Plus, Loader2, Star, AlertTriangle } from "lucide-react";
 import { WatchtowerPlanCardPreview } from "@/watchtower/components/WatchtowerPlanCardPreview";
 
 type PlanRow = Tables<"plans">;
