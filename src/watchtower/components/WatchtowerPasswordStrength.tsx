@@ -51,12 +51,22 @@ const RULES: Rule[] = [
 ];
 
 export function PasswordRulesHint({ password }: { password: string }) {
+  const passedCount = RULES.filter((r) => r.test(password)).length;
+  const totalCount = RULES.length;
+  const ariaText = passedCount === totalCount 
+    ? "Todas as regras de senha foram atendidas" 
+    : `${passedCount} de ${totalCount} regras atendidas. Regras pendentes: ${RULES.filter((r) => !r.test(password)).map((r) => r.label).join(", ")}`;
+
   return (
-    <div className="rounded-md border border-border bg-secondary/40 p-3 space-y-1.5">
+    <div 
+      className="rounded-md border border-border bg-secondary/40 p-3 space-y-1.5" 
+      aria-live="polite" 
+      aria-atomic="true"
+    >
       <p className="text-[10px] tracking-[0.2em] text-muted-foreground font-semibold">
         REGRAS DA SENHA
       </p>
-      <ul className="space-y-1">
+      <ul className="space-y-1" role="list" aria-label={`Progresso das regras: ${passedCount} de ${totalCount} atendidas`}>
         {RULES.map((r) => {
           const ok = r.test(password);
           return (
@@ -67,15 +77,17 @@ export function PasswordRulesHint({ password }: { password: string }) {
               }`}
             >
               {ok ? (
-                <Check className="h-3 w-3 text-green-500 shrink-0" />
+                <Check className="h-3 w-3 text-green-500 shrink-0" aria-hidden="true" />
               ) : (
-                <X className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+                <X className="h-3 w-3 text-muted-foreground/60 shrink-0" aria-hidden="true" />
               )}
               <span>{r.label}</span>
+              <span className="sr-only">{ok ? " - atendida" : " - pendente"}</span>
             </li>
           );
         })}
       </ul>
+      <span className="sr-only">{ariaText}</span>
     </div>
   );
 }
