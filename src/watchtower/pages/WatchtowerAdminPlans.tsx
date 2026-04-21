@@ -221,6 +221,8 @@ export default function WatchtowerAdminPlans() {
       const { error } = await supabase.from("plans").update({ highlight: newValue }).eq("id", plan.id);
       if (error) throw error;
       if (newValue) await enforceUniqueHighlight(plan.id);
+      // Audit log: record who changed what and when
+      await logHighlightAudit(plan, newValue ? "highlighted" : "unhighlighted", currentHighlightedPlan);
       toast({
         title: newValue ? "Plano em destaque" : "Destaque removido",
         description: newValue ? `"${plan.name}" agora é o plano em destaque.` : `"${plan.name}" não está mais em destaque.`,
@@ -243,6 +245,8 @@ export default function WatchtowerAdminPlans() {
       const { error } = await supabase.from("plans").update({ highlight: true }).eq("id", planToHighlight.id);
       if (error) throw error;
       await enforceUniqueHighlight(planToHighlight.id);
+      // Audit log: capture the swap (from previous highlighted → new one)
+      await logHighlightAudit(planToHighlight, "highlighted", currentHighlightedPlan);
       toast({
         title: "Plano em destaque",
         description: `"${planToHighlight.name}" agora é o plano em destaque. O destaque foi removido de "${currentHighlightedPlan?.name}".`,

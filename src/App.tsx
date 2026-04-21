@@ -41,6 +41,7 @@ import WatchtowerAdminUsers from "./watchtower/pages/WatchtowerAdminUsers";
 import WatchtowerAdminPlans from "./watchtower/pages/WatchtowerAdminPlans";
 import WatchtowerAdminCameras from "./watchtower/pages/WatchtowerAdminCameras";
 import WatchtowerAdminPayments from "./watchtower/pages/WatchtowerAdminPayments";
+import WatchtowerAdminAudit from "./watchtower/pages/WatchtowerAdminAudit";
 import WatchtowerResetPassword from "./watchtower/pages/WatchtowerResetPassword";
 
 const queryClient = new QueryClient();
@@ -120,6 +121,7 @@ const App = () => (
                 <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerProtectedRoute><WatchtowerAdminPlans /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerProtectedRoute><WatchtowerAdminCameras /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerProtectedRoute><WatchtowerAdminPayments /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerProtectedRoute><WatchtowerAdminAudit /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
                 <Route path="/watchtower/about" element={<WatchtowerAbout />} />
                 <Route path="/watchtower/contact" element={<WatchtowerContact />} />
