@@ -2,6 +2,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ChevronLeft, Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -10,7 +17,20 @@ import { z } from "zod";
 import { contactService } from "@/watchtower/services";
 
 const WHATSAPP_NUMBER = "5511945598960";
+const CONTACT_EMAIL = "nelsonhaproenca@gmail.com";
 const MESSAGE_MAX = 1000;
+
+// Assuntos para roteamento futuro via n8n.
+// O label vai como subject do e-mail; o n8n filtrará por ele.
+const EMAIL_SUBJECTS: ReadonlyArray<{ value: string; label: string; description: string }> = [
+  { value: "comercial", label: "Contratar plano de monitoramento", description: "Quero contratar / saber preços" },
+  { value: "suporte", label: "Suporte técnico (câmera offline / falha)", description: "Problema com câmera ou stream" },
+  { value: "financeiro", label: "Dúvidas sobre pagamento ou fatura", description: "Pix, boletos, comprovantes" },
+  { value: "parceria", label: "Proposta de parceria comercial", description: "Integradores, revendas, indicações" },
+  { value: "imprensa", label: "Imprensa e mídia", description: "Entrevistas, materiais, divulgação" },
+  { value: "trabalhe-conosco", label: "Trabalhe conosco", description: "Envio de currículo / vagas" },
+  { value: "outros", label: "Outros assuntos", description: "Não encontrou seu motivo" },
+];
 
 const contactSchema = z.object({
   name: z
@@ -251,18 +271,43 @@ export default function WatchtowerContact() {
                 <p className="text-xs text-muted-foreground mt-1">Resposta rápida via mensagem</p>
               </a>
 
-              <a
-                href="mailto:nelsonhaproenca@gmail.com"
-                className="block border border-border rounded-lg p-6 hover:border-primary/40 hover:bg-primary/5 transition-colors group"
-              >
+              <div className="border border-border rounded-lg p-6 hover:border-primary/40 transition-colors">
                 <div className="flex items-center gap-3 mb-2">
                   <Mail className="h-5 w-5 text-primary" />
                   <span className="text-xs tracking-[0.15em] text-primary font-medium">EMAIL</span>
                 </div>
-                <p className="text-sm text-foreground group-hover:text-primary transition-colors break-all">
-                  nelsonhaproenca@gmail.com
+                <p className="text-sm text-foreground break-all mb-3">
+                  {CONTACT_EMAIL}
                 </p>
-              </a>
+                <label htmlFor="email-subject" className="text-[10px] tracking-[0.15em] text-muted-foreground font-medium block mb-1.5">
+                  ASSUNTO
+                </label>
+                <Select
+                  onValueChange={(value) => {
+                    const subject = EMAIL_SUBJECTS.find((s) => s.value === value);
+                    if (!subject) return;
+                    const url = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`[${subject.label}]`)}`;
+                    window.location.href = url;
+                  }}
+                >
+                  <SelectTrigger id="email-subject" className="bg-secondary border-border text-sm">
+                    <SelectValue placeholder="Selecione o assunto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EMAIL_SUBJECTS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        <div className="flex flex-col">
+                          <span className="text-sm">{s.label}</span>
+                          <span className="text-[11px] text-muted-foreground">{s.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Seu cliente de e-mail abrirá com o assunto preenchido.
+                </p>
+              </div>
 
               <div className="border border-border rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-2">
