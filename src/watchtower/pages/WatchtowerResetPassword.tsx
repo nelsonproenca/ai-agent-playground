@@ -126,7 +126,10 @@ export default function WatchtowerResetPassword() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <PasswordStrengthMeter password={password} />
+                <div className="grid grid-cols-1 gap-3 pt-1">
+                  <PasswordStrengthMeter password={password} />
+                  <PasswordRulesHint password={password} />
+                </div>
               </div>
 
               <div className="space-y-2">
