@@ -1,13 +1,13 @@
 import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity, Shield, Layers, CameraIcon, CreditCard } from "lucide-react";
 import { WatchtowerNavLink } from "./WatchtowerNavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
 
 const baseItems = [
   { title: "Câmeras", url: "/watchtower/dashboard", icon: LayoutGrid },
@@ -29,37 +29,56 @@ export function WatchtowerAppSidebar() {
   const location = useLocation();
   const { signOut } = useWatchtowerAuth();
   const { isAdmin } = useIsAdmin();
-
-  const menuItems = isAdmin ? [...baseItems, ...adminItems] : baseItems;
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarContent className="pt-6">
-        <div className="flex justify-center mb-8 px-2">
+      <SidebarHeader className="pt-6 pb-2">
+        <Link to="/" className="flex items-center gap-3 px-2">
           <img
             src="/watchtower-favicon.png"
-            alt="Watchtower Monitoramentos"
+            alt="Watchtower"
             width={32}
             height={32}
-            className="h-8 w-8 object-contain"
+            className="h-8 w-8 object-contain shrink-0"
             loading="lazy"
           />
-        </div>
+          {!collapsed && (
+            <div className="flex flex-col overflow-hidden">
+              <span className="font-display text-sm font-bold tracking-wider text-foreground truncate">WATCHTOWER</span>
+              <span className="text-[10px] tracking-[0.15em] text-muted-foreground truncate">MONITORAMENTO</span>
+            </div>
+          )}
+        </Link>
+      </SidebarHeader>
+
+      <SidebarContent>
         <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel>Navegação</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Voltar ao Site" className="flex items-center justify-center h-12 w-12 mx-auto rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors">
-                  <Link to="/"><Home className="h-5 w-5" /></Link>
+                <SidebarMenuButton asChild tooltip="Voltar ao Site">
+                  <Link to="/">
+                    <Home className="h-4 w-4 shrink-0" />
+                    <span>Voltar ao Site</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {menuItems.map((item) => {
-                const isActive = location.pathname === item.url || (item.url === "/watchtower/dashboard" && location.pathname === "/watchtower/dashboard");
+              {baseItems.map((item) => {
+                const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title} className={`flex items-center justify-center h-12 w-12 mx-auto rounded-lg transition-colors ${isActive ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"}`}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.title}
+                      className={isActive ? "bg-primary/10 text-primary border border-primary/20" : ""}
+                    >
                       <WatchtowerNavLink to={item.url} end={item.url === "/watchtower/dashboard"}>
-                        <item.icon className="h-5 w-5" />
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span>{item.title}</span>
                       </WatchtowerNavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -68,12 +87,46 @@ export function WatchtowerAppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Administração</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminItems.map((item) => {
+                  const isActive = location.pathname === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.title}
+                        className={isActive ? "bg-primary/10 text-primary border border-primary/20" : ""}
+                      >
+                        <WatchtowerNavLink to={item.url}>
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </WatchtowerNavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
+
       <SidebarFooter className="pb-6">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={signOut} tooltip="Sair" className="flex items-center justify-center h-12 w-12 mx-auto rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
-              <LogOut className="h-5 w-5" />
+            <SidebarMenuButton
+              onClick={signOut}
+              tooltip="Sair"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>Sair</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
