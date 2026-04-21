@@ -229,7 +229,7 @@ export default function WatchtowerAuth() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {!isLogin && (
+              {!isLogin && showPasswordHelpers && (
                 <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-start pt-1">
                   <PasswordStrengthMeter password={password} />
                   <PasswordRulesHint password={password} />
