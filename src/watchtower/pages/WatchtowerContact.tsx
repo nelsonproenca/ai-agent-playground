@@ -104,6 +104,7 @@ export default function WatchtowerContact() {
   const [messageLength, setMessageLength] = useState(0);
   const [subject, setSubject] = useState("");
   const [phone, setPhone] = useState("");
+  const [preferWhatsApp, setPreferWhatsApp] = useState(false);
 
   const openWhatsApp = () => {
     const msg = encodeURIComponent("Olá! Vim pelo site da Watchtower Monitoramentos e gostaria de mais informações.");
