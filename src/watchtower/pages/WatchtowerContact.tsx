@@ -118,6 +118,7 @@ export default function WatchtowerContact() {
     const raw = {
       name: (formData.get("name") as string) ?? "",
       email: (formData.get("email") as string) ?? "",
+      phone: phone,
       subject: subject,
       message: (formData.get("message") as string) ?? "",
       website: (formData.get("website") as string) ?? "",
