@@ -300,6 +300,28 @@ export default function WatchtowerContact() {
                       {errors.phone && (
                         <p id="contact-phone-error" className="text-xs text-destructive mt-1.5">{errors.phone}</p>
                       )}
+                      <AnimatePresence initial={false}>
+                        {phone.replace(/\D/g, "").length > 0 && (
+                          <motion.label
+                            key="prefer-wa"
+                            htmlFor="contact-prefer-whatsapp"
+                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                            animate={{ opacity: 1, height: "auto", marginTop: 10 }}
+                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex items-center gap-2 cursor-pointer select-none overflow-hidden"
+                          >
+                            <Checkbox
+                              id="contact-prefer-whatsapp"
+                              checked={preferWhatsApp}
+                              onCheckedChange={(c) => setPreferWhatsApp(c === true)}
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              Prefiro contato via <span className="text-primary font-medium">WhatsApp</span>
+                            </span>
+                          </motion.label>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     <div>
