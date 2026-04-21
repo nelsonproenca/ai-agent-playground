@@ -56,6 +56,20 @@ const contactSchema = z.object({
     .trim()
     .min(1, { message: "Selecione um assunto" })
     .refine((v) => SUBJECT_OPTIONS.some((o) => o.value === v), { message: "Assunto inválido" }),
+  phone: z
+    .string()
+    .trim()
+    .max(20, { message: "Telefone deve ter no máximo 20 caracteres" })
+    .refine(
+      (v) => {
+        if (!v) return true;
+        const digits = v.replace(/\D/g, "");
+        return digits.length === 10 || digits.length === 11;
+      },
+      { message: "Telefone inválido. Use (11) 99999-9999" },
+    )
+    .optional()
+    .or(z.literal("")),
   message: z
     .string()
     .trim()
@@ -65,7 +79,21 @@ const contactSchema = z.object({
   website: z.string().max(0, { message: "Spam detectado" }).optional(),
 });
 
-type FormErrors = Partial<Record<"name" | "email" | "subject" | "message", string>>;
+type FormErrors = Partial<Record<"name" | "email" | "phone" | "subject" | "message", string>>;
+
+/**
+ * Aplica máscara brasileira de telefone:
+ *  - 10 dígitos: (11) 9999-9999
+ *  - 11 dígitos: (11) 99999-9999
+ */
+function formatPhoneBR(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
 
 export default function WatchtowerContact() {
   const navigate = useNavigate();
