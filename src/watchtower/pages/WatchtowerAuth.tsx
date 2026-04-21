@@ -33,7 +33,13 @@ export default function WatchtowerAuth() {
   }, [navigate]);
 
   const handleForgotPassword = async () => {
+    const traceId = `pwd-reset-${Date.now()}`;
+    console.group(`🔐 [${traceId}] Forgot Password Flow`);
+    console.log("📧 Step 1/4: Validando e-mail informado...", { email });
+
     if (!email) {
+      console.warn(`⚠️ [${traceId}] Falha na validação: e-mail vazio`);
+      console.groupEnd();
       toast({
         title: "Informe seu e-mail",
         description: "Digite seu e-mail no campo acima para receber o link de recuperação.",
@@ -41,18 +47,101 @@ export default function WatchtowerAuth() {
       });
       return;
     }
-    setResetLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/watchtower/reset-password`,
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.warn(`⚠️ [${traceId}] Falha na validação: formato de e-mail inválido`, { email });
+      console.groupEnd();
+      toast({
+        title: "E-mail inválido",
+        description: `O formato do e-mail "${email}" não é válido. Use o formato nome@dominio.com.`,
+        variant: "destructive",
       });
-      if (error) throw error;
+      return;
+    }
+
+    const redirectTo = `${window.location.origin}/watchtower/reset-password`;
+    console.log("✅ Step 2/4: E-mail validado. Preparando requisição...", {
+      email,
+      redirectTo,
+      origin: window.location.origin,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    });
+
+    setResetLoading(true);
+    const startedAt = performance.now();
+
+    try {
+      console.log(`🚀 [${traceId}] Step 3/4: Chamando supabase.auth.resetPasswordForEmail...`);
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+      const duration = Math.round(performance.now() - startedAt);
+
+      console.log(`📨 [${traceId}] Resposta recebida em ${duration}ms`, { data, error });
+
+      if (error) {
+        console.error(`❌ [${traceId}] Step 3/4 FALHOU - Erro retornado pelo Supabase:`, {
+          name: error.name,
+          message: error.message,
+          status: (error as any).status,
+          code: (error as any).code,
+          full: error,
+        });
+
+        let friendlyTitle = "Erro ao enviar e-mail";
+        let friendlyDescription = error.message;
+        const status = (error as any).status;
+        const code = (error as any).code;
+
+        if (status === 429 || /rate.?limit|too many/i.test(error.message)) {
+          friendlyTitle = "Muitas tentativas";
+          friendlyDescription = "Aguarde alguns minutos antes de tentar novamente. O Supabase limita pedidos de recuperação para evitar spam.";
+        } else if (status === 422 || /invalid.*email/i.test(error.message)) {
+          friendlyTitle = "E-mail inválido";
+          friendlyDescription = "O Supabase rejeitou este e-mail. Verifique se está correto.";
+        } else if (/network|fetch|failed to fetch/i.test(error.message)) {
+          friendlyTitle = "Falha de conexão";
+          friendlyDescription = "Não foi possível contactar o servidor. Verifique sua internet.";
+        } else if (status === 500 || /smtp|email.*provider/i.test(error.message)) {
+          friendlyTitle = "Falha no servidor de e-mail";
+          friendlyDescription = "O Supabase não conseguiu enviar o e-mail. Pode ser problema de SMTP/configuração de domínio.";
+        }
+
+        toast({
+          title: `${friendlyTitle} [${code || status || "ERR"}]`,
+          description: `${friendlyDescription} (Trace: ${traceId})`,
+          variant: "destructive",
+        });
+        console.groupEnd();
+        return;
+      }
+
+      console.log(`✅ [${traceId}] Step 4/4: Requisição aceita pelo Supabase em ${duration}ms`);
+      console.info(
+        `ℹ️ [${traceId}] Importante: o Supabase SEMPRE responde com sucesso por segurança (não revela se o e-mail existe). ` +
+        `Se o e-mail não chegar, verifique: (1) caixa de spam, (2) configuração SMTP no Supabase, (3) rate limit (~3 emails/hora no SMTP padrão), (4) Edge Function logs do auth-email-hook.`
+      );
+      console.groupEnd();
+
       toast({
         title: "E-mail enviado!",
-        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+        description: `Se "${email}" estiver cadastrado, o link chegará em instantes. Verifique também a caixa de spam.`,
       });
     } catch (error: any) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      const duration = Math.round(performance.now() - startedAt);
+      console.error(`💥 [${traceId}] Exceção inesperada após ${duration}ms:`, {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack,
+        full: error,
+      });
+      console.groupEnd();
+      toast({
+        title: "Erro inesperado",
+        description: `${error?.message || "Erro desconhecido"} (Trace: ${traceId})`,
+        variant: "destructive",
+      });
     } finally {
       setResetLoading(false);
     }
