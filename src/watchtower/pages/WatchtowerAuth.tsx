@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import cctvBg from "@/assets/watchtower/cctv-background.jpg";
+import watchtowerLogo from "@/assets/watchtower/watchtower-logo-gold.png";
 
 export default function WatchtowerAuth() {
   const [searchParams] = useSearchParams();
@@ -83,9 +84,9 @@ export default function WatchtowerAuth() {
         <img src={cctvBg} alt="Surveillance cameras" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/30 to-background/80" />
         <div className="relative z-10 flex flex-col justify-center px-16">
-          <h1 className="font-display text-5xl font-bold text-primary tracking-wider">VIGÍLIA CAM</h1>
+          <img src={watchtowerLogo} alt="Watchtower Monitoramentos" width={320} height={320} className="w-72 h-auto object-contain -ml-4" />
           <div className="w-16 h-0.5 bg-primary mt-6 mb-4" />
-          <p className="text-xs tracking-[0.25em] text-muted-foreground font-medium">MONITORAMENTO INTELIGENTE DE CÂMERAS</p>
+          <p className="text-xs tracking-[0.25em] text-muted-foreground font-medium">VIGILÂNCIA INTELIGENTE DE CÂMERAS</p>
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center p-8 bg-background relative">
@@ -93,9 +94,9 @@ export default function WatchtowerAuth() {
           <ChevronLeft className="h-4 w-4" />VOLTAR
         </button>
         <div className="w-full max-w-sm">
-          <div className="lg:hidden mb-10 text-center">
-            <h1 className="font-display text-3xl font-bold text-primary tracking-wider">VIGÍLIA CAM</h1>
-            <p className="text-[10px] tracking-[0.25em] text-muted-foreground mt-2">MONITORAMENTO INTELIGENTE DE CÂMERAS</p>
+          <div className="lg:hidden mb-10 text-center flex flex-col items-center">
+            <img src={watchtowerLogo} alt="Watchtower Monitoramentos" width={220} height={220} className="w-48 h-auto object-contain" />
+            <p className="text-[10px] tracking-[0.25em] text-muted-foreground mt-2">VIGILÂNCIA INTELIGENTE DE CÂMERAS</p>
           </div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-1">{isLogin ? "ENTRAR" : "CRIAR CONTA"}</h2>
           <p className="text-xs text-muted-foreground mb-8">{isLogin ? "Acesse seu painel de monitoramento" : "Cadastre-se para começar"}</p>

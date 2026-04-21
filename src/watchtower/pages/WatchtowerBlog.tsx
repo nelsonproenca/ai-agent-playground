@@ -1,11 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const posts = [
   { date: "15 MAR 2026", tag: "SEGURANÇA", title: "5 Dicas Para Melhorar a Segurança do Seu Condomínio", excerpt: "Descubra como otimizar o monitoramento e prevenir incidentes com estratégias simples e eficazes." },
   { date: "08 MAR 2026", tag: "TECNOLOGIA", title: "Como Funciona o Streaming em Tempo Real de Câmeras", excerpt: "Entenda a tecnologia por trás da transmissão ao vivo e como garantimos qualidade e estabilidade." },
-  { date: "01 MAR 2026", tag: "NOVIDADES", title: "Vigília Cam Lança Plano Ouro com Download de Gravações", excerpt: "Agora você pode baixar gravações diretamente do painel." },
+  { date: "01 MAR 2026", tag: "NOVIDADES", title: "Watchtower Monitoramentos Lança Plano Ouro com Download de Gravações", excerpt: "Agora você pode baixar gravações diretamente do painel." },
   { date: "22 FEV 2026", tag: "DICAS", title: "Posicionamento Ideal de Câmeras: Guia Completo", excerpt: "Aprenda onde instalar suas câmeras para máxima cobertura e eficiência." },
 ];
 
@@ -17,7 +17,10 @@ export default function WatchtowerBlog() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/80 bg-background/95 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <button onClick={() => navigate("/watchtower")} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"><ChevronLeft className="h-4 w-4" />VOLTAR</button>
-          <span className="font-display text-lg font-bold text-primary tracking-wider">Vigília Cam</span>
+          <Link to="/watchtower" className="flex items-center gap-2">
+            <img src="/watchtower-favicon.png" alt="Watchtower Monitoramentos" width={28} height={28} className="h-7 w-7 object-contain" loading="lazy" />
+            <span className="font-display text-base font-bold text-primary tracking-wider">WATCHTOWER MONITORAMENTOS</span>
+          </Link>
           <div className="w-16" />
         </div>
       </nav>
