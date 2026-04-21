@@ -2,12 +2,24 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { contactService } from "@/watchtower/services";
+
+const SUBJECT_OPTIONS = [
+  { value: "duvidas-planos", label: "Dúvidas sobre planos e preços" },
+  { value: "suporte-tecnico", label: "Suporte técnico / câmera offline" },
+  { value: "instalacao", label: "Instalação e configuração" },
+  { value: "pagamento-faturamento", label: "Pagamento e faturamento" },
+  { value: "parcerias", label: "Parcerias comerciais" },
+  { value: "trabalhe-conosco", label: "Trabalhe conosco" },
+  { value: "imprensa", label: "Imprensa e mídia" },
+  { value: "outros", label: "Outros assuntos" },
+];
 
 const WHATSAPP_NUMBER = "5511945598960";
 const MESSAGE_MAX = 1000;
