@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import cctvBg from "@/assets/watchtower/cctv-background.jpg";
 import watchtowerLogo from "@/assets/watchtower/watchtower-logo-gold.png";
+import { evaluatePassword, PasswordStrengthMeter } from "@/watchtower/components/WatchtowerPasswordStrength";
 
 export default function WatchtowerAuth() {
   const [searchParams] = useSearchParams();
