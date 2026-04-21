@@ -275,9 +275,29 @@ export default function WatchtowerContact() {
                     </div>
 
                     <div>
-                      <label htmlFor="contact-subject" className="text-xs tracking-wider font-semibold text-foreground mb-1.5 block">
-                        ASSUNTO
+                      <label htmlFor="contact-phone" className="text-xs tracking-wider font-semibold text-foreground mb-1.5 block">
+                        TELEFONE / WHATSAPP <span className="text-muted-foreground font-normal normal-case tracking-normal">(opcional)</span>
                       </label>
+                      <Input
+                        id="contact-phone"
+                        name="phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        placeholder="(11) 99999-9999"
+                        value={phone}
+                        onChange={(e) => setPhone(formatPhoneBR(e.target.value))}
+                        maxLength={20}
+                        aria-invalid={!!errors.phone}
+                        aria-describedby={errors.phone ? "contact-phone-error" : undefined}
+                        className="bg-secondary border-border"
+                      />
+                      {errors.phone && (
+                        <p id="contact-phone-error" className="text-xs text-destructive mt-1.5">{errors.phone}</p>
+                      )}
+                    </div>
+
+                    <div>
                       <Select value={subject} onValueChange={setSubject}>
                         <SelectTrigger
                           id="contact-subject"
