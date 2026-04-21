@@ -77,9 +77,9 @@ export default function WatchtowerAdminUsers() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl tracking-wider">Administradores</h1>
-        <p className="text-muted-foreground text-sm">
-          Gerencie privilégios de acesso. Total: {users.length} usuário(s) — {adminCount} admin(s).
+        <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">ADMINISTRADORES</h2>
+        <p className="text-xs tracking-[0.15em] text-muted-foreground">
+          GERENCIE PRIVILÉGIOS DE ACESSO. TOTAL: {users.length} USUÁRIO(S) — {adminCount} ADMIN(S)
         </p>
       </div>
 

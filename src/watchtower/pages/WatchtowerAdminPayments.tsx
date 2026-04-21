@@ -108,10 +108,8 @@ export default function WatchtowerAdminPayments() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl tracking-wider">Pagamentos</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Aprove ou rejeite solicitações de assinatura enviadas via PIX.
-        </p>
+        <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">PAGAMENTOS</h2>
+        <p className="text-xs tracking-[0.15em] text-muted-foreground mt-2">APROVE OU REJEITE SOLICITAÇÕES DE ASSINATURA VIA PIX</p>
       </div>
 
       <Input
