@@ -87,8 +87,9 @@ export default function WatchtowerResetPassword() {
         </button>
 
         <div className="w-full max-w-sm">
-          <div className="mb-10 text-center">
-            <h1 className="font-display text-3xl font-bold text-primary tracking-wider">WATCHTOWER</h1>
+          <div className="mb-10 text-center flex flex-col items-center">
+            <img src="/watchtower-favicon.png" alt="Watchtower Monitoramentos" width={64} height={64} className="h-16 w-16 object-contain mb-3" loading="lazy" />
+            <h1 className="font-display text-2xl font-bold text-primary tracking-wider">WATCHTOWER MONITORAMENTOS</h1>
             <p className="text-[10px] tracking-[0.25em] text-muted-foreground mt-2">REDEFINIÇÃO DE SENHA</p>
           </div>
 

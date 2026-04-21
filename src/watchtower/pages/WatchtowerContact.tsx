@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { contactService } from "@/watchtower/services";
 
 const contactInfo = [
-  { icon: Mail, label: "EMAIL", value: "contato@vigiliacam.com.br" },
+  { icon: Mail, label: "EMAIL", value: "contato@watchtowermonitoramentos.com.br" },
   { icon: Phone, label: "TELEFONE", value: "(11) 9999-9999" },
   { icon: MapPin, label: "ENDEREÇO", value: "São Paulo, SP — Brasil" },
 ];
@@ -44,7 +44,10 @@ export default function WatchtowerContact() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/80 bg-background/95 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <button onClick={() => navigate("/watchtower")} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"><ChevronLeft className="h-4 w-4" />VOLTAR</button>
-          <span className="font-display text-lg font-bold text-primary tracking-wider">Vigília Cam</span>
+          <Link to="/watchtower" className="flex items-center gap-2">
+            <img src="/watchtower-favicon.png" alt="Watchtower Monitoramentos" width={28} height={28} className="h-7 w-7 object-contain" loading="lazy" />
+            <span className="font-display text-base font-bold text-primary tracking-wider">WATCHTOWER MONITORAMENTOS</span>
+          </Link>
           <div className="w-16" />
         </div>
       </nav>

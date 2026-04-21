@@ -36,7 +36,14 @@ export function WatchtowerAppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarContent className="pt-6">
         <div className="flex justify-center mb-8 px-2">
-          <span className="font-display text-lg font-bold text-primary tracking-wider">VC</span>
+          <img
+            src="/watchtower-favicon.png"
+            alt="Watchtower Monitoramentos"
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
+            loading="lazy"
+          />
         </div>
         <SidebarGroup>
           <SidebarGroupContent>
