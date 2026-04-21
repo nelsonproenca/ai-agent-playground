@@ -22,6 +22,9 @@ export default function WatchtowerAuth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const passwordStrength = evaluatePassword(password);
+  const showPasswordHelpers = password.length > 0 && passwordStrength.score < 3;
+
   // Se um link de recovery cair em /watchtower/auth, redireciona para a página de reset
   useEffect(() => {
     const url = new URL(window.location.href);
