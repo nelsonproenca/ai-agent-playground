@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Pencil, Trash2, Plus, Loader2, Star } from "lucide-react";
+import { WatchtowerPlanCardPreview } from "@/watchtower/components/WatchtowerPlanCardPreview";
 
 type PlanRow = Tables<"plans">;
 
