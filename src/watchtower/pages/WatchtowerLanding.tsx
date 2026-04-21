@@ -74,7 +74,17 @@ export default function WatchtowerLanding() {
             <Link to="/" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
               <ChevronLeft className="h-4 w-4 inline mr-1" />SITE
             </Link>
-            <span className={`font-display font-bold text-primary tracking-wider transition-all duration-300 ${scrolled ? "text-lg" : "text-xl"}`}>Vigília Cam</span>
+            <Link to="/watchtower" className="flex items-center gap-2">
+              <img
+                src="/watchtower-favicon.png"
+                alt="Watchtower Monitoramentos"
+                width={32}
+                height={32}
+                className={`object-contain transition-all duration-300 ${scrolled ? "h-7 w-7" : "h-8 w-8"}`}
+                loading="lazy"
+              />
+              <span className={`font-display font-bold text-primary tracking-wider transition-all duration-300 ${scrolled ? "text-base" : "text-lg"}`}>WATCHTOWER MONITORAMENTOS</span>
+            </Link>
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#inicio" className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">INÍCIO</a>
@@ -94,10 +104,37 @@ export default function WatchtowerLanding() {
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
         </motion.div>
         <div className="max-w-7xl mx-auto relative z-10 text-center flex flex-col items-center">
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-5xl md:text-7xl font-light leading-tight max-w-4xl tracking-tight">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="mb-8 relative"
+          >
+            <motion.div
+              className="absolute inset-0 bg-primary/30 blur-3xl rounded-full -z-10"
+              animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0.9, 0.5] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src="/watchtower-favicon.png"
+              alt="Watchtower Monitoramentos"
+              width={112}
+              height={112}
+              className="h-24 w-24 md:h-28 md:w-28 object-contain"
+              animate={{
+                filter: [
+                  "drop-shadow(0 0 15px hsl(var(--primary) / 0.3))",
+                  "drop-shadow(0 0 30px hsl(var(--primary) / 0.6))",
+                  "drop-shadow(0 0 15px hsl(var(--primary) / 0.3))",
+                ],
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }} className="font-display text-4xl md:text-6xl font-light leading-tight max-w-4xl tracking-tight">
             VIGILÂNCIA <span className="text-primary font-semibold">INTELIGENTE</span> PARA{" "}<span className="text-primary font-semibold">SUA SEGURANÇA</span>
           </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-8 text-muted-foreground max-w-2xl text-lg md:text-xl font-light leading-relaxed">
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="mt-6 text-muted-foreground max-w-2xl text-base md:text-lg font-light leading-relaxed">
             Monitore suas câmeras em tempo real, acesse gravações e gerencie tudo em um único painel profissional.
           </motion.p>
         </div>
@@ -208,7 +245,7 @@ export default function WatchtowerLanding() {
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display text-3xl md:text-4xl font-bold text-center mb-12">Tire Suas Dúvidas</motion.h2>
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
             <Accordion type="single" collapsible className="space-y-4">
-              <AccordionItem value="item-1" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Preciso de equipamento especial para usar o Vigília Cam?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Não! O Vigília Cam funciona com qualquer câmera IP compatível com RTSP ou HLS.</AccordionContent></AccordionItem>
+              <AccordionItem value="item-1" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Preciso de equipamento especial para usar a Watchtower Monitoramentos?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Não! A Watchtower Monitoramentos funciona com qualquer câmera IP compatível com RTSP ou HLS.</AccordionContent></AccordionItem>
               <AccordionItem value="item-2" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Quanto tempo de gravação fica disponível?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Depende do plano contratado. Bronze: ao vivo. Prata: 7 dias. Ouro: 30 dias com download.</AccordionContent></AccordionItem>
               <AccordionItem value="item-3" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">É seguro acessar minhas câmeras pela internet?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Sim! Utilizamos criptografia TLS/SSL para todas as conexões.</AccordionContent></AccordionItem>
               <AccordionItem value="item-4" className="border border-border rounded-lg px-6 bg-card"><AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline py-4">Posso cancelar a qualquer momento?</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground leading-relaxed">Sim! Não há contratos de fidelidade. Cancele quando quiser.</AccordionContent></AccordionItem>
@@ -222,8 +259,11 @@ export default function WatchtowerLanding() {
       <footer className="border-t border-border py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8">
           <div>
-            <span className="font-display text-lg font-bold text-primary">Vigília Cam</span>
-            <p className="text-xs text-muted-foreground mt-2 max-w-xs">Monitoramento inteligente de câmeras</p>
+            <div className="flex items-center gap-2">
+              <img src="/watchtower-favicon.png" alt="Watchtower Monitoramentos" width={32} height={32} className="h-8 w-8 object-contain" loading="lazy" />
+              <span className="font-display text-base font-bold text-primary tracking-wider">WATCHTOWER MONITORAMENTOS</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 max-w-xs">Vigilância inteligente de câmeras</p>
           </div>
           <div className="flex gap-12 md:gap-16">
             <div>
@@ -251,7 +291,7 @@ export default function WatchtowerLanding() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Vigília Cam. Todos os direitos reservados.</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Watchtower Monitoramentos. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

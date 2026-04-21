@@ -162,7 +162,7 @@ export default function WatchtowerAdminCameras() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-display text-3xl font-bold tracking-wider">GESTÃO DE CÂMERAS</h2>
+          <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">GESTÃO DE CÂMERAS</h2>
           <p className="text-xs tracking-[0.15em] text-muted-foreground mt-2">CADASTRO, VÍNCULO E STATUS EM TEMPO REAL</p>
         </div>
         <div className="flex gap-2">

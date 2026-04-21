@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import cctvBg from "@/assets/watchtower/cctv-background.jpg";
+import watchtowerLogo from "@/assets/watchtower/watchtower-logo-gold.png";
 
 export default function WatchtowerAuth() {
   const [searchParams] = useSearchParams();
@@ -16,8 +17,46 @@ export default function WatchtowerAuth() {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Se um link de recovery cair em /watchtower/auth, redireciona para a página de reset
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const hasCode = url.searchParams.has("code");
+    const hash = window.location.hash || "";
+    const isRecoveryHash = hash.includes("type=recovery");
+    if (hasCode || isRecoveryHash) {
+      navigate(`/watchtower/reset-password${url.search}${hash}`, { replace: true });
+    }
+  }, [navigate]);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Informe seu e-mail",
+        description: "Digite seu e-mail no campo acima para receber o link de recuperação.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/watchtower/reset-password`,
+      });
+      if (error) throw error;
+      toast({
+        title: "E-mail enviado!",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+      });
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +84,9 @@ export default function WatchtowerAuth() {
         <img src={cctvBg} alt="Surveillance cameras" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/30 to-background/80" />
         <div className="relative z-10 flex flex-col justify-center px-16">
-          <h1 className="font-display text-5xl font-bold text-primary tracking-wider">VIGÍLIA CAM</h1>
+          <img src={watchtowerLogo} alt="Watchtower Monitoramentos" width={320} height={320} className="w-72 h-auto object-contain -ml-4" />
           <div className="w-16 h-0.5 bg-primary mt-6 mb-4" />
-          <p className="text-xs tracking-[0.25em] text-muted-foreground font-medium">MONITORAMENTO INTELIGENTE DE CÂMERAS</p>
+          <p className="text-xs tracking-[0.25em] text-muted-foreground font-medium">VIGILÂNCIA INTELIGENTE DE CÂMERAS</p>
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center p-8 bg-background relative">
@@ -55,9 +94,9 @@ export default function WatchtowerAuth() {
           <ChevronLeft className="h-4 w-4" />VOLTAR
         </button>
         <div className="w-full max-w-sm">
-          <div className="lg:hidden mb-10 text-center">
-            <h1 className="font-display text-3xl font-bold text-primary tracking-wider">VIGÍLIA CAM</h1>
-            <p className="text-[10px] tracking-[0.25em] text-muted-foreground mt-2">MONITORAMENTO INTELIGENTE DE CÂMERAS</p>
+          <div className="lg:hidden mb-10 text-center flex flex-col items-center">
+            <img src={watchtowerLogo} alt="Watchtower Monitoramentos" width={220} height={220} className="w-48 h-auto object-contain" />
+            <p className="text-[10px] tracking-[0.25em] text-muted-foreground mt-2">VIGILÂNCIA INTELIGENTE DE CÂMERAS</p>
           </div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-1">{isLogin ? "ENTRAR" : "CRIAR CONTA"}</h2>
           <p className="text-xs text-muted-foreground mb-8">{isLogin ? "Acesse seu painel de monitoramento" : "Cadastre-se para começar"}</p>
@@ -75,7 +114,16 @@ export default function WatchtowerAuth() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="wt-password" className="text-xs tracking-wider text-muted-foreground">SENHA</Label>
-                {isLogin && <button type="button" className="text-[10px] text-primary hover:underline">Esqueci a senha</button>}
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={resetLoading}
+                    className="text-[10px] text-primary hover:underline disabled:opacity-50"
+                  >
+                    {resetLoading ? "Enviando..." : "Esqueci a senha"}
+                  </button>
+                )}
               </div>
               <div className="relative">
                 <Input id="wt-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-secondary border-border text-foreground pr-10 h-11" />

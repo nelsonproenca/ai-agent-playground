@@ -72,6 +72,9 @@ export interface NotificationPreferencesDto {
 export interface SubmitContactPayload {
   name: string;
   email: string;
+  phone?: string;
+  preferWhatsApp?: boolean;
+  subject: string;
   message: string;
 }
 
