@@ -2,6 +2,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ChevronLeft, Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -10,7 +17,20 @@ import { z } from "zod";
 import { contactService } from "@/watchtower/services";
 
 const WHATSAPP_NUMBER = "5511945598960";
+const CONTACT_EMAIL = "nelsonhaproenca@gmail.com";
 const MESSAGE_MAX = 1000;
+
+// Assuntos para roteamento futuro via n8n.
+// O label vai como subject do e-mail; o n8n filtrará por ele.
+const EMAIL_SUBJECTS: ReadonlyArray<{ value: string; label: string; description: string }> = [
+  { value: "comercial", label: "Contratar plano de monitoramento", description: "Quero contratar / saber preços" },
+  { value: "suporte", label: "Suporte técnico (câmera offline / falha)", description: "Problema com câmera ou stream" },
+  { value: "financeiro", label: "Dúvidas sobre pagamento ou fatura", description: "Pix, boletos, comprovantes" },
+  { value: "parceria", label: "Proposta de parceria comercial", description: "Integradores, revendas, indicações" },
+  { value: "imprensa", label: "Imprensa e mídia", description: "Entrevistas, materiais, divulgação" },
+  { value: "trabalhe-conosco", label: "Trabalhe conosco", description: "Envio de currículo / vagas" },
+  { value: "outros", label: "Outros assuntos", description: "Não encontrou seu motivo" },
+];
 
 const contactSchema = z.object({
   name: z
