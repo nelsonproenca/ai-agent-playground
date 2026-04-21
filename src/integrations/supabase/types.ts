@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string
+          changed_by_email: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_name: string | null
+          entity_type: string
+          id: string
+          plan_id: string | null
+          plan_name: string | null
+          previous_highlighted_plan_id: string | null
+          previous_highlighted_plan_name: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by: string
+          changed_by_email?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type: string
+          id?: string
+          plan_id?: string | null
+          plan_name?: string | null
+          previous_highlighted_plan_id?: string | null
+          previous_highlighted_plan_name?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string
+          changed_by_email?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string
+          id?: string
+          plan_id?: string | null
+          plan_name?: string | null
+          previous_highlighted_plan_id?: string | null
+          previous_highlighted_plan_name?: string | null
+        }
+        Relationships: []
+      }
       agendamentos: {
         Row: {
           cliente_email: string | null
@@ -400,42 +448,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      plan_highlight_audit: {
-        Row: {
-          action: string
-          changed_at: string
-          changed_by: string
-          changed_by_email: string | null
-          id: string
-          plan_id: string
-          plan_name: string
-          previous_highlighted_plan_id: string | null
-          previous_highlighted_plan_name: string | null
-        }
-        Insert: {
-          action: string
-          changed_at?: string
-          changed_by: string
-          changed_by_email?: string | null
-          id?: string
-          plan_id: string
-          plan_name: string
-          previous_highlighted_plan_id?: string | null
-          previous_highlighted_plan_name?: string | null
-        }
-        Update: {
-          action?: string
-          changed_at?: string
-          changed_by?: string
-          changed_by_email?: string | null
-          id?: string
-          plan_id?: string
-          plan_name?: string
-          previous_highlighted_plan_id?: string | null
-          previous_highlighted_plan_name?: string | null
-        }
-        Relationships: []
       }
       plans: {
         Row: {
