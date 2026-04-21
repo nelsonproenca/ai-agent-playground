@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const WHATSAPP_NUMBER = "5511945598960";
 
