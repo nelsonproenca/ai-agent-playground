@@ -56,6 +56,9 @@ export default function WatchtowerAdminPlans() {
   const [form, setForm] = useState<PlanForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [highlightingId, setHighlightingId] = useState<string | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [planToHighlight, setPlanToHighlight] = useState<PlanRow | null>(null);
+  const [currentHighlightedPlan, setCurrentHighlightedPlan] = useState<PlanRow | null>(null);
 
   const loadPlans = async () => {
     setLoading(true);
