@@ -13,17 +13,17 @@ const values = [
 ];
 
 const stats = [
-  { num: "500+", label: "CÂMERAS MONITORADAS" },
-  { num: "99.9%", label: "UPTIME GARANTIDO" },
+  { num: "100%", label: "FOCO NO CLIENTE" },
   { num: "24/7", label: "SUPORTE ATIVO" },
-  { num: "150+", label: "CLIENTES ATIVOS" },
+  { num: "TLS", label: "CRIPTOGRAFIA DE PONTA" },
+  { num: "2026", label: "ANO DE FUNDAÇÃO" },
 ];
 
 const timeline = [
-  { year: "2023", title: "A IDEIA", desc: "Identificamos a lacuna no mercado: monitoramento profissional acessível para residências, comércios e condomínios brasileiros." },
-  { year: "2024", title: "FUNDAÇÃO", desc: "A Watchtower Monitoramentos nasce com foco em streaming HLS de baixa latência e infraestrutura cloud-first." },
-  { year: "2025", title: "EXPANSÃO", desc: "Lançamento dos planos Bronze, Prata e Ouro. Integração com câmeras IP RTSP e suporte multi-tenant." },
-  { year: "2026", title: "HOJE", desc: "Mais de 500 câmeras ativas, painel administrativo completo, health checks automatizados e crescimento contínuo." },
+  { year: "2025", title: "A IDEIA", desc: "Identificamos a lacuna no mercado: monitoramento profissional acessível para residências, comércios e condomínios brasileiros." },
+  { year: "2026", title: "FUNDAÇÃO", desc: "A Watchtower Monitoramentos nasce com foco em streaming HLS de baixa latência e infraestrutura cloud-first." },
+  { year: "HOJE", title: "PRIMEIROS PASSOS", desc: "Operação em fase inicial com nosso primeiro cliente ativo e 3 câmeras monitoradas em produção. Validando tecnologia e processos com cuidado." },
+  { year: "PRÓXIMO", title: "CRESCIMENTO", desc: "Expansão da base de clientes, lançamento dos planos Bronze, Prata e Ouro e refinamento contínuo da plataforma com base em feedback real." },
 ];
 
 export default function WatchtowerAbout() {
@@ -78,10 +78,10 @@ export default function WatchtowerAbout() {
                 A <span className="text-primary font-medium">Watchtower Monitoramentos</span> nasceu de uma constatação simples: o mercado brasileiro de segurança eletrônica oferecia ou soluções caras e complexas para grandes corporações, ou opções amadoras e instáveis para o consumidor final. Não havia equilíbrio.
               </p>
               <p>
-                Fundada em 2024 por profissionais com mais de duas décadas de experiência em arquitetura de software, infraestrutura cloud e segurança da informação, a Watchtower foi construída desde o primeiro dia com qualidade enterprise — mas com a acessibilidade e simplicidade que o mercado pedia.
+                Fundada em 2026 por profissionais com mais de duas décadas de experiência em arquitetura de software, infraestrutura cloud e segurança da informação, a Watchtower foi construída desde o primeiro dia com qualidade enterprise — mas com a acessibilidade e simplicidade que o mercado pedia.
               </p>
               <p>
-                Hoje monitoramos centenas de câmeras espalhadas pelo Brasil, com streaming HLS criptografado em tempo real, painel administrativo completo, health checks automatizados e suporte humano 24/7. E continuamos crescendo, sempre com o mesmo compromisso: <span className="text-primary font-medium">proteger o que mais importa para nossos clientes</span>.
+                Estamos no início da nossa jornada: hoje atendemos nosso primeiro cliente com 3 câmeras ativas em produção, validando cada decisão técnica com cuidado e atenção total. Cada novo cliente é tratado como parceiro, com suporte direto e dedicado. <span className="text-primary font-medium">Crescemos no ritmo certo, priorizando qualidade sobre quantidade</span>.
               </p>
             </div>
           </motion.section>
