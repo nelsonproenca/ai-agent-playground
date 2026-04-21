@@ -143,6 +143,28 @@ export default function WatchtowerAdminPlans() {
     if (error) throw error;
   };
 
+  // Records a highlight change in the audit table for traceability.
+  const logHighlightAudit = async (
+    plan: PlanRow,
+    action: "highlighted" | "unhighlighted",
+    previousPlan: PlanRow | null,
+  ) => {
+    const { data: auth } = await supabase.auth.getUser();
+    const user = auth?.user;
+    if (!user) return; // RLS would reject anyway
+    const { error } = await supabase.from("plan_highlight_audit").insert({
+      plan_id: plan.id,
+      plan_name: plan.name,
+      previous_highlighted_plan_id: previousPlan?.id ?? null,
+      previous_highlighted_plan_name: previousPlan?.name ?? null,
+      action,
+      changed_by: user.id,
+      changed_by_email: user.email ?? null,
+    });
+    // Audit failures should not block the user — just warn in console.
+    if (error) console.warn("[audit] failed to log highlight change:", error.message);
+  };
+
   const handleSave = async () => {
     if (!form.name.trim() || !form.sku.trim()) {
       toast({ title: "Nome e SKU são obrigatórios", variant: "destructive" });
@@ -199,6 +221,8 @@ export default function WatchtowerAdminPlans() {
       const { error } = await supabase.from("plans").update({ highlight: newValue }).eq("id", plan.id);
       if (error) throw error;
       if (newValue) await enforceUniqueHighlight(plan.id);
+      // Audit log: record who changed what and when
+      await logHighlightAudit(plan, newValue ? "highlighted" : "unhighlighted", currentHighlightedPlan);
       toast({
         title: newValue ? "Plano em destaque" : "Destaque removido",
         description: newValue ? `"${plan.name}" agora é o plano em destaque.` : `"${plan.name}" não está mais em destaque.`,
@@ -221,6 +245,8 @@ export default function WatchtowerAdminPlans() {
       const { error } = await supabase.from("plans").update({ highlight: true }).eq("id", planToHighlight.id);
       if (error) throw error;
       await enforceUniqueHighlight(planToHighlight.id);
+      // Audit log: capture the swap (from previous highlighted → new one)
+      await logHighlightAudit(planToHighlight, "highlighted", currentHighlightedPlan);
       toast({
         title: "Plano em destaque",
         description: `"${planToHighlight.name}" agora é o plano em destaque. O destaque foi removido de "${currentHighlightedPlan?.name}".`,

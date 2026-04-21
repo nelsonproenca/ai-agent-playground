@@ -1,4 +1,4 @@
-import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity, Shield, Layers, CameraIcon, CreditCard } from "lucide-react";
+import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity, Shield, Layers, CameraIcon, CreditCard, History } from "lucide-react";
 import { WatchtowerNavLink } from "./WatchtowerNavLink";
 import { useLocation, Link } from "react-router-dom";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
@@ -21,6 +21,7 @@ const adminItems = [
   { title: "Admin: Planos", url: "/watchtower/dashboard/admin/plans", icon: Layers },
   { title: "Admin: Pagamentos", url: "/watchtower/dashboard/admin/payments", icon: CreditCard },
   { title: "Admin: Usuários", url: "/watchtower/dashboard/admin/users", icon: Shield },
+  { title: "Admin: Auditoria", url: "/watchtower/dashboard/admin/audit", icon: History },
   { title: "Admin: Health Check", url: "/watchtower/dashboard/health", icon: Activity },
 ];
 
