@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,46 @@ export default function WatchtowerAuth() {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Se um link de recovery cair em /watchtower/auth, redireciona para a página de reset
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const hasCode = url.searchParams.has("code");
+    const hash = window.location.hash || "";
+    const isRecoveryHash = hash.includes("type=recovery");
+    if (hasCode || isRecoveryHash) {
+      navigate(`/watchtower/reset-password${url.search}${hash}`, { replace: true });
+    }
+  }, [navigate]);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Informe seu e-mail",
+        description: "Digite seu e-mail no campo acima para receber o link de recuperação.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/watchtower/reset-password`,
+      });
+      if (error) throw error;
+      toast({
+        title: "E-mail enviado!",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+      });
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +113,16 @@ export default function WatchtowerAuth() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="wt-password" className="text-xs tracking-wider text-muted-foreground">SENHA</Label>
-                {isLogin && <button type="button" className="text-[10px] text-primary hover:underline">Esqueci a senha</button>}
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={resetLoading}
+                    className="text-[10px] text-primary hover:underline disabled:opacity-50"
+                  >
+                    {resetLoading ? "Enviando..." : "Esqueci a senha"}
+                  </button>
+                )}
               </div>
               <div className="relative">
                 <Input id="wt-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-secondary border-border text-foreground pr-10 h-11" />
