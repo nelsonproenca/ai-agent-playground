@@ -56,6 +56,20 @@ const contactSchema = z.object({
     .trim()
     .min(1, { message: "Selecione um assunto" })
     .refine((v) => SUBJECT_OPTIONS.some((o) => o.value === v), { message: "Assunto inválido" }),
+  phone: z
+    .string()
+    .trim()
+    .max(20, { message: "Telefone deve ter no máximo 20 caracteres" })
+    .refine(
+      (v) => {
+        if (!v) return true;
+        const digits = v.replace(/\D/g, "");
+        return digits.length === 10 || digits.length === 11;
+      },
+      { message: "Telefone inválido. Use (11) 99999-9999" },
+    )
+    .optional()
+    .or(z.literal("")),
   message: z
     .string()
     .trim()
@@ -65,7 +79,21 @@ const contactSchema = z.object({
   website: z.string().max(0, { message: "Spam detectado" }).optional(),
 });
 
-type FormErrors = Partial<Record<"name" | "email" | "subject" | "message", string>>;
+type FormErrors = Partial<Record<"name" | "email" | "phone" | "subject" | "message", string>>;
+
+/**
+ * Aplica máscara brasileira de telefone:
+ *  - 10 dígitos: (11) 9999-9999
+ *  - 11 dígitos: (11) 99999-9999
+ */
+function formatPhoneBR(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
 
 export default function WatchtowerContact() {
   const navigate = useNavigate();
@@ -74,6 +102,7 @@ export default function WatchtowerContact() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [messageLength, setMessageLength] = useState(0);
   const [subject, setSubject] = useState("");
+  const [phone, setPhone] = useState("");
 
   const openWhatsApp = () => {
     const msg = encodeURIComponent("Olá! Vim pelo site da Watchtower Monitoramentos e gostaria de mais informações.");
@@ -89,6 +118,7 @@ export default function WatchtowerContact() {
     const raw = {
       name: (formData.get("name") as string) ?? "",
       email: (formData.get("email") as string) ?? "",
+      phone: phone,
       subject: subject,
       message: (formData.get("message") as string) ?? "",
       website: (formData.get("website") as string) ?? "",
@@ -108,6 +138,7 @@ export default function WatchtowerContact() {
         form.reset();
         setMessageLength(0);
         setSubject("");
+        setPhone("");
       } else {
         toast.error("Verifique os campos do formulário.");
       }
@@ -120,6 +151,7 @@ export default function WatchtowerContact() {
       await contactService.submit({
         name: parsed.data.name,
         email: parsed.data.email,
+        phone: parsed.data.phone || undefined,
         subject: subjectLabel,
         message: parsed.data.message,
       });
@@ -127,6 +159,7 @@ export default function WatchtowerContact() {
       form.reset();
       setMessageLength(0);
       setSubject("");
+      setPhone("");
       setSuccess(true);
     } catch {
       toast.error("Erro ao enviar", { description: "Tente novamente mais tarde." });
@@ -238,6 +271,29 @@ export default function WatchtowerContact() {
                       />
                       {errors.email && (
                         <p id="contact-email-error" className="text-xs text-destructive mt-1.5">{errors.email}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-phone" className="text-xs tracking-wider font-semibold text-foreground mb-1.5 block">
+                        TELEFONE / WHATSAPP <span className="text-muted-foreground font-normal normal-case tracking-normal">(opcional)</span>
+                      </label>
+                      <Input
+                        id="contact-phone"
+                        name="phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        placeholder="(11) 99999-9999"
+                        value={phone}
+                        onChange={(e) => setPhone(formatPhoneBR(e.target.value))}
+                        maxLength={20}
+                        aria-invalid={!!errors.phone}
+                        aria-describedby={errors.phone ? "contact-phone-error" : undefined}
+                        className="bg-secondary border-border"
+                      />
+                      {errors.phone && (
+                        <p id="contact-phone-error" className="text-xs text-destructive mt-1.5">{errors.phone}</p>
                       )}
                     </div>
 
