@@ -427,6 +427,61 @@ export default function WatchtowerAdminPlans() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Confirmation Dialog for Highlight Change */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-highlight" />
+              Confirmar Alteração de Destaque
+            </DialogTitle>
+            <DialogDescription>
+              Você está prestes a mudar o plano em destaque. Esta ação removerá o destaque do plano atual.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="bg-muted/50 rounded-lg p-4 space-y-3 my-2">
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider">De:</div>
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-highlight fill-highlight" />
+                <span className="font-medium">{currentHighlightedPlan?.name || "Nenhum"}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider">Para:</div>
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-highlight fill-highlight" />
+                <span className="font-medium text-highlight">{planToHighlight?.name}</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={confirmHighlightChange}
+              disabled={highlightingId !== null}
+              className="gap-2"
+            >
+              {highlightingId === planToHighlight?.id ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Confirmando...
+                </>
+              ) : (
+                <>
+                  <Star className="h-4 w-4" />
+                  Confirmar Destaque
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
