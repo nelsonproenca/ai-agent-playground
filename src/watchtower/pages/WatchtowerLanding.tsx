@@ -104,10 +104,25 @@ export default function WatchtowerLanding() {
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
         </motion.div>
         <div className="max-w-7xl mx-auto relative z-10 text-center flex flex-col items-center">
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="font-display text-5xl md:text-7xl font-light leading-tight max-w-4xl tracking-tight">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="mb-8 relative"
+          >
+            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full -z-10" />
+            <img
+              src="/watchtower-favicon.png"
+              alt="Watchtower Monitoramentos"
+              width={112}
+              height={112}
+              className="h-24 w-24 md:h-28 md:w-28 object-contain drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)]"
+            />
+          </motion.div>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }} className="font-display text-4xl md:text-6xl font-light leading-tight max-w-4xl tracking-tight">
             VIGILÂNCIA <span className="text-primary font-semibold">INTELIGENTE</span> PARA{" "}<span className="text-primary font-semibold">SUA SEGURANÇA</span>
           </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="mt-8 text-muted-foreground max-w-2xl text-lg md:text-xl font-light leading-relaxed">
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="mt-6 text-muted-foreground max-w-2xl text-base md:text-lg font-light leading-relaxed">
             Monitore suas câmeras em tempo real, acesse gravações e gerencie tudo em um único painel profissional.
           </motion.p>
         </div>
