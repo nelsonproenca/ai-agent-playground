@@ -3,22 +3,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
+import {
+  ChevronLeft,
+  Mail,
+  MessageCircle,
+  MapPin,
+  Clock,
+  CheckCircle2,
+  Tag,
+  Wrench,
+  Settings,
+  CreditCard,
+  Handshake,
+  Briefcase,
+  Newspaper,
+  HelpCircle,
+  type LucideIcon,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { contactService } from "@/watchtower/services";
 
-const SUBJECT_OPTIONS = [
-  { value: "duvidas-planos", label: "Dúvidas sobre planos e preços" },
-  { value: "suporte-tecnico", label: "Suporte técnico / câmera offline" },
-  { value: "instalacao", label: "Instalação e configuração" },
-  { value: "pagamento-faturamento", label: "Pagamento e faturamento" },
-  { value: "parcerias", label: "Parcerias comerciais" },
-  { value: "trabalhe-conosco", label: "Trabalhe conosco" },
-  { value: "imprensa", label: "Imprensa e mídia" },
-  { value: "outros", label: "Outros assuntos" },
+const SUBJECT_OPTIONS: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "duvidas-planos", label: "Dúvidas sobre planos e preços", icon: Tag },
+  { value: "suporte-tecnico", label: "Suporte técnico / câmera offline", icon: Wrench },
+  { value: "instalacao", label: "Instalação e configuração", icon: Settings },
+  { value: "pagamento-faturamento", label: "Pagamento e faturamento", icon: CreditCard },
+  { value: "parcerias", label: "Parcerias comerciais", icon: Handshake },
+  { value: "trabalhe-conosco", label: "Trabalhe conosco", icon: Briefcase },
+  { value: "imprensa", label: "Imprensa e mídia", icon: Newspaper },
+  { value: "outros", label: "Outros assuntos", icon: HelpCircle },
 ];
 
 const WHATSAPP_NUMBER = "5511945598960";
@@ -239,11 +255,17 @@ export default function WatchtowerContact() {
                           <SelectValue placeholder="Selecione o assunto da mensagem" />
                         </SelectTrigger>
                         <SelectContent>
-                          {SUBJECT_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
+                          {SUBJECT_OPTIONS.map((opt) => {
+                            const Icon = opt.icon;
+                            return (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                <span className="flex items-center gap-2">
+                                  <Icon className="h-4 w-4 text-primary shrink-0" />
+                                  <span>{opt.label}</span>
+                                </span>
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       {errors.subject && (
