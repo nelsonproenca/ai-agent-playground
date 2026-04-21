@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
-import { evaluatePassword, PasswordStrengthMeter } from "@/watchtower/components/WatchtowerPasswordStrength";
+import { evaluatePassword, PasswordStrengthMeter, PasswordRulesHint } from "@/watchtower/components/WatchtowerPasswordStrength";
 
 export default function WatchtowerResetPassword() {
   const [password, setPassword] = useState("");
