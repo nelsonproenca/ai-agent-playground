@@ -340,13 +340,13 @@ export default function WatchtowerAdminPlans() {
                   key={plan.id}
                   className={
                     plan.highlight
-                      ? "relative bg-amber-500/10 hover:bg-amber-500/15 border-l-4 border-l-amber-500 shadow-[inset_0_0_30px_rgba(251,191,36,0.08)]"
+                      ? "relative bg-highlight/10 hover:bg-highlight/15 border-l-4 border-l-highlight"
                       : ""
                   }
                 >
                   <TableCell>
                     <div className="font-medium flex items-center gap-2">
-                      {plan.highlight && <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />}
+                      {plan.highlight && <Star className="h-3.5 w-3.5 text-highlight fill-highlight shrink-0" />}
                       <span className="truncate">{plan.name}</span>
                     </div>
                     <div className="text-xs text-muted-foreground truncate max-w-[180px]">{plan.period}</div>
@@ -368,7 +368,7 @@ export default function WatchtowerAdminPlans() {
                         aria-label={plan.highlight ? "Remover destaque" : "Tornar este o plano em destaque"}
                       />
                       {plan.highlight && (
-                        <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px] tracking-wider font-semibold gap-1">
+                        <Badge className="bg-highlight text-highlight-foreground hover:bg-highlight text-[10px] tracking-wider font-semibold gap-1">
                           <Star className="h-3 w-3 fill-current" />
                           EM DESTAQUE
                         </Badge>
