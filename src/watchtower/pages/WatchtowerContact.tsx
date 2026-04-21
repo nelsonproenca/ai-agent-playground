@@ -2,12 +2,24 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { contactService } from "@/watchtower/services";
+
+const SUBJECT_OPTIONS = [
+  { value: "duvidas-planos", label: "Dúvidas sobre planos e preços" },
+  { value: "suporte-tecnico", label: "Suporte técnico / câmera offline" },
+  { value: "instalacao", label: "Instalação e configuração" },
+  { value: "pagamento-faturamento", label: "Pagamento e faturamento" },
+  { value: "parcerias", label: "Parcerias comerciais" },
+  { value: "trabalhe-conosco", label: "Trabalhe conosco" },
+  { value: "imprensa", label: "Imprensa e mídia" },
+  { value: "outros", label: "Outros assuntos" },
+];
 
 const WHATSAPP_NUMBER = "5511945598960";
 const MESSAGE_MAX = 1000;
@@ -23,6 +35,11 @@ const contactSchema = z.object({
     .trim()
     .email({ message: "E-mail inválido" })
     .max(255, { message: "E-mail deve ter no máximo 255 caracteres" }),
+  subject: z
+    .string()
+    .trim()
+    .min(1, { message: "Selecione um assunto" })
+    .refine((v) => SUBJECT_OPTIONS.some((o) => o.value === v), { message: "Assunto inválido" }),
   message: z
     .string()
     .trim()
@@ -32,7 +49,7 @@ const contactSchema = z.object({
   website: z.string().max(0, { message: "Spam detectado" }).optional(),
 });
 
-type FormErrors = Partial<Record<"name" | "email" | "message", string>>;
+type FormErrors = Partial<Record<"name" | "email" | "subject" | "message", string>>;
 
 export default function WatchtowerContact() {
   const navigate = useNavigate();
@@ -40,6 +57,7 @@ export default function WatchtowerContact() {
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [messageLength, setMessageLength] = useState(0);
+  const [subject, setSubject] = useState("");
 
   const openWhatsApp = () => {
     const msg = encodeURIComponent("Olá! Vim pelo site da Watchtower Monitoramentos e gostaria de mais informações.");
@@ -55,6 +73,7 @@ export default function WatchtowerContact() {
     const raw = {
       name: (formData.get("name") as string) ?? "",
       email: (formData.get("email") as string) ?? "",
+      subject: subject,
       message: (formData.get("message") as string) ?? "",
       website: (formData.get("website") as string) ?? "",
     };
@@ -72,6 +91,7 @@ export default function WatchtowerContact() {
         setSuccess(true);
         form.reset();
         setMessageLength(0);
+        setSubject("");
       } else {
         toast.error("Verifique os campos do formulário.");
       }
@@ -80,14 +100,17 @@ export default function WatchtowerContact() {
 
     setSending(true);
     try {
+      const subjectLabel = SUBJECT_OPTIONS.find((o) => o.value === parsed.data.subject)?.label ?? parsed.data.subject;
       await contactService.submit({
         name: parsed.data.name,
         email: parsed.data.email,
+        subject: subjectLabel,
         message: parsed.data.message,
       });
       toast.success("Mensagem enviada!", { description: "Retornaremos em até 24 horas." });
       form.reset();
       setMessageLength(0);
+      setSubject("");
       setSuccess(true);
     } catch {
       toast.error("Erro ao enviar", { description: "Tente novamente mais tarde." });
@@ -199,6 +222,32 @@ export default function WatchtowerContact() {
                       />
                       {errors.email && (
                         <p id="contact-email-error" className="text-xs text-destructive mt-1.5">{errors.email}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-subject" className="text-xs tracking-wider font-semibold text-foreground mb-1.5 block">
+                        ASSUNTO
+                      </label>
+                      <Select value={subject} onValueChange={setSubject}>
+                        <SelectTrigger
+                          id="contact-subject"
+                          aria-invalid={!!errors.subject}
+                          aria-describedby={errors.subject ? "contact-subject-error" : undefined}
+                          className="bg-secondary border-border"
+                        >
+                          <SelectValue placeholder="Selecione o assunto da mensagem" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUBJECT_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.subject && (
+                        <p id="contact-subject-error" className="text-xs text-destructive mt-1.5">{errors.subject}</p>
                       )}
                     </div>
 
