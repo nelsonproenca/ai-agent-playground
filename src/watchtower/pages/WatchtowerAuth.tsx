@@ -168,12 +168,34 @@ export default function WatchtowerAuth() {
         if (error) throw error;
         navigate("/watchtower/dashboard");
       } else {
-        const { error } = await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName }, emailRedirectTo: window.location.origin } });
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { display_name: displayName },
+            emailRedirectTo: `${window.location.origin}/watchtower/dashboard`,
+          },
+        });
         if (error) throw error;
-        toast({ title: "Conta criada!", description: "Verifique seu e-mail para confirmar o cadastro." });
+        if (data.session) {
+          toast({ title: "Conta criada!", description: "Bem-vindo ao Watchtower." });
+          navigate("/watchtower/dashboard");
+        } else {
+          toast({ title: "Conta criada!", description: "Faça login para continuar." });
+          setIsLogin(true);
+        }
       }
     } catch (error: any) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      const msg = error?.message || "Erro desconhecido";
+      let friendly = msg;
+      if (/invalid json|content-type.*text\/html/i.test(msg)) {
+        friendly = "Falha no servidor de autenticação. Confirme se 'Confirm email' está desativado em Supabase → Auth → Providers → Email.";
+      } else if (/email.*confirm|not confirmed/i.test(msg)) {
+        friendly = "Confirmação de e-mail está ativa. Desative em Supabase → Auth → Providers → Email.";
+      } else if (/already.*registered|already exists/i.test(msg)) {
+        friendly = "Este e-mail já está cadastrado. Faça login.";
+      }
+      toast({ title: "Erro no cadastro", description: friendly, variant: "destructive" });
     } finally {
       setLoading(false);
     }
