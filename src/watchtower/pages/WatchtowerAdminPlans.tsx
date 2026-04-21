@@ -69,6 +69,9 @@ export default function WatchtowerAdminPlans() {
         .order("display_order", { ascending: true });
       if (error) throw error;
       setPlans(data ?? []);
+      // Track current highlighted plan for confirmation dialog
+      const highlighted = data?.find((p) => p.highlight) ?? null;
+      setCurrentHighlightedPlan(highlighted);
     } catch (e: unknown) {
       toast({ title: "Erro ao carregar planos", description: (e as Error).message, variant: "destructive" });
     } finally {
