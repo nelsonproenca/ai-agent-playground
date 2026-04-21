@@ -35,6 +35,11 @@ const contactSchema = z.object({
     .trim()
     .email({ message: "E-mail inválido" })
     .max(255, { message: "E-mail deve ter no máximo 255 caracteres" }),
+  subject: z
+    .string()
+    .trim()
+    .min(1, { message: "Selecione um assunto" })
+    .refine((v) => SUBJECT_OPTIONS.some((o) => o.value === v), { message: "Assunto inválido" }),
   message: z
     .string()
     .trim()
@@ -44,7 +49,7 @@ const contactSchema = z.object({
   website: z.string().max(0, { message: "Spam detectado" }).optional(),
 });
 
-type FormErrors = Partial<Record<"name" | "email" | "message", string>>;
+type FormErrors = Partial<Record<"name" | "email" | "subject" | "message", string>>;
 
 export default function WatchtowerContact() {
   const navigate = useNavigate();
