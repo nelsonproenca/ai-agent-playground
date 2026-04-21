@@ -9,12 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Trash2, Plus, Loader2, Star } from "lucide-react";
+import { Pencil, Trash2, Plus, Loader2, Star, AlertTriangle } from "lucide-react";
 import { WatchtowerPlanCardPreview } from "@/watchtower/components/WatchtowerPlanCardPreview";
 
 type PlanRow = Tables<"plans">;
@@ -56,6 +56,9 @@ export default function WatchtowerAdminPlans() {
   const [form, setForm] = useState<PlanForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [highlightingId, setHighlightingId] = useState<string | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [planToHighlight, setPlanToHighlight] = useState<PlanRow | null>(null);
+  const [currentHighlightedPlan, setCurrentHighlightedPlan] = useState<PlanRow | null>(null);
 
   const loadPlans = async () => {
     setLoading(true);
@@ -66,6 +69,9 @@ export default function WatchtowerAdminPlans() {
         .order("display_order", { ascending: true });
       if (error) throw error;
       setPlans(data ?? []);
+      // Track current highlighted plan for confirmation dialog
+      const highlighted = data?.find((p) => p.highlight) ?? null;
+      setCurrentHighlightedPlan(highlighted);
     } catch (e: unknown) {
       toast({ title: "Erro ao carregar planos", description: (e as Error).message, variant: "destructive" });
     } finally {
@@ -179,6 +185,14 @@ export default function WatchtowerAdminPlans() {
 
   // Toggle highlight directly from the table — promotes any plan to be the current highlight.
   const handleToggleHighlight = async (plan: PlanRow) => {
+    // If trying to highlight and there's already another highlighted plan, show confirmation
+    if (!plan.highlight && currentHighlightedPlan && currentHighlightedPlan.id !== plan.id) {
+      setPlanToHighlight(plan);
+      setConfirmDialogOpen(true);
+      return;
+    }
+    
+    // If unhighlighting the current highlighted plan, just do it without confirmation
     setHighlightingId(plan.id);
     try {
       const newValue = !plan.highlight;
@@ -187,13 +201,36 @@ export default function WatchtowerAdminPlans() {
       if (newValue) await enforceUniqueHighlight(plan.id);
       toast({
         title: newValue ? "Plano em destaque" : "Destaque removido",
-        description: newValue ? `"${plan.name}" agora é o plano em destaque.` : undefined,
+        description: newValue ? `"${plan.name}" agora é o plano em destaque.` : `"${plan.name}" não está mais em destaque.`,
       });
       loadPlans();
     } catch (e: unknown) {
       toast({ title: "Erro ao atualizar destaque", description: (e as Error).message, variant: "destructive" });
     } finally {
       setHighlightingId(null);
+    }
+  };
+
+  const confirmHighlightChange = async () => {
+    if (!planToHighlight) return;
+    
+    setHighlightingId(planToHighlight.id);
+    setConfirmDialogOpen(false);
+    
+    try {
+      const { error } = await supabase.from("plans").update({ highlight: true }).eq("id", planToHighlight.id);
+      if (error) throw error;
+      await enforceUniqueHighlight(planToHighlight.id);
+      toast({
+        title: "Plano em destaque",
+        description: `"${planToHighlight.name}" agora é o plano em destaque. O destaque foi removido de "${currentHighlightedPlan?.name}".`,
+      });
+      loadPlans();
+    } catch (e: unknown) {
+      toast({ title: "Erro ao atualizar destaque", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setHighlightingId(null);
+      setPlanToHighlight(null);
     }
   };
 
@@ -391,6 +428,61 @@ export default function WatchtowerAdminPlans() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Confirmation Dialog for Highlight Change */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-highlight" />
+              Confirmar Alteração de Destaque
+            </DialogTitle>
+            <DialogDescription>
+              Você está prestes a mudar o plano em destaque. Esta ação removerá o destaque do plano atual.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="bg-muted/50 rounded-lg p-4 space-y-3 my-2">
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider">De:</div>
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-highlight fill-highlight" />
+                <span className="font-medium">{currentHighlightedPlan?.name || "Nenhum"}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider">Para:</div>
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-highlight fill-highlight" />
+                <span className="font-medium text-highlight">{planToHighlight?.name}</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={confirmHighlightChange}
+              disabled={highlightingId !== null}
+              className="gap-2"
+            >
+              {highlightingId === planToHighlight?.id ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Confirmando...
+                </>
+              ) : (
+                <>
+                  <Star className="h-4 w-4" />
+                  Confirmar Destaque
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
