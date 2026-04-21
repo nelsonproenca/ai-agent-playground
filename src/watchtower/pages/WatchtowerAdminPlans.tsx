@@ -127,8 +127,8 @@ export default function WatchtowerAdminPlans() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold">Manutenção de Planos</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gerencie os planos de assinatura</p>
+          <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">MANUTENÇÃO DE PLANOS</h2>
+          <p className="text-xs tracking-[0.15em] text-muted-foreground mt-2">GERENCIE OS PLANOS DE ASSINATURA</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
