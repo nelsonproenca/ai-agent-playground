@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
-import { evaluatePassword, PasswordStrengthMeter } from "@/watchtower/components/WatchtowerPasswordStrength";
+import { evaluatePassword, PasswordStrengthMeter, PasswordRulesHint } from "@/watchtower/components/WatchtowerPasswordStrength";
 
 export default function WatchtowerResetPassword() {
   const [password, setPassword] = useState("");
@@ -126,7 +126,10 @@ export default function WatchtowerResetPassword() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <PasswordStrengthMeter password={password} />
+                <div className="grid grid-cols-1 gap-3 pt-1">
+                  <PasswordStrengthMeter password={password} />
+                  <PasswordRulesHint password={password} />
+                </div>
               </div>
 
               <div className="space-y-2">

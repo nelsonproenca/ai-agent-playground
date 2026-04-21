@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import cctvBg from "@/assets/watchtower/cctv-background.jpg";
 import watchtowerLogo from "@/assets/watchtower/watchtower-logo-gold.png";
-import { evaluatePassword, PasswordStrengthMeter } from "@/watchtower/components/WatchtowerPasswordStrength";
+import { evaluatePassword, PasswordStrengthMeter, PasswordRulesHint } from "@/watchtower/components/WatchtowerPasswordStrength";
 
 export default function WatchtowerAuth() {
   const [searchParams] = useSearchParams();
@@ -229,7 +229,12 @@ export default function WatchtowerAuth() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {!isLogin && <PasswordStrengthMeter password={password} />}
+              {!isLogin && (
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-start pt-1">
+                  <PasswordStrengthMeter password={password} />
+                  <PasswordRulesHint password={password} />
+                </div>
+              )}
             </div>
             <Button
               type="submit"
