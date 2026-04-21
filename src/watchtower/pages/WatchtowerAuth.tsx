@@ -150,6 +150,14 @@ export default function WatchtowerAuth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLogin && evaluatePassword(password).score < 2) {
+      toast({
+        title: "Senha muito fraca",
+        description: "Use ao menos 10 caracteres com letras maiúsculas, números ou símbolos.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLoading(true);
     try {
       if (isLogin) {
