@@ -192,6 +192,7 @@ export default function WatchtowerAdminPlans() {
       return;
     }
     
+    // If unhighlighting the current highlighted plan, just do it without confirmation
     setHighlightingId(plan.id);
     try {
       const newValue = !plan.highlight;
@@ -200,7 +201,7 @@ export default function WatchtowerAdminPlans() {
       if (newValue) await enforceUniqueHighlight(plan.id);
       toast({
         title: newValue ? "Plano em destaque" : "Destaque removido",
-        description: newValue ? `"${plan.name}" agora é o plano em destaque.` : undefined,
+        description: newValue ? `"${plan.name}" agora é o plano em destaque.` : `"${plan.name}" não está mais em destaque.`,
       });
       loadPlans();
     } catch (e: unknown) {
