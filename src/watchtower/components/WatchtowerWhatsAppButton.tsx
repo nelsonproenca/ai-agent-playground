@@ -145,7 +145,7 @@ export function WatchtowerWhatsAppButton() {
   if (overlayOpen) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 group animate-in fade-in duration-200">
+    <div className="fixed bottom-6 right-6 z-50 group animate-slide-up">
       {/* Tooltip contextual */}
       <span
         role="tooltip"
