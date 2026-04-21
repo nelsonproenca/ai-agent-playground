@@ -13,10 +13,10 @@ const values = [
 ];
 
 const stats = [
-  { num: "500+", label: "CÂMERAS MONITORADAS" },
-  { num: "99.9%", label: "UPTIME GARANTIDO" },
+  { num: "100%", label: "FOCO NO CLIENTE" },
   { num: "24/7", label: "SUPORTE ATIVO" },
-  { num: "150+", label: "CLIENTES ATIVOS" },
+  { num: "TLS", label: "CRIPTOGRAFIA DE PONTA" },
+  { num: "2026", label: "ANO DE FUNDAÇÃO" },
 ];
 
 const timeline = [
