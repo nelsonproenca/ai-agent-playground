@@ -22,6 +22,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Wifi, WifiOff, RefreshCw, Loader2 } from "lucide-react";
+import { logAdminEvent } from "@/watchtower/services/auditLogService";
 
 const UNASSIGNED = "__unassigned__";
 
@@ -111,9 +112,23 @@ export default function WatchtowerAdminCameras() {
     try {
       if (editing) {
         await adminService.updateCamera(editing.id, payload);
+        await logAdminEvent({
+          entityType: "camera",
+          entityId: editing.id,
+          entityName: form.name,
+          action: "updated",
+          details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
+        });
         toast({ title: "Câmera atualizada" });
       } else {
-        await adminService.createCamera(payload);
+        const newId = await adminService.createCamera(payload);
+        await logAdminEvent({
+          entityType: "camera",
+          entityId: typeof newId === "string" ? newId : editing?.id ?? form.slug,
+          entityName: form.name,
+          action: "created",
+          details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
+        });
         toast({ title: "Câmera cadastrada" });
       }
       setEditorOpen(false);
@@ -129,6 +144,13 @@ export default function WatchtowerAdminCameras() {
     if (!deleteTarget) return;
     try {
       await adminService.deleteCamera(deleteTarget.id);
+      await logAdminEvent({
+        entityType: "camera",
+        entityId: deleteTarget.id,
+        entityName: deleteTarget.name,
+        action: "deleted",
+        details: { slug: deleteTarget.slug },
+      });
       toast({ title: "Câmera excluída" });
       setDeleteTarget(null);
       loadAll();
