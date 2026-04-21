@@ -401,6 +401,42 @@ export type Database = {
           },
         ]
       }
+      plan_highlight_audit: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string
+          changed_by_email: string | null
+          id: string
+          plan_id: string
+          plan_name: string
+          previous_highlighted_plan_id: string | null
+          previous_highlighted_plan_name: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by: string
+          changed_by_email?: string | null
+          id?: string
+          plan_id: string
+          plan_name: string
+          previous_highlighted_plan_id?: string | null
+          previous_highlighted_plan_name?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string
+          changed_by_email?: string | null
+          id?: string
+          plan_id?: string
+          plan_name?: string
+          previous_highlighted_plan_id?: string | null
+          previous_highlighted_plan_name?: string | null
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           active: boolean
