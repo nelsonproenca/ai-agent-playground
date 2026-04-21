@@ -252,7 +252,7 @@ export default function WatchtowerContact() {
               </a>
 
               <a
-                href="mailto:contato@watchtowermonitoramentos.com.br"
+                href="mailto:nelsonhaproenca@gmail.com"
                 className="block border border-border rounded-lg p-6 hover:border-primary/40 hover:bg-primary/5 transition-colors group"
               >
                 <div className="flex items-center gap-3 mb-2">
@@ -260,7 +260,7 @@ export default function WatchtowerContact() {
                   <span className="text-xs tracking-[0.15em] text-primary font-medium">EMAIL</span>
                 </div>
                 <p className="text-sm text-foreground group-hover:text-primary transition-colors break-all">
-                  contato@watchtowermonitoramentos.com.br
+                  nelsonhaproenca@gmail.com
                 </p>
               </a>
 
