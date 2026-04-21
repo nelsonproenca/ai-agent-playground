@@ -271,18 +271,43 @@ export default function WatchtowerContact() {
                 <p className="text-xs text-muted-foreground mt-1">Resposta rápida via mensagem</p>
               </a>
 
-              <a
-                href="mailto:nelsonhaproenca@gmail.com"
-                className="block border border-border rounded-lg p-6 hover:border-primary/40 hover:bg-primary/5 transition-colors group"
-              >
+              <div className="border border-border rounded-lg p-6 hover:border-primary/40 transition-colors">
                 <div className="flex items-center gap-3 mb-2">
                   <Mail className="h-5 w-5 text-primary" />
                   <span className="text-xs tracking-[0.15em] text-primary font-medium">EMAIL</span>
                 </div>
-                <p className="text-sm text-foreground group-hover:text-primary transition-colors break-all">
-                  nelsonhaproenca@gmail.com
+                <p className="text-sm text-foreground break-all mb-3">
+                  {CONTACT_EMAIL}
                 </p>
-              </a>
+                <label htmlFor="email-subject" className="text-[10px] tracking-[0.15em] text-muted-foreground font-medium block mb-1.5">
+                  ASSUNTO
+                </label>
+                <Select
+                  onValueChange={(value) => {
+                    const subject = EMAIL_SUBJECTS.find((s) => s.value === value);
+                    if (!subject) return;
+                    const url = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`[${subject.label}]`)}`;
+                    window.location.href = url;
+                  }}
+                >
+                  <SelectTrigger id="email-subject" className="bg-secondary border-border text-sm">
+                    <SelectValue placeholder="Selecione o assunto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EMAIL_SUBJECTS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        <div className="flex flex-col">
+                          <span className="text-sm">{s.label}</span>
+                          <span className="text-[11px] text-muted-foreground">{s.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Seu cliente de e-mail abrirá com o assunto preenchido.
+                </p>
+              </div>
 
               <div className="border border-border rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-2">
