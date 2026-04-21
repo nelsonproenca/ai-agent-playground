@@ -226,6 +226,32 @@ export default function WatchtowerContact() {
                     </div>
 
                     <div>
+                      <label htmlFor="contact-subject" className="text-xs tracking-wider font-semibold text-foreground mb-1.5 block">
+                        ASSUNTO
+                      </label>
+                      <Select value={subject} onValueChange={setSubject}>
+                        <SelectTrigger
+                          id="contact-subject"
+                          aria-invalid={!!errors.subject}
+                          aria-describedby={errors.subject ? "contact-subject-error" : undefined}
+                          className="bg-secondary border-border"
+                        >
+                          <SelectValue placeholder="Selecione o assunto da mensagem" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUBJECT_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.subject && (
+                        <p id="contact-subject-error" className="text-xs text-destructive mt-1.5">{errors.subject}</p>
+                      )}
+                    </div>
+
+                    <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label htmlFor="contact-message" className="text-xs tracking-wider font-semibold text-foreground">
                           MENSAGEM
