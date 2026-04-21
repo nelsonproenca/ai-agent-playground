@@ -78,10 +78,10 @@ export default function WatchtowerAbout() {
                 A <span className="text-primary font-medium">Watchtower Monitoramentos</span> nasceu de uma constatação simples: o mercado brasileiro de segurança eletrônica oferecia ou soluções caras e complexas para grandes corporações, ou opções amadoras e instáveis para o consumidor final. Não havia equilíbrio.
               </p>
               <p>
-                Fundada em 2024 por profissionais com mais de duas décadas de experiência em arquitetura de software, infraestrutura cloud e segurança da informação, a Watchtower foi construída desde o primeiro dia com qualidade enterprise — mas com a acessibilidade e simplicidade que o mercado pedia.
+                Fundada em 2026 por profissionais com mais de duas décadas de experiência em arquitetura de software, infraestrutura cloud e segurança da informação, a Watchtower foi construída desde o primeiro dia com qualidade enterprise — mas com a acessibilidade e simplicidade que o mercado pedia.
               </p>
               <p>
-                Hoje monitoramos centenas de câmeras espalhadas pelo Brasil, com streaming HLS criptografado em tempo real, painel administrativo completo, health checks automatizados e suporte humano 24/7. E continuamos crescendo, sempre com o mesmo compromisso: <span className="text-primary font-medium">proteger o que mais importa para nossos clientes</span>.
+                Estamos no início da nossa jornada: hoje atendemos nosso primeiro cliente com 3 câmeras ativas em produção, validando cada decisão técnica com cuidado e atenção total. Cada novo cliente é tratado como parceiro, com suporte direto e dedicado. <span className="text-primary font-medium">Crescemos no ritmo certo, priorizando qualidade sobre quantidade</span>.
               </p>
             </div>
           </motion.section>
