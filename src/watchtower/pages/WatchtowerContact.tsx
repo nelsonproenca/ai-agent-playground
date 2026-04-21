@@ -255,11 +255,17 @@ export default function WatchtowerContact() {
                           <SelectValue placeholder="Selecione o assunto da mensagem" />
                         </SelectTrigger>
                         <SelectContent>
-                          {SUBJECT_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
+                          {SUBJECT_OPTIONS.map((opt) => {
+                            const Icon = opt.icon;
+                            return (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                <span className="flex items-center gap-2">
+                                  <Icon className="h-4 w-4 text-primary shrink-0" />
+                                  <span>{opt.label}</span>
+                                </span>
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       {errors.subject && (
