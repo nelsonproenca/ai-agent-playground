@@ -298,6 +298,9 @@ export default function WatchtowerContact() {
                     </div>
 
                     <div>
+                      <label htmlFor="contact-subject" className="text-xs tracking-wider font-semibold text-foreground mb-1.5 block">
+                        ASSUNTO
+                      </label>
                       <Select value={subject} onValueChange={setSubject}>
                         <SelectTrigger
                           id="contact-subject"
