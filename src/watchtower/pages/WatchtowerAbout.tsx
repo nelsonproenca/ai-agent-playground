@@ -20,10 +20,10 @@ const stats = [
 ];
 
 const timeline = [
-  { year: "2023", title: "A IDEIA", desc: "Identificamos a lacuna no mercado: monitoramento profissional acessível para residências, comércios e condomínios brasileiros." },
-  { year: "2024", title: "FUNDAÇÃO", desc: "A Watchtower Monitoramentos nasce com foco em streaming HLS de baixa latência e infraestrutura cloud-first." },
-  { year: "2025", title: "EXPANSÃO", desc: "Lançamento dos planos Bronze, Prata e Ouro. Integração com câmeras IP RTSP e suporte multi-tenant." },
-  { year: "2026", title: "HOJE", desc: "Mais de 500 câmeras ativas, painel administrativo completo, health checks automatizados e crescimento contínuo." },
+  { year: "2025", title: "A IDEIA", desc: "Identificamos a lacuna no mercado: monitoramento profissional acessível para residências, comércios e condomínios brasileiros." },
+  { year: "2026", title: "FUNDAÇÃO", desc: "A Watchtower Monitoramentos nasce com foco em streaming HLS de baixa latência e infraestrutura cloud-first." },
+  { year: "HOJE", title: "PRIMEIROS PASSOS", desc: "Operação em fase inicial com nosso primeiro cliente ativo e 3 câmeras monitoradas em produção. Validando tecnologia e processos com cuidado." },
+  { year: "PRÓXIMO", title: "CRESCIMENTO", desc: "Expansão da base de clientes, lançamento dos planos Bronze, Prata e Ouro e refinamento contínuo da plataforma com base em feedback real." },
 ];
 
 export default function WatchtowerAbout() {
