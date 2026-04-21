@@ -48,13 +48,13 @@ export default function WatchtowerSettings() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Configurações</h1>
-        <p className="text-muted-foreground">Gerencie suas preferências e informações da conta</p>
+        <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">CONFIGURAÇÕES</h2>
+        <p className="text-xs tracking-[0.15em] text-muted-foreground mt-2">GERENCIE SUAS PREFERÊNCIAS E INFORMAÇÕES DA CONTA</p>
       </div>
 
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Informações do Perfil</CardTitle>
+          <CardTitle className="font-display text-lg tracking-wider">INFORMAÇÕES DO PERFIL</CardTitle>
           <CardDescription>Atualize suas informações pessoais</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -89,7 +89,7 @@ export default function WatchtowerSettings() {
 
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Notificações</CardTitle>
+          <CardTitle className="font-display text-lg tracking-wider">NOTIFICAÇÕES</CardTitle>
           <CardDescription>Configure como você deseja receber notificações</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -137,7 +137,7 @@ export default function WatchtowerSettings() {
 
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Segurança</CardTitle>
+          <CardTitle className="font-display text-lg tracking-wider">SEGURANÇA</CardTitle>
           <CardDescription>Gerencie a segurança da sua conta</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
