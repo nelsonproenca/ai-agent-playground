@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import cctvBg from "@/assets/watchtower/cctv-background.jpg";
 import watchtowerLogo from "@/assets/watchtower/watchtower-logo-gold.png";
+import { evaluatePassword, PasswordStrengthMeter } from "@/watchtower/components/WatchtowerPasswordStrength";
 
 export default function WatchtowerAuth() {
   const [searchParams] = useSearchParams();
@@ -149,6 +150,14 @@ export default function WatchtowerAuth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLogin && evaluatePassword(password).score < 2) {
+      toast({
+        title: "Senha muito fraca",
+        description: "Use ao menos 10 caracteres com letras maiúsculas, números ou símbolos.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLoading(true);
     try {
       if (isLogin) {
@@ -220,8 +229,13 @@ export default function WatchtowerAuth() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {!isLogin && <PasswordStrengthMeter password={password} />}
             </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground h-11 font-semibold text-xs tracking-wider" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full gradient-primary text-primary-foreground h-11 font-semibold text-xs tracking-wider"
+              disabled={loading || (!isLogin && evaluatePassword(password).score < 2)}
+            >
               {loading ? "Carregando..." : isLogin ? "ENTRAR →" : "CADASTRAR"}
             </Button>
           </form>
