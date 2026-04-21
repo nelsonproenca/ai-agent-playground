@@ -11,11 +11,9 @@ import {
 
 const baseItems = [
   { title: "Câmeras", url: "/watchtower/dashboard", icon: LayoutGrid },
-  { title: "Ao Vivo", url: "/watchtower/dashboard/live", icon: Video },
   { title: "Faturas", url: "/watchtower/dashboard/billing", icon: FileText },
   { title: "Suporte", url: "/watchtower/dashboard/support", icon: Headphones },
   { title: "Configurações", url: "/watchtower/dashboard/settings", icon: Settings },
-  { title: "Health Check", url: "/watchtower/dashboard/health", icon: Activity },
 ];
 
 const adminItems = [
@@ -23,6 +21,7 @@ const adminItems = [
   { title: "Admin: Planos", url: "/watchtower/dashboard/admin/plans", icon: Layers },
   { title: "Admin: Pagamentos", url: "/watchtower/dashboard/admin/payments", icon: CreditCard },
   { title: "Admin: Usuários", url: "/watchtower/dashboard/admin/users", icon: Shield },
+  { title: "Admin: Health Check", url: "/watchtower/dashboard/health", icon: Activity },
 ];
 
 export function WatchtowerAppSidebar() {
