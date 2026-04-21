@@ -81,6 +81,9 @@
     --sidebar-accent-foreground: 210 20% 85%;
     --sidebar-border: 220 14% 18%;
     --sidebar-ring: 175 80% 50%;
+
+    --highlight: 38 92% 50%;
+    --highlight-foreground: 220 20% 7%;
   }
 }
 
