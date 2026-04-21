@@ -138,6 +138,7 @@ export default function WatchtowerContact() {
         form.reset();
         setMessageLength(0);
         setSubject("");
+        setPhone("");
       } else {
         toast.error("Verifique os campos do formulário.");
       }
@@ -150,6 +151,7 @@ export default function WatchtowerContact() {
       await contactService.submit({
         name: parsed.data.name,
         email: parsed.data.email,
+        phone: parsed.data.phone || undefined,
         subject: subjectLabel,
         message: parsed.data.message,
       });
@@ -157,6 +159,7 @@ export default function WatchtowerContact() {
       form.reset();
       setMessageLength(0);
       setSubject("");
+      setPhone("");
       setSuccess(true);
     } catch {
       toast.error("Erro ao enviar", { description: "Tente novamente mais tarde." });
