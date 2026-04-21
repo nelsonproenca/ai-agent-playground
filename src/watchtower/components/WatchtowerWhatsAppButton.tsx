@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const WHATSAPP_NUMBER = "5511945598960";
 
@@ -97,17 +97,55 @@ function getContextFor(pathname: string): ContextMessage {
   return DEFAULT_CONTEXT;
 }
 
+/**
+ * Detecta se há algum overlay (Dialog, Sheet, Drawer, AlertDialog) aberto.
+ * Radix UI marca esses elementos com role="dialog" + data-state="open" e
+ * trava o scroll do <body> via data-scroll-locked. Observamos ambos para cobrir
+ * Vaul (Drawer) e Sonner também.
+ */
+function useOverlayOpen(): boolean {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      const body = document.body;
+      // Radix trava o scroll → atributo presente quando há modal aberto
+      if (body.hasAttribute("data-scroll-locked")) return setOpen(true);
+      // Fallback: qualquer dialog/alertdialog em estado open no DOM
+      const overlay = document.querySelector(
+        '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]'
+      );
+      setOpen(!!overlay);
+    };
+
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["data-scroll-locked", "data-state", "style"],
+      subtree: true,
+      childList: true,
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return open;
+}
+
 export function WatchtowerWhatsAppButton() {
   const { pathname } = useLocation();
   const { tooltip, message } = useMemo(() => getContextFor(pathname), [pathname]);
+  const overlayOpen = useOverlayOpen();
 
   const handleClick = () => {
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  if (overlayOpen) return null;
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 group">
+    <div className="fixed bottom-6 right-6 z-50 group animate-in fade-in duration-200">
       {/* Tooltip contextual */}
       <span
         role="tooltip"
