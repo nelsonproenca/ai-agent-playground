@@ -229,8 +229,13 @@ export default function WatchtowerAuth() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {!isLogin && <PasswordStrengthMeter password={password} />}
             </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground h-11 font-semibold text-xs tracking-wider" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full gradient-primary text-primary-foreground h-11 font-semibold text-xs tracking-wider"
+              disabled={loading || (!isLogin && evaluatePassword(password).score < 2)}
+            >
               {loading ? "Carregando..." : isLogin ? "ENTRAR →" : "CADASTRAR"}
             </Button>
           </form>
