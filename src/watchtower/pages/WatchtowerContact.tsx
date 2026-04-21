@@ -57,6 +57,7 @@ export default function WatchtowerContact() {
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [messageLength, setMessageLength] = useState(0);
+  const [subject, setSubject] = useState("");
 
   const openWhatsApp = () => {
     const msg = encodeURIComponent("Olá! Vim pelo site da Watchtower Monitoramentos e gostaria de mais informações.");
