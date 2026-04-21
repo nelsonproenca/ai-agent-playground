@@ -68,10 +68,13 @@ function WatchtowerPublicRoute({ children }: { children: React.ReactNode }) {
 function WatchtowerThemeWrapper({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const isWatchtower = pathname.startsWith("/watchtower");
+  // Oculta o botão flutuante em telas de autenticação para não competir com o formulário
+  const hideWhatsApp =
+    pathname === "/watchtower/auth" || pathname === "/watchtower/reset-password";
   return (
     <div className={isWatchtower ? "watchtower-theme min-h-screen" : ""}>
       {children}
-      {isWatchtower && <WatchtowerWhatsAppButton />}
+      {isWatchtower && !hideWhatsApp && <WatchtowerWhatsAppButton />}
     </div>
   );
 }
