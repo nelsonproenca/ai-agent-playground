@@ -210,75 +210,92 @@ export default function WatchtowerAdminPlans() {
               <Plus className="h-4 w-4" /> Novo Plano
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editing ? "Editar plano" : "Novo plano"}</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
-              <div className="space-y-2 md:col-span-2">
-                <Label>Nome *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Plano Bronze" />
-              </div>
-              <div className="space-y-2">
-                <Label>SKU *</Label>
-                <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="PLAN_BRONZE" />
-              </div>
-              <div className="space-y-2">
-                <Label>Numeração / Tag</Label>
-                <Input value={form.num} onChange={(e) => setForm({ ...form, num: e.target.value })} placeholder="01" />
-              </div>
-              <div className="space-y-2">
-                <Label>Preço (texto)</Label>
-                <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="R$ 29,90" />
-              </div>
-              <div className="space-y-2">
-                <Label>Sufixo</Label>
-                <Input value={form.suffix} onChange={(e) => setForm({ ...form, suffix: e.target.value })} placeholder="/mês" />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label>Período / Subtítulo</Label>
-                <Input value={form.period} onChange={(e) => setForm({ ...form, period: e.target.value })} placeholder="Mensal" />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label>Features (uma por linha)</Label>
-                <Textarea
-                  rows={4}
-                  value={form.features}
-                  onChange={(e) => setForm({ ...form, features: e.target.value })}
-                  placeholder={"Visualização ao vivo\nGravação 7 dias\nSuporte 24/7"}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Texto do botão (CTA)</Label>
-                <Input value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })} placeholder="Contratar" />
-              </div>
-              <div className="space-y-2">
-                <Label>Ordem de exibição</Label>
-                <Input
-                  type="number"
-                  value={form.display_order}
-                  onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-              <div className="flex flex-col gap-3 md:col-span-2">
-                <div className="flex items-center justify-between rounded-md border p-3">
-                  <div>
-                    <Label className="cursor-pointer">Plano ativo</Label>
-                    <p className="text-xs text-muted-foreground mt-1">Exibido na página pública.</p>
-                  </div>
-                  <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 py-2">
+              {/* ─── Form column ─────────────────────────────────────── */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Nome *</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Plano Bronze" />
                 </div>
-                <div className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/5 p-3">
-                  <div>
-                    <Label className="cursor-pointer flex items-center gap-2">
-                      <Star className="h-4 w-4 text-primary" /> Em destaque
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Marca este plano como "MAIS POPULAR". Apenas um plano pode estar em destaque por vez.
-                    </p>
-                  </div>
-                  <Switch checked={form.highlight} onCheckedChange={(v) => setForm({ ...form, highlight: v })} />
+                <div className="space-y-2">
+                  <Label>SKU *</Label>
+                  <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="PLAN_BRONZE" />
                 </div>
+                <div className="space-y-2">
+                  <Label>Numeração / Tag</Label>
+                  <Input value={form.num} onChange={(e) => setForm({ ...form, num: e.target.value })} placeholder="01" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Preço (texto)</Label>
+                  <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="R$ 29,90" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sufixo</Label>
+                  <Input value={form.suffix} onChange={(e) => setForm({ ...form, suffix: e.target.value })} placeholder="/mês" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Período / Subtítulo</Label>
+                  <Input value={form.period} onChange={(e) => setForm({ ...form, period: e.target.value })} placeholder="Mensal" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Features (uma por linha)</Label>
+                  <Textarea
+                    rows={4}
+                    value={form.features}
+                    onChange={(e) => setForm({ ...form, features: e.target.value })}
+                    placeholder={"Visualização ao vivo\nGravação 7 dias\nSuporte 24/7"}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Texto do botão (CTA)</Label>
+                  <Input value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })} placeholder="Contratar" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Ordem de exibição</Label>
+                  <Input
+                    type="number"
+                    value={form.display_order}
+                    onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div className="flex flex-col gap-3 md:col-span-2">
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div>
+                      <Label className="cursor-pointer">Plano ativo</Label>
+                      <p className="text-xs text-muted-foreground mt-1">Exibido na página pública.</p>
+                    </div>
+                    <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
+                  </div>
+                  <div className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/5 p-3">
+                    <div>
+                      <Label className="cursor-pointer flex items-center gap-2">
+                        <Star className="h-4 w-4 text-primary" /> Em destaque
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Marca este plano como "MAIS POPULAR". Apenas um plano pode estar em destaque por vez.
+                      </p>
+                    </div>
+                    <Switch checked={form.highlight} onCheckedChange={(v) => setForm({ ...form, highlight: v })} />
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── Live preview column ─────────────────────────────── */}
+              <div className="lg:sticky lg:top-0 lg:self-start">
+                <WatchtowerPlanCardPreview
+                  num={form.num}
+                  name={form.name}
+                  period={form.period}
+                  price={form.price}
+                  suffix={form.suffix}
+                  cta={form.cta}
+                  features={form.features.split("\n").map((f) => f.trim()).filter(Boolean)}
+                  highlight={form.highlight}
+                />
               </div>
             </div>
             <DialogFooter>
