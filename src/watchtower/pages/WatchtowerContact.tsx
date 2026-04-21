@@ -155,6 +155,7 @@ export default function WatchtowerContact() {
         name: parsed.data.name,
         email: parsed.data.email,
         phone: parsed.data.phone || undefined,
+        preferWhatsApp: parsed.data.phone ? preferWhatsApp : undefined,
         subject: subjectLabel,
         message: parsed.data.message,
       });
@@ -163,6 +164,7 @@ export default function WatchtowerContact() {
       setMessageLength(0);
       setSubject("");
       setPhone("");
+      setPreferWhatsApp(false);
       setSuccess(true);
     } catch {
       toast.error("Erro ao enviar", { description: "Tente novamente mais tarde." });
