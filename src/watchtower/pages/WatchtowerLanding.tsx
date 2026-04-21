@@ -110,13 +110,25 @@ export default function WatchtowerLanding() {
             transition={{ duration: 0.7, ease: "easeOut" }}
             className="mb-8 relative"
           >
-            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full -z-10" />
-            <img
+            <motion.div
+              className="absolute inset-0 bg-primary/30 blur-3xl rounded-full -z-10"
+              animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0.9, 0.5] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
               src="/watchtower-favicon.png"
               alt="Watchtower Monitoramentos"
               width={112}
               height={112}
-              className="h-24 w-24 md:h-28 md:w-28 object-contain drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)]"
+              className="h-24 w-24 md:h-28 md:w-28 object-contain"
+              animate={{
+                filter: [
+                  "drop-shadow(0 0 15px hsl(var(--primary) / 0.3))",
+                  "drop-shadow(0 0 30px hsl(var(--primary) / 0.6))",
+                  "drop-shadow(0 0 15px hsl(var(--primary) / 0.3))",
+                ],
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
           </motion.div>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }} className="font-display text-4xl md:text-6xl font-light leading-tight max-w-4xl tracking-tight">
