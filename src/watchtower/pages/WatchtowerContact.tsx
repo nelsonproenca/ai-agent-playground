@@ -73,6 +73,7 @@ export default function WatchtowerContact() {
     const raw = {
       name: (formData.get("name") as string) ?? "",
       email: (formData.get("email") as string) ?? "",
+      subject: subject,
       message: (formData.get("message") as string) ?? "",
       website: (formData.get("website") as string) ?? "",
     };
@@ -90,6 +91,7 @@ export default function WatchtowerContact() {
         setSuccess(true);
         form.reset();
         setMessageLength(0);
+        setSubject("");
       } else {
         toast.error("Verifique os campos do formulário.");
       }
@@ -98,14 +100,17 @@ export default function WatchtowerContact() {
 
     setSending(true);
     try {
+      const subjectLabel = SUBJECT_OPTIONS.find((o) => o.value === parsed.data.subject)?.label ?? parsed.data.subject;
       await contactService.submit({
         name: parsed.data.name,
         email: parsed.data.email,
+        subject: subjectLabel,
         message: parsed.data.message,
       });
       toast.success("Mensagem enviada!", { description: "Retornaremos em até 24 horas." });
       form.reset();
       setMessageLength(0);
+      setSubject("");
       setSuccess(true);
     } catch {
       toast.error("Erro ao enviar", { description: "Tente novamente mais tarde." });
