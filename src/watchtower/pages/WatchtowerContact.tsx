@@ -141,6 +141,7 @@ export default function WatchtowerContact() {
         setMessageLength(0);
         setSubject("");
         setPhone("");
+        setPreferWhatsApp(false);
       } else {
         toast.error("Verifique os campos do formulário.");
       }
