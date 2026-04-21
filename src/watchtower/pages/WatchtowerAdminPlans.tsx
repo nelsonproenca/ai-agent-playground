@@ -185,6 +185,13 @@ export default function WatchtowerAdminPlans() {
 
   // Toggle highlight directly from the table — promotes any plan to be the current highlight.
   const handleToggleHighlight = async (plan: PlanRow) => {
+    // If trying to highlight and there's already another highlighted plan, show confirmation
+    if (!plan.highlight && currentHighlightedPlan && currentHighlightedPlan.id !== plan.id) {
+      setPlanToHighlight(plan);
+      setConfirmDialogOpen(true);
+      return;
+    }
+    
     setHighlightingId(plan.id);
     try {
       const newValue = !plan.highlight;
@@ -200,6 +207,29 @@ export default function WatchtowerAdminPlans() {
       toast({ title: "Erro ao atualizar destaque", description: (e as Error).message, variant: "destructive" });
     } finally {
       setHighlightingId(null);
+    }
+  };
+
+  const confirmHighlightChange = async () => {
+    if (!planToHighlight) return;
+    
+    setHighlightingId(planToHighlight.id);
+    setConfirmDialogOpen(false);
+    
+    try {
+      const { error } = await supabase.from("plans").update({ highlight: true }).eq("id", planToHighlight.id);
+      if (error) throw error;
+      await enforceUniqueHighlight(planToHighlight.id);
+      toast({
+        title: "Plano em destaque",
+        description: `"${planToHighlight.name}" agora é o plano em destaque. O destaque foi removido de "${currentHighlightedPlan?.name}".`,
+      });
+      loadPlans();
+    } catch (e: unknown) {
+      toast({ title: "Erro ao atualizar destaque", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setHighlightingId(null);
+      setPlanToHighlight(null);
     }
   };
 
