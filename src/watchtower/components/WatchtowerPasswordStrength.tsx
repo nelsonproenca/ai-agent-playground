@@ -18,21 +18,24 @@ export function evaluatePassword(pw: string): PasswordStrength {
 export function PasswordStrengthMeter({ password }: { password: string }) {
   if (!password) return null;
   const s = evaluatePassword(password);
+  const ariaText = s.score === 0 ? "Senha muito fraca" : s.score === 1 ? "Senha fraca" : s.score === 2 ? "Senha média" : "Senha forte";
   return (
-    <div className="space-y-1.5 pt-1">
-      <div className="flex gap-1">
+    <div className="space-y-1.5 pt-1" aria-live="polite" aria-atomic="true">
+      <div className="flex gap-1" role="img" aria-label={`Força da senha: ${ariaText}`}>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
             className={`h-1 flex-1 rounded-full transition-colors ${
               i <= s.score ? s.color : "bg-muted"
             }`}
+            aria-hidden="true"
           />
         ))}
       </div>
       <p className="text-[10px] tracking-wider text-muted-foreground">
         FORÇA: <span className="text-foreground">{s.label}</span>
       </p>
+      <span className="sr-only">{ariaText}</span>
     </div>
   );
 }
