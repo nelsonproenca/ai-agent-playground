@@ -1,13 +1,24 @@
 import { useState, useEffect } from "react";
 import { healthCheckService } from "@/watchtower/services/healthCheckService";
 import type { HealthConfigDto, HealthLogDto } from "@/watchtower/types/api";
+import { useBackendStatus } from "@/watchtower/hooks/useBackendStatus";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Activity, Wifi, WifiOff, RefreshCw, Settings, Bell, Clock } from "lucide-react";
+import {
+  Activity,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  Settings,
+  Bell,
+  Clock,
+  Server,
+  Loader2,
+} from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
