@@ -1,4 +1,4 @@
-import { LayoutGrid, FileText, Headphones, Settings, LogOut, Activity, Shield, Layers, CameraIcon, CreditCard, History } from "lucide-react";
+import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity, Shield, Layers, CameraIcon, CreditCard, History } from "lucide-react";
 import { WatchtowerNavLink } from "./WatchtowerNavLink";
 import { useLocation, Link } from "react-router-dom";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
@@ -17,12 +17,12 @@ const baseItems = [
 ];
 
 const adminItems = [
-  { title: "Câmeras", url: "/watchtower/dashboard/admin/cameras", icon: CameraIcon },
-  { title: "Pagamentos", url: "/watchtower/dashboard/admin/payments", icon: CreditCard },
-  { title: "Planos", url: "/watchtower/dashboard/admin/plans", icon: Layers },
-  { title: "Admins", url: "/watchtower/dashboard/admin/users", icon: Shield },
-  { title: "Auditoria", url: "/watchtower/dashboard/admin/audit", icon: History },
-  { title: "Health Check", url: "/watchtower/dashboard/health", icon: Activity },
+  { title: "Admin: Câmeras", url: "/watchtower/dashboard/admin/cameras", icon: CameraIcon },
+  { title: "Admin: Planos", url: "/watchtower/dashboard/admin/plans", icon: Layers },
+  { title: "Admin: Pagamentos", url: "/watchtower/dashboard/admin/payments", icon: CreditCard },
+  { title: "Admin: Usuários", url: "/watchtower/dashboard/admin/users", icon: Shield },
+  { title: "Admin: Auditoria", url: "/watchtower/dashboard/admin/audit", icon: History },
+  { title: "Admin: Health Check", url: "/watchtower/dashboard/health", icon: Activity },
 ];
 
 export function WatchtowerAppSidebar() {
@@ -34,30 +34,38 @@ export function WatchtowerAppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="pt-6 pb-4">
-        <Link to="/watchtower/dashboard" className="flex items-center gap-3 px-2">
-          {!collapsed ? (
-            <span className="font-display text-base font-bold tracking-[0.2em] text-primary truncate">
-              VIGÍLIA CAM
-            </span>
-          ) : (
-            <img
-              src="/watchtower-favicon.png"
-              alt="Vigília Cam"
-              width={28}
-              height={28}
-              className="h-7 w-7 object-contain shrink-0"
-              loading="lazy"
-            />
+      <SidebarHeader className="pt-6 pb-2">
+        <Link to="/" className="flex items-center gap-3 px-2">
+          <img
+            src="/watchtower-favicon.png"
+            alt="Watchtower"
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain shrink-0"
+            loading="lazy"
+          />
+          {!collapsed && (
+            <div className="flex flex-col overflow-hidden">
+              <span className="font-display text-sm font-bold tracking-wider text-foreground truncate">WATCHTOWER</span>
+              <span className="text-[10px] tracking-[0.15em] text-muted-foreground truncate">MONITORAMENTO</span>
+            </div>
           )}
         </Link>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel>Menu</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel>Navegação</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Voltar ao Site">
+                  <Link to="/">
+                    <Home className="h-4 w-4 shrink-0" />
+                    <span>Voltar ao Site</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {baseItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
@@ -82,7 +90,7 @@ export function WatchtowerAppSidebar() {
 
         {isAdmin && (
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel>Admin</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel>Administração</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminItems.map((item) => {
