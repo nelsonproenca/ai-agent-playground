@@ -61,62 +61,12 @@ export default function WatchtowerAdminCameras() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ ...emptyForm });
     setEditorOpen(true);
   };
 
   const openEdit = (cam: AdminCameraDto) => {
     setEditing(cam);
-    setForm({
-      ownerUserId: cam.ownerUserId,
-      name: cam.name,
-      slug: cam.slug,
-      locationName: cam.locationName,
-      hlsBaseUrl: "",
-      isActive: cam.isActive,
-    });
     setEditorOpen(true);
-  };
-
-  const save = async () => {
-    if (!form.name.trim() || !form.slug.trim()) {
-      toast({ title: "Nome e Slug são obrigatórios.", variant: "destructive" });
-      return;
-    }
-    setSaving(true);
-    const payload: CreateCameraPayload = {
-      ...form,
-      ownerUserId: form.ownerUserId === UNASSIGNED ? "" : form.ownerUserId,
-    };
-    try {
-      if (editing) {
-        await adminService.updateCamera(editing.id, payload);
-        await logAdminEvent({
-          entityType: "camera",
-          entityId: editing.id,
-          entityName: form.name,
-          action: "updated",
-          details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
-        });
-        toast({ title: "Câmera atualizada" });
-      } else {
-        const newId = await adminService.createCamera(payload);
-        await logAdminEvent({
-          entityType: "camera",
-          entityId: typeof newId === "string" ? newId : editing?.id ?? form.slug,
-          entityName: form.name,
-          action: "created",
-          details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
-        });
-        toast({ title: "Câmera cadastrada" });
-      }
-      setEditorOpen(false);
-      loadAll();
-    } catch (e: unknown) {
-      toast({ title: "Erro ao salvar", description: (e as Error).message, variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
   };
 
   const confirmDelete = async () => {
