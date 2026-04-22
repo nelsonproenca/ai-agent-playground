@@ -3,18 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { adminService } from "@/watchtower/services/adminService";
 import { healthCheckService } from "@/watchtower/services/healthCheckService";
-import type { AdminCameraDto, AdminUserDto, CreateCameraPayload } from "@/watchtower/types/api";
+import type { AdminCameraDto, AdminUserDto } from "@/watchtower/types/api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,17 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Wifi, WifiOff, RefreshCw, Loader2 } from "lucide-react";
 import { logAdminEvent } from "@/watchtower/services/auditLogService";
-
-const UNASSIGNED = "__unassigned__";
-
-const emptyForm: CreateCameraPayload = {
-  ownerUserId: UNASSIGNED,
-  name: "",
-  slug: "",
-  locationName: "",
-  hlsBaseUrl: "",
-  isActive: true,
-};
+import { WatchtowerCameraEditorDialog } from "@/watchtower/components/WatchtowerCameraEditorDialog";
 
 export default function WatchtowerAdminCameras() {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
@@ -48,8 +29,6 @@ export default function WatchtowerAdminCameras() {
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<AdminCameraDto | null>(null);
-  const [form, setForm] = useState<CreateCameraPayload>(emptyForm);
-  const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminCameraDto | null>(null);
 
   useEffect(() => {
@@ -82,62 +61,12 @@ export default function WatchtowerAdminCameras() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ ...emptyForm });
     setEditorOpen(true);
   };
 
   const openEdit = (cam: AdminCameraDto) => {
     setEditing(cam);
-    setForm({
-      ownerUserId: cam.ownerUserId,
-      name: cam.name,
-      slug: cam.slug,
-      locationName: cam.locationName,
-      hlsBaseUrl: "",
-      isActive: cam.isActive,
-    });
     setEditorOpen(true);
-  };
-
-  const save = async () => {
-    if (!form.name.trim() || !form.slug.trim()) {
-      toast({ title: "Nome e Slug são obrigatórios.", variant: "destructive" });
-      return;
-    }
-    setSaving(true);
-    const payload: CreateCameraPayload = {
-      ...form,
-      ownerUserId: form.ownerUserId === UNASSIGNED ? "" : form.ownerUserId,
-    };
-    try {
-      if (editing) {
-        await adminService.updateCamera(editing.id, payload);
-        await logAdminEvent({
-          entityType: "camera",
-          entityId: editing.id,
-          entityName: form.name,
-          action: "updated",
-          details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
-        });
-        toast({ title: "Câmera atualizada" });
-      } else {
-        const newId = await adminService.createCamera(payload);
-        await logAdminEvent({
-          entityType: "camera",
-          entityId: typeof newId === "string" ? newId : editing?.id ?? form.slug,
-          entityName: form.name,
-          action: "created",
-          details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
-        });
-        toast({ title: "Câmera cadastrada" });
-      }
-      setEditorOpen(false);
-      loadAll();
-    } catch (e: unknown) {
-      toast({ title: "Erro ao salvar", description: (e as Error).message, variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
   };
 
   const confirmDelete = async () => {
@@ -257,54 +186,13 @@ export default function WatchtowerAdminCameras() {
         </Table>
       </div>
 
-      <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Editar câmera" : "Nova câmera"}</DialogTitle>
-            <DialogDescription>Preencha os dados da câmera.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nome *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Câmera 01 - Entrada" />
-            </div>
-            <div className="space-y-2">
-              <Label>Slug (MediaMTX) *</Label>
-              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="cam-001-entrada" className="font-mono" />
-            </div>
-            <div className="space-y-2">
-              <Label>Localização</Label>
-              <Input value={form.locationName} onChange={(e) => setForm({ ...form, locationName: e.target.value })} placeholder="Portaria A" />
-            </div>
-            <div className="space-y-2">
-              <Label>HLS Base URL *</Label>
-              <Input value={form.hlsBaseUrl} onChange={(e) => setForm({ ...form, hlsBaseUrl: e.target.value })} placeholder="http://127.0.0.1:8888" className="font-mono" />
-            </div>
-            <div className="space-y-2">
-              <Label>Usuário dono</Label>
-              <Select value={form.ownerUserId || UNASSIGNED} onValueChange={(v) => setForm({ ...form, ownerUserId: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione um usuário" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={UNASSIGNED}>Sem dono</SelectItem>
-                  {users.map((u) => (
-                    <SelectItem key={u.userId} value={u.userId}>
-                      {u.userId.slice(0, 8)}… {u.planName ? `— ${u.planName}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <Label className="cursor-pointer">Câmera ativa</Label>
-              <Switch checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditorOpen(false)}>Cancelar</Button>
-            <Button onClick={save} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editing ? "Salvar" : "Cadastrar"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <WatchtowerCameraEditorDialog
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        editing={editing}
+        users={users}
+        onSaved={loadAll}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>

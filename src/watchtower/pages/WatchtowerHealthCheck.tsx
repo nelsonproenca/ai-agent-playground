@@ -1,13 +1,24 @@
 import { useState, useEffect } from "react";
 import { healthCheckService } from "@/watchtower/services/healthCheckService";
 import type { HealthConfigDto, HealthLogDto } from "@/watchtower/types/api";
+import { useBackendStatus } from "@/watchtower/hooks/useBackendStatus";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Activity, Wifi, WifiOff, RefreshCw, Settings, Bell, Clock } from "lucide-react";
+import {
+  Activity,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  Settings,
+  Bell,
+  Clock,
+  Server,
+  Loader2,
+} from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -18,26 +29,32 @@ export default function WatchtowerHealthCheck() {
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
   const { toast } = useToast();
+  const backend = useBackendStatus(60_000);
 
   const [formWebhook, setFormWebhook] = useState("");
   const [formInterval, setFormInterval] = useState(5);
   const [formFailures, setFormFailures] = useState(3);
 
   const fetchData = async () => {
-    const [logsData, configData] = await Promise.all([
-      healthCheckService.getLogs({ limit: 200 }),
-      healthCheckService.getConfig(),
-    ]);
-    setLogs(logsData);
-    setConfig(configData);
-    setFormWebhook(configData.n8nWebhookUrl ?? "");
-    setFormInterval(configData.checkIntervalMinutes);
-    setFormFailures(configData.notifyAfterFailures);
-    setLoading(false);
+    try {
+      const [logsData, configData] = await Promise.all([
+        healthCheckService.getLogs({ limit: 200 }).catch(() => [] as HealthLogDto[]),
+        healthCheckService.getConfig().catch(() => null),
+      ]);
+      setLogs(logsData);
+      if (configData) {
+        setConfig(configData);
+        setFormWebhook(configData.n8nWebhookUrl ?? "");
+        setFormInterval(configData.checkIntervalMinutes);
+        setFormFailures(configData.notifyAfterFailures);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchData().catch(() => setLoading(false));
+    void fetchData();
   }, []);
 
   const runHealthCheck = async () => {
@@ -102,7 +119,7 @@ export default function WatchtowerHealthCheck() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">HEALTH CHECK</h2>
-          <p className="text-xs tracking-[0.15em] text-muted-foreground mt-2">MONITORAMENTO DE STATUS DAS CÂMERAS</p>
+          <p className="text-xs tracking-[0.15em] text-muted-foreground mt-2">MONITORAMENTO DE STATUS DAS CÂMERAS E BACKEND</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowSettings(!showSettings)} className="text-xs tracking-wider">
@@ -114,6 +131,98 @@ export default function WatchtowerHealthCheck() {
           </Button>
         </div>
       </div>
+
+      {/* Backend status card */}
+      <Card
+        className={`p-5 border-2 bg-card transition-colors ${
+          backend.status === "online"
+            ? "border-green-500/40"
+            : backend.status === "offline"
+              ? "border-destructive/50"
+              : "border-border"
+        }`}
+      >
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4 min-w-0 flex-1">
+            <div
+              className={`shrink-0 p-3 rounded-lg ${
+                backend.status === "online"
+                  ? "bg-green-500/10 text-green-500"
+                  : backend.status === "offline"
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {backend.status === "checking" ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Server className="h-6 w-6" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-display text-sm font-semibold tracking-wider text-foreground">
+                  BACKEND EXTERNO
+                </h3>
+                <Badge
+                  variant="outline"
+                  className={`text-[10px] tracking-wider font-semibold ${
+                    backend.status === "online"
+                      ? "border-green-500/30 text-green-500"
+                      : backend.status === "offline"
+                        ? "border-destructive/30 text-destructive"
+                        : "border-border text-muted-foreground"
+                  }`}
+                >
+                  {backend.status === "online"
+                    ? "ONLINE"
+                    : backend.status === "offline"
+                      ? "OFFLINE"
+                      : "VERIFICANDO..."}
+                </Badge>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1 truncate font-mono" title={backend.baseUrl}>
+                {backend.baseUrl || "(VITE_API_URL não configurada)"}
+              </p>
+              <div className="flex items-center gap-4 flex-wrap mt-2 text-[11px]">
+                {backend.responseTimeMs != null && (
+                  <span className="text-muted-foreground">
+                    Latência: <span className="text-foreground font-semibold">{backend.responseTimeMs}ms</span>
+                  </span>
+                )}
+                {backend.lastCheckedAt && (
+                  <span className="text-muted-foreground">
+                    Última verificação:{" "}
+                    <span className="text-foreground">
+                      {formatDistanceToNow(backend.lastCheckedAt, { addSuffix: true, locale: ptBR })}
+                    </span>
+                  </span>
+                )}
+              </div>
+              {backend.status === "offline" && backend.errorMessage && (
+                <div className="mt-3 p-2 rounded bg-destructive/10 border border-destructive/20">
+                  <p className="text-[11px] text-destructive font-mono break-all">
+                    ⚠️ {backend.errorMessage}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Telas dependentes (cameras, pagamentos, usuários) não funcionarão até o backend voltar.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void backend.check()}
+            disabled={backend.status === "checking"}
+            className="text-xs tracking-wider shrink-0"
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${backend.status === "checking" ? "animate-spin" : ""}`} />
+            TESTAR
+          </Button>
+        </div>
+      </Card>
 
       {/* Settings panel */}
       {showSettings && (

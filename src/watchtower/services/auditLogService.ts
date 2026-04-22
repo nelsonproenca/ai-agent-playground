@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Failures never block the user-facing flow — they are logged to the console
  * so the original operation still succeeds even if the audit insert fails.
  */
-export type AuditEntityType = "plan" | "camera";
+export type AuditEntityType = "plan" | "camera" | "admin";
 
 export interface LogAdminEventInput {
   entityType: AuditEntityType;

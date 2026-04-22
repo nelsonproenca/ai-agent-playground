@@ -2,10 +2,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+// Rota padrão para onde clientes são redirecionados ao tentar acessar área admin.
+const USER_HOME_ROUTE = "/watchtower/dashboard";
 import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
+import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
+import { useAccessStatus } from "@/watchtower/hooks/useAccessStatus";
 import { WatchtowerWhatsAppButton } from "@/watchtower/components/WatchtowerWhatsAppButton";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
@@ -43,12 +50,14 @@ import WatchtowerAdminCameras from "./watchtower/pages/WatchtowerAdminCameras";
 import WatchtowerAdminPayments from "./watchtower/pages/WatchtowerAdminPayments";
 import WatchtowerAdminAudit from "./watchtower/pages/WatchtowerAdminAudit";
 import WatchtowerResetPassword from "./watchtower/pages/WatchtowerResetPassword";
+import WatchtowerWaiting from "./watchtower/pages/WatchtowerWaiting";
 
 const queryClient = new QueryClient();
 
 function WatchtowerProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useWatchtowerAuth();
-  if (loading) {
+  const { isWaiting, loading: statusLoading } = useAccessStatus();
+  if (loading || statusLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -56,12 +65,72 @@ function WatchtowerProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/watchtower/auth" replace />;
+  // Acesso ainda não liberado (15min) ou pedido admin pendente → tela de espera
+  if (isWaiting) return <Navigate to="/watchtower/waiting" replace />;
+  return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
+}
+
+/**
+ * Restringe rotas /watchtower/dashboard/admin/* a usuários com role 'admin'.
+ * Cliente autenticado: redirecionado para /watchtower/dashboard (área padrão).
+ * Não autenticado: redirecionado para /watchtower/auth.
+ * Em janela de espera (15min OU pedido admin pendente): redirecionado para /watchtower/waiting.
+ */
+function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useWatchtowerAuth();
+  const { isAdmin, loading: roleLoading } = useIsAdmin();
+  const { isWaiting, loading: statusLoading } = useAccessStatus();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Toast padronizado quando usuário NÃO admin tenta acessar área admin.
+  useEffect(() => {
+    if (authLoading || roleLoading || statusLoading) return;
+    if (!user || isAdmin || isWaiting) return;
+
+    const attemptedRoute = location.pathname;
+    toast.error("Acesso restrito — área administrativa", {
+      id: `admin-denied:${attemptedRoute}`,
+      duration: 7000,
+      description: (
+        <span className="block">
+          A rota{" "}
+          <code className="px-1.5 py-0.5 rounded bg-muted text-foreground font-mono text-xs">
+            {attemptedRoute}
+          </code>{" "}
+          é exclusiva para administradores. Redirecionando você para{" "}
+          <code className="px-1.5 py-0.5 rounded bg-muted text-foreground font-mono text-xs">
+            {USER_HOME_ROUTE}
+          </code>
+          .
+        </span>
+      ),
+      action: {
+        label: "Ir para meu painel",
+        onClick: () => navigate(USER_HOME_ROUTE),
+      },
+    });
+  }, [authLoading, roleLoading, statusLoading, user, isAdmin, isWaiting, location.pathname, navigate]);
+
+  if (authLoading || roleLoading || statusLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/watchtower/auth" replace state={{ from: location.pathname }} />;
+  if (isWaiting) return <Navigate to="/watchtower/waiting" replace />;
+  if (!isAdmin) return <Navigate to={USER_HOME_ROUTE} replace />;
   return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
 }
 
 function WatchtowerPublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useWatchtowerAuth();
-  if (loading) return null;
+  const { isWaiting, loading: statusLoading } = useAccessStatus();
+  if (loading || statusLoading) return null;
+  // Se logado e em espera → manda pra tela de espera (não pra dashboard)
+  if (user && isWaiting) return <Navigate to="/watchtower/waiting" replace />;
   if (user) return <Navigate to="/watchtower/dashboard" replace />;
   return <>{children}</>;
 }
@@ -117,12 +186,13 @@ const App = () => (
                 <Route path="/watchtower/dashboard/support" element={<WatchtowerProtectedRoute><WatchtowerSupport /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/dashboard/settings" element={<WatchtowerProtectedRoute><WatchtowerSettings /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/dashboard/health" element={<WatchtowerProtectedRoute><WatchtowerHealthCheck /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/users" element={<WatchtowerProtectedRoute><WatchtowerAdminUsers /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerProtectedRoute><WatchtowerAdminPlans /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerProtectedRoute><WatchtowerAdminCameras /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerProtectedRoute><WatchtowerAdminPayments /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerProtectedRoute><WatchtowerAdminAudit /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/admin/users" element={<WatchtowerAdminRoute><WatchtowerAdminUsers /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerAdminRoute><WatchtowerAdminPlans /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerAdminRoute><WatchtowerAdminCameras /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerAdminRoute><WatchtowerAdminPayments /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerAdminRoute><WatchtowerAdminAudit /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
+                <Route path="/watchtower/waiting" element={<WatchtowerWaiting />} />
                 <Route path="/watchtower/about" element={<WatchtowerAbout />} />
                 <Route path="/watchtower/contact" element={<WatchtowerContact />} />
                 <Route path="/watchtower/blog" element={<WatchtowerBlog />} />

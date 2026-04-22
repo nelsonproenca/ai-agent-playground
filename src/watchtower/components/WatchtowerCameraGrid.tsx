@@ -1,15 +1,21 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
+import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { cameraService, paymentService } from "@/watchtower/services";
 import { WatchtowerCameraCard } from "./WatchtowerCameraCard";
+import { WatchtowerEmptyCameraCard } from "./WatchtowerEmptyCameraCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Camera, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 const PAGE_SIZE_OPTIONS = [2, 4, 8] as const;
 type PageSize = typeof PAGE_SIZE_OPTIONS[number];
+
+// Mínimo de slots visíveis no grid para clientes — completamos com placeholders
+// quando faltam câmeras. Para admin, sempre exibimos pelo menos 1 slot de cadastro.
+const MIN_VISIBLE_SLOTS_USER = 4;
 
 // Responsive grid classes tuned per page size to avoid awkward empty columns.
 const GRID_CLASSES: Record<PageSize, string> = {
@@ -20,6 +26,7 @@ const GRID_CLASSES: Record<PageSize, string> = {
 
 export function WatchtowerCameraGrid() {
   const { user } = useWatchtowerAuth();
+  const { isAdmin } = useIsAdmin();
   const [pageSize, setPageSize] = useState<PageSize>(4);
   const [page, setPage] = useState(0);
 
@@ -37,28 +44,50 @@ export function WatchtowerCameraGrid() {
 
   const isLoading = camerasLoading || statusLoading;
 
+  // Sanitiza pageSize: garante valor positivo presente nas opções aceitas.
+  const safePageSize: PageSize = (PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize)
+    ? pageSize
+    : 4;
+
+  // Garante contagem não-negativa mesmo se a API retornar payload inesperado.
+  const cameraCount = Math.max(0, cameras?.length ?? 0);
+
+  // Para admin: sempre exibimos exatamente 1 slot de cadastro no topo.
+  // Para usuário: completamos até MIN_VISIBLE_SLOTS_USER se houver poucas câmeras.
+  const placeholderCount = isAdmin
+    ? 1
+    : Math.max(0, MIN_VISIBLE_SLOTS_USER - cameraCount);
+
+  // Paginação aplicada apenas às câmeras ativas — o slot admin fica fixo no topo
+  // e os placeholders do usuário ficam fixos no fim, sem entrar na paginação.
   const totalPages = useMemo(
-    () => Math.max(1, Math.ceil((cameras?.length ?? 0) / pageSize)),
-    [cameras, pageSize],
+    () => Math.max(1, Math.ceil(Math.max(1, cameraCount) / safePageSize)),
+    [cameraCount, safePageSize],
   );
 
-  const currentPage = Math.min(page, totalPages - 1);
+  // Clamp de página: nunca negativa, nunca além do total.
+  const currentPage = Math.min(Math.max(0, page), Math.max(0, totalPages - 1));
 
   const visibleCameras = useMemo(() => {
-    if (!cameras) return [];
-    const start = currentPage * pageSize;
-    return cameras.slice(start, start + pageSize);
-  }, [cameras, currentPage, pageSize]);
+    if (!cameras || cameraCount === 0) return [];
+    const start = Math.max(0, currentPage * safePageSize);
+    const end = Math.min(cameraCount, start + safePageSize);
+    return cameras.slice(start, end);
+  }, [cameras, cameraCount, currentPage, safePageSize]);
 
   const handlePageSizeChange = (value: string) => {
-    setPageSize(Number(value) as PageSize);
+    const parsed = Number(value);
+    const next: PageSize = (PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)
+      ? (parsed as PageSize)
+      : 4;
+    setPageSize(next);
     setPage(0);
   };
 
   if (isLoading) {
     return (
-      <div className={GRID_CLASSES[pageSize]}>
-        {Array.from({ length: pageSize }).map((_, i) => (
+      <div className={GRID_CLASSES[safePageSize]}>
+        {Array.from({ length: safePageSize }).map((_, i) => (
           <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
             <Skeleton className="aspect-video w-full" />
             <div className="p-4 space-y-3">
@@ -72,35 +101,21 @@ export function WatchtowerCameraGrid() {
     );
   }
 
-  if (!cameras?.length) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
-          <Camera className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h2 className="text-lg font-semibold text-foreground mb-1">
-          Nenhuma câmera encontrada
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          As câmeras serão exibidas aqui quando disponíveis.
-        </p>
-      </div>
-    );
-  }
-
   const hasActiveAccess = accessStatus?.userAccessStatus === "Active";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-xs tracking-[0.15em] text-muted-foreground">
-          {cameras.length} {cameras.length === 1 ? "CÂMERA" : "CÂMERAS"} • PÁGINA {currentPage + 1}/{totalPages}
+          {cameraCount} {cameraCount === 1 ? "CÂMERA ATIVA" : "CÂMERAS ATIVAS"}
+          {!isAdmin && placeholderCount > 0 && ` • ${placeholderCount} ${placeholderCount === 1 ? "SLOT DISPONÍVEL" : "SLOTS DISPONÍVEIS"}`}
+          {cameraCount > safePageSize && ` • PÁGINA ${currentPage + 1}/${totalPages}`}
         </p>
         <div className="flex items-center gap-2">
           <label htmlFor="cameras-per-page" className="text-xs tracking-[0.15em] text-muted-foreground">
             POR PÁGINA
           </label>
-          <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+          <Select value={String(safePageSize)} onValueChange={handlePageSizeChange}>
             <SelectTrigger id="cameras-per-page" className="h-9 w-20 bg-secondary border-border text-sm">
               <SelectValue />
             </SelectTrigger>
@@ -115,40 +130,94 @@ export function WatchtowerCameraGrid() {
         </div>
       </div>
 
-      <div className={GRID_CLASSES[pageSize]}>
-        {visibleCameras.map((camera) => (
-          <WatchtowerCameraCard
-            key={camera.id}
-            camera={camera}
-            hasAccess={hasActiveAccess}
-          />
-        ))}
-      </div>
+      {/* SEÇÃO ADMIN: slot de cadastro sempre no topo */}
+      {isAdmin && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-bold tracking-[0.25em] text-primary">
+              ADICIONAR CÂMERA
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className={GRID_CLASSES[safePageSize]}>
+            <WatchtowerEmptyCameraCard index={0} isAdmin />
+          </div>
+        </section>
+      )}
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-            aria-label="Página anterior"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground px-2">
-            {currentPage + 1} / {totalPages}
+      {/* SEÇÃO: câmeras ativas */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-bold tracking-[0.25em] text-muted-foreground">
+            CÂMERAS ATIVAS {cameraCount > 0 && `(${cameraCount})`}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage >= totalPages - 1}
-            aria-label="Próxima página"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+          <div className="h-px flex-1 bg-border" />
         </div>
+
+        {cameraCount === 0 ? (
+          <p className="text-sm text-muted-foreground py-6 text-center border border-dashed border-border rounded-lg">
+            Nenhuma câmera ativa no momento.
+          </p>
+        ) : (
+          <>
+            <div className={GRID_CLASSES[safePageSize]}>
+              {visibleCameras.map((camera) => (
+                <WatchtowerCameraCard
+                  key={camera.id}
+                  camera={camera}
+                  hasAccess={hasActiveAccess}
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(0, Math.min(p, totalPages - 1) - 1))}
+                  disabled={currentPage === 0}
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground px-2">
+                  {currentPage + 1} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(Math.max(0, totalPages - 1), Math.max(0, p) + 1))}
+                  disabled={currentPage >= totalPages - 1}
+                  aria-label="Próxima página"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* SEÇÃO USUÁRIO: slots disponíveis para contratar plano */}
+      {!isAdmin && placeholderCount > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-bold tracking-[0.25em] text-muted-foreground">
+              SLOTS DISPONÍVEIS ({placeholderCount})
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className={GRID_CLASSES[safePageSize]}>
+            {Array.from({ length: placeholderCount }, (_, i) => (
+              <WatchtowerEmptyCameraCard
+                key={`placeholder-${i + 1}`}
+                index={cameraCount + i + 1}
+                isAdmin={false}
+              />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );
