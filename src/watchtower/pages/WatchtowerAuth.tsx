@@ -9,6 +9,9 @@ import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import cctvBg from "@/assets/watchtower/cctv-background.jpg";
 import watchtowerLogo from "@/assets/watchtower/watchtower-logo-gold.png";
 import { evaluatePassword, PasswordStrengthMeter, PasswordRulesHint } from "@/watchtower/components/WatchtowerPasswordStrength";
+import { Shield, User as UserIcon } from "lucide-react";
+
+type RequestedRole = "user" | "admin";
 
 export default function WatchtowerAuth() {
   const [searchParams] = useSearchParams();
@@ -16,6 +19,7 @@ export default function WatchtowerAuth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [requestedRole, setRequestedRole] = useState<RequestedRole>("user");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
@@ -172,16 +176,43 @@ export default function WatchtowerAuth() {
           email,
           password,
           options: {
-            data: { display_name: displayName },
+            // requested_role é lido pelo trigger handle_new_user para marcar
+            // o profile como pendente caso seja 'admin'.
+            data: { display_name: displayName, requested_role: requestedRole },
             emailRedirectTo: `${window.location.origin}/watchtower/dashboard`,
           },
         });
         if (error) throw error;
+
+        // Dispara e-mail de boas-vindas (não bloqueia o fluxo se falhar)
+        try {
+          await supabase.functions.invoke("watchtower-notify-access", {
+            body: {
+              event: requestedRole === "admin" ? "welcome_admin_request" : "welcome_user",
+              email,
+              displayName,
+              accessReleasedAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+            },
+          });
+        } catch (notifyErr) {
+          console.warn("[signup] falha ao enviar e-mail de boas-vindas:", notifyErr);
+        }
+
+        const welcomeDescription =
+          requestedRole === "admin"
+            ? "Pedido de acesso ADMIN enviado. Outro admin irá aprovar — avisaremos por e-mail. Tempo médio: 15 min."
+            : "Bem-vindo! Por segurança, seu acesso será liberado em 15 minutos. Você receberá um e-mail de confirmação.";
+
+        toast({
+          title: "Conta criada com sucesso! 🎉",
+          description: welcomeDescription,
+          duration: 9000,
+        });
+
         if (data.session) {
-          toast({ title: "Conta criada!", description: "Bem-vindo ao Watchtower." });
-          navigate("/watchtower/dashboard");
+          // já logado: o guard de "espera" cuidará do redirect.
+          navigate("/watchtower/waiting");
         } else {
-          toast({ title: "Conta criada!", description: "Faça login para continuar." });
           setIsLogin(true);
         }
       }
