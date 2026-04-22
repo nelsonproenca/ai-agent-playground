@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { adminService } from "@/watchtower/services/adminService";
+import { logAdminEvent } from "@/watchtower/services/auditLogService";
 import type { AdminUserDto } from "@/watchtower/types/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -54,9 +55,23 @@ export default function WatchtowerAdminUsers() {
     try {
       if (u.isAdmin) {
         await adminService.demoteUser(u.userId);
+        await logAdminEvent({
+          entityType: "admin",
+          entityId: u.userId,
+          entityName: u.planName ?? u.userId.slice(0, 8),
+          action: "demoted",
+          details: { targetUserId: u.userId },
+        });
         toast.success("Usuário rebaixado.");
       } else {
         await adminService.promoteUser(u.userId);
+        await logAdminEvent({
+          entityType: "admin",
+          entityId: u.userId,
+          entityName: u.planName ?? u.userId.slice(0, 8),
+          action: "promoted",
+          details: { targetUserId: u.userId },
+        });
         toast.success("Usuário promovido a admin.");
       }
       fetchUsers();
