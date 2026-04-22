@@ -1,4 +1,4 @@
-import { LayoutGrid, Video, FileText, Headphones, Settings, LogOut, Home, Activity, Shield, Layers, CameraIcon, CreditCard, History } from "lucide-react";
+import { LayoutGrid, FileText, Headphones, Settings, LogOut, Activity, Shield, Layers, CameraIcon, CreditCard, History } from "lucide-react";
 import { WatchtowerNavLink } from "./WatchtowerNavLink";
 import { useLocation, Link } from "react-router-dom";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
@@ -9,20 +9,26 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const baseItems = [
-  { title: "Câmeras", url: "/watchtower/dashboard", icon: LayoutGrid },
-  { title: "Faturas", url: "/watchtower/dashboard/billing", icon: FileText },
-  { title: "Suporte", url: "/watchtower/dashboard/support", icon: Headphones },
-  { title: "Configurações", url: "/watchtower/dashboard/settings", icon: Settings },
+// Itens disponíveis para todos (admins e clientes).
+const commonItems = [
+  { title: "Câmeras", url: "/watchtower/dashboard", icon: LayoutGrid, end: true },
+  { title: "Configurações", url: "/watchtower/dashboard/settings", icon: Settings, end: false },
 ];
 
+// Itens exclusivos para clientes (não-admin).
+const clientItems = [
+  { title: "Faturas", url: "/watchtower/dashboard/billing", icon: FileText, end: false },
+  { title: "Suporte", url: "/watchtower/dashboard/support", icon: Headphones, end: false },
+];
+
+// Itens exclusivos para admins.
 const adminItems = [
-  { title: "Admin: Câmeras", url: "/watchtower/dashboard/admin/cameras", icon: CameraIcon },
-  { title: "Admin: Planos", url: "/watchtower/dashboard/admin/plans", icon: Layers },
-  { title: "Admin: Pagamentos", url: "/watchtower/dashboard/admin/payments", icon: CreditCard },
-  { title: "Admin: Usuários", url: "/watchtower/dashboard/admin/users", icon: Shield },
-  { title: "Admin: Auditoria", url: "/watchtower/dashboard/admin/audit", icon: History },
-  { title: "Admin: Health Check", url: "/watchtower/dashboard/health", icon: Activity },
+  { title: "Câmeras", url: "/watchtower/dashboard/admin/cameras", icon: CameraIcon },
+  { title: "Pagamentos", url: "/watchtower/dashboard/admin/payments", icon: CreditCard },
+  { title: "Planos", url: "/watchtower/dashboard/admin/plans", icon: Layers },
+  { title: "Admins", url: "/watchtower/dashboard/admin/users", icon: Shield },
+  { title: "Health Check", url: "/watchtower/dashboard/health", icon: Activity },
+  { title: "Auditoria", url: "/watchtower/dashboard/admin/audit", icon: History },
 ];
 
 export function WatchtowerAppSidebar() {
@@ -31,6 +37,9 @@ export function WatchtowerAppSidebar() {
   const { isAdmin } = useIsAdmin();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+
+  // Quando o usuário é admin, ocultar links exclusivos de clientes (Faturas/Suporte).
+  const menuItems = isAdmin ? commonItems : [...commonItems.slice(0, 1), ...clientItems, ...commonItems.slice(1)];
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -55,18 +64,10 @@ export function WatchtowerAppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel>Navegação</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel>MENU</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Voltar ao Site">
-                  <Link to="/">
-                    <Home className="h-4 w-4 shrink-0" />
-                    <span>Voltar ao Site</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              {baseItems.map((item) => {
+              {menuItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -76,7 +77,7 @@ export function WatchtowerAppSidebar() {
                       tooltip={item.title}
                       className={isActive ? "bg-primary/10 text-primary border border-primary/20" : ""}
                     >
-                      <WatchtowerNavLink to={item.url} end={item.url === "/watchtower/dashboard"}>
+                      <WatchtowerNavLink to={item.url} end={item.end}>
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span>{item.title}</span>
                       </WatchtowerNavLink>
@@ -90,7 +91,7 @@ export function WatchtowerAppSidebar() {
 
         {isAdmin && (
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel>Administração</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel>ADMIN</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminItems.map((item) => {

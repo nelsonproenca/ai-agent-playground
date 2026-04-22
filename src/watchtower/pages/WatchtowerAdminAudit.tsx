@@ -4,7 +4,7 @@ import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Star, History, ArrowRight, Camera, Package, Pencil, Trash2, Plus } from "lucide-react";
+import { Loader2, Star, History, ArrowRight, Camera, Package, Pencil, Trash2, Plus, Shield, ShieldOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 type AuditRow = {
@@ -36,6 +36,7 @@ const formatDate = (iso: string) =>
 const ENTITY_META: Record<string, { label: string; Icon: typeof Camera }> = {
   plan: { label: "PLANO", Icon: Package },
   camera: { label: "CÂMERA", Icon: Camera },
+  admin: { label: "ADMIN", Icon: Shield },
 };
 
 const ACTION_META: Record<
@@ -47,6 +48,8 @@ const ACTION_META: Record<
   created: { label: "CRIADO", variant: "outline", className: "border-primary/40 text-primary", Icon: Plus },
   updated: { label: "ATUALIZADO", variant: "outline", Icon: Pencil },
   deleted: { label: "EXCLUÍDO", variant: "destructive", Icon: Trash2 },
+  promoted: { label: "PROMOVIDO", variant: "default", className: "bg-primary/15 text-primary border border-primary/30 hover:bg-primary/15", Icon: Shield },
+  demoted: { label: "REBAIXADO", variant: "secondary", Icon: ShieldOff },
 };
 
 export default function WatchtowerAdminAudit() {
