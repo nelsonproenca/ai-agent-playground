@@ -571,6 +571,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_released_at: string | null
+          admin_request_status: string
           avatar_url: string | null
           created_at: string
           display_name: string | null
@@ -581,6 +583,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          access_released_at?: string | null
+          admin_request_status?: string
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -591,6 +595,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          access_released_at?: string | null
+          admin_request_status?: string
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -663,9 +669,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_admin_request: { Args: { _user_id: string }; Returns: undefined }
       approve_pending_payment: {
         Args: { _payment_id: string }
         Returns: undefined
+      }
+      get_my_access_status: {
+        Args: never
+        Returns: {
+          access_released_at: string
+          admin_request_status: string
+          is_admin: boolean
+        }[]
       }
       has_role: {
         Args: {
@@ -673,6 +688,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      list_pending_admin_requests: {
+        Args: never
+        Returns: {
+          access_released_at: string
+          created_at: string
+          display_name: string
+          email: string
+          user_id: string
+        }[]
       }
       list_pending_payments_admin: {
         Args: never
@@ -701,6 +726,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      reject_admin_request: { Args: { _user_id: string }; Returns: undefined }
       reject_pending_payment: {
         Args: { _payment_id: string }
         Returns: undefined

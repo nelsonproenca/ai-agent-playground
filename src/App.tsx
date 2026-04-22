@@ -12,6 +12,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
 import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
+import { useAccessStatus } from "@/watchtower/hooks/useAccessStatus";
 import { WatchtowerWhatsAppButton } from "@/watchtower/components/WatchtowerWhatsAppButton";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
@@ -49,12 +50,14 @@ import WatchtowerAdminCameras from "./watchtower/pages/WatchtowerAdminCameras";
 import WatchtowerAdminPayments from "./watchtower/pages/WatchtowerAdminPayments";
 import WatchtowerAdminAudit from "./watchtower/pages/WatchtowerAdminAudit";
 import WatchtowerResetPassword from "./watchtower/pages/WatchtowerResetPassword";
+import WatchtowerWaiting from "./watchtower/pages/WatchtowerWaiting";
 
 const queryClient = new QueryClient();
 
 function WatchtowerProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useWatchtowerAuth();
-  if (loading) {
+  const { isWaiting, loading: statusLoading } = useAccessStatus();
+  if (loading || statusLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -62,6 +65,8 @@ function WatchtowerProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/watchtower/auth" replace />;
+  // Acesso ainda não liberado (15min) ou pedido admin pendente → tela de espera
+  if (isWaiting) return <Navigate to="/watchtower/waiting" replace />;
   return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
 }
 
@@ -69,22 +74,19 @@ function WatchtowerProtectedRoute({ children }: { children: React.ReactNode }) {
  * Restringe rotas /watchtower/dashboard/admin/* a usuários com role 'admin'.
  * Cliente autenticado: redirecionado para /watchtower/dashboard (área padrão).
  * Não autenticado: redirecionado para /watchtower/auth.
- * Enquanto o status de admin carrega, exibe spinner para evitar flash da rota.
+ * Em janela de espera (15min OU pedido admin pendente): redirecionado para /watchtower/waiting.
  */
 function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useWatchtowerAuth();
   const { isAdmin, loading: roleLoading } = useIsAdmin();
+  const { isWaiting, loading: statusLoading } = useAccessStatus();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Quando o usuário está autenticado mas NÃO é admin, dispara um toast
-  // padronizado antes do redirecionamento. O guard `roleLoading` evita
-  // disparos prematuros enquanto a checagem de role ainda está em andamento.
-  // A dependência em `pathname` + `id` único garantem uma única notificação
-  // por tentativa de acesso (sem duplicatas em re-render).
+  // Toast padronizado quando usuário NÃO admin tenta acessar área admin.
   useEffect(() => {
-    if (authLoading || roleLoading) return;
-    if (!user || isAdmin) return;
+    if (authLoading || roleLoading || statusLoading) return;
+    if (!user || isAdmin || isWaiting) return;
 
     const attemptedRoute = location.pathname;
     toast.error("Acesso restrito — área administrativa", {
@@ -108,9 +110,9 @@ function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
         onClick: () => navigate(USER_HOME_ROUTE),
       },
     });
-  }, [authLoading, roleLoading, user, isAdmin, location.pathname, navigate]);
+  }, [authLoading, roleLoading, statusLoading, user, isAdmin, isWaiting, location.pathname, navigate]);
 
-  if (authLoading || roleLoading) {
+  if (authLoading || roleLoading || statusLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -118,13 +120,17 @@ function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/watchtower/auth" replace state={{ from: location.pathname }} />;
+  if (isWaiting) return <Navigate to="/watchtower/waiting" replace />;
   if (!isAdmin) return <Navigate to={USER_HOME_ROUTE} replace />;
   return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
 }
 
 function WatchtowerPublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useWatchtowerAuth();
-  if (loading) return null;
+  const { isWaiting, loading: statusLoading } = useAccessStatus();
+  if (loading || statusLoading) return null;
+  // Se logado e em espera → manda pra tela de espera (não pra dashboard)
+  if (user && isWaiting) return <Navigate to="/watchtower/waiting" replace />;
   if (user) return <Navigate to="/watchtower/dashboard" replace />;
   return <>{children}</>;
 }
@@ -186,6 +192,7 @@ const App = () => (
                 <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerAdminRoute><WatchtowerAdminPayments /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerAdminRoute><WatchtowerAdminAudit /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
+                <Route path="/watchtower/waiting" element={<WatchtowerWaiting />} />
                 <Route path="/watchtower/about" element={<WatchtowerAbout />} />
                 <Route path="/watchtower/contact" element={<WatchtowerContact />} />
                 <Route path="/watchtower/blog" element={<WatchtowerBlog />} />
