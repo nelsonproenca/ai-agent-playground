@@ -20,6 +20,7 @@ const GRID_CLASSES: Record<PageSize, string> = {
 
 export function WatchtowerCameraGrid() {
   const { user } = useWatchtowerAuth();
+  const { isAdmin } = useIsAdmin();
   const [pageSize, setPageSize] = useState<PageSize>(4);
   const [page, setPage] = useState(0);
 
@@ -37,9 +38,14 @@ export function WatchtowerCameraGrid() {
 
   const isLoading = camerasLoading || statusLoading;
 
+  const cameraCount = cameras?.length ?? 0;
+  // Sempre completar o grid até MIN_VISIBLE_SLOTS para evitar a tela vazia.
+  const placeholderCount = Math.max(0, MIN_VISIBLE_SLOTS - cameraCount);
+  const totalSlots = cameraCount + placeholderCount;
+
   const totalPages = useMemo(
-    () => Math.max(1, Math.ceil((cameras?.length ?? 0) / pageSize)),
-    [cameras, pageSize],
+    () => Math.max(1, Math.ceil(totalSlots / pageSize)),
+    [totalSlots, pageSize],
   );
 
   const currentPage = Math.min(page, totalPages - 1);
@@ -49,6 +55,16 @@ export function WatchtowerCameraGrid() {
     const start = currentPage * pageSize;
     return cameras.slice(start, start + pageSize);
   }, [cameras, currentPage, pageSize]);
+
+  // Quantos placeholders precisamos exibir nesta página.
+  const visiblePlaceholders = useMemo(() => {
+    const start = currentPage * pageSize;
+    const end = start + pageSize;
+    const placeholderStart = Math.max(0, start - cameraCount);
+    const placeholderEnd = Math.max(0, Math.min(end, totalSlots) - cameraCount);
+    const count = Math.max(0, placeholderEnd - placeholderStart);
+    return Array.from({ length: count }, (_, i) => placeholderStart + i + 1);
+  }, [currentPage, pageSize, cameraCount, totalSlots]);
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value) as PageSize);
@@ -72,29 +88,15 @@ export function WatchtowerCameraGrid() {
     );
   }
 
-  if (!cameras?.length) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
-          <Camera className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h2 className="text-lg font-semibold text-foreground mb-1">
-          Nenhuma câmera encontrada
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          As câmeras serão exibidas aqui quando disponíveis.
-        </p>
-      </div>
-    );
-  }
-
   const hasActiveAccess = accessStatus?.userAccessStatus === "Active";
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-xs tracking-[0.15em] text-muted-foreground">
-          {cameras.length} {cameras.length === 1 ? "CÂMERA" : "CÂMERAS"} • PÁGINA {currentPage + 1}/{totalPages}
+          {cameraCount} {cameraCount === 1 ? "CÂMERA ATIVA" : "CÂMERAS ATIVAS"}
+          {placeholderCount > 0 && ` • ${placeholderCount} ${placeholderCount === 1 ? "SLOT DISPONÍVEL" : "SLOTS DISPONÍVEIS"}`}
+          {" • "}PÁGINA {currentPage + 1}/{totalPages}
         </p>
         <div className="flex items-center gap-2">
           <label htmlFor="cameras-per-page" className="text-xs tracking-[0.15em] text-muted-foreground">
@@ -121,6 +123,13 @@ export function WatchtowerCameraGrid() {
             key={camera.id}
             camera={camera}
             hasAccess={hasActiveAccess}
+          />
+        ))}
+        {visiblePlaceholders.map((slotIndex) => (
+          <WatchtowerEmptyCameraCard
+            key={`placeholder-${slotIndex}`}
+            index={slotIndex}
+            isAdmin={isAdmin}
           />
         ))}
       </div>
