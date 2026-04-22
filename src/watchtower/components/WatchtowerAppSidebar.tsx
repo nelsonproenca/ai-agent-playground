@@ -25,12 +25,28 @@ const adminItems = [
   { title: "Health Check", url: "/watchtower/dashboard/health", icon: Activity },
 ];
 
+// Rotas que devem casar exatamente (não por prefixo) para evitar
+// que itens "raiz" fiquem ativos em qualquer sub-rota irmã.
+const EXACT_MATCH_URLS = new Set<string>([
+  "/watchtower/dashboard",
+]);
+
+function isItemActive(pathname: string, url: string): boolean {
+  if (EXACT_MATCH_URLS.has(url)) {
+    return pathname === url;
+  }
+  // Considera ativo para a rota exata e qualquer sub-rota (ex.: /admin/users/123)
+  return pathname === url || pathname.startsWith(`${url}/`);
+}
+
 export function WatchtowerAppSidebar() {
   const location = useLocation();
   const { signOut } = useWatchtowerAuth();
   const { isAdmin } = useIsAdmin();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+
+  const activeClasses = "bg-primary/10 text-primary border border-primary/20";
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -59,16 +75,17 @@ export function WatchtowerAppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {baseItems.map((item) => {
-                const isActive = location.pathname === item.url;
+                const exact = EXACT_MATCH_URLS.has(item.url);
+                const isActive = isItemActive(location.pathname, item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
                       tooltip={item.title}
-                      className={isActive ? "bg-primary/10 text-primary border border-primary/20" : ""}
+                      className={isActive ? activeClasses : ""}
                     >
-                      <WatchtowerNavLink to={item.url} end={item.url === "/watchtower/dashboard"}>
+                      <WatchtowerNavLink to={item.url} end={exact}>
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span>{item.title}</span>
                       </WatchtowerNavLink>
@@ -86,16 +103,17 @@ export function WatchtowerAppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminItems.map((item) => {
-                  const isActive = location.pathname === item.url;
+                  const exact = EXACT_MATCH_URLS.has(item.url);
+                  const isActive = isItemActive(location.pathname, item.url);
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
                         isActive={isActive}
                         tooltip={item.title}
-                        className={isActive ? "bg-primary/10 text-primary border border-primary/20" : ""}
+                        className={isActive ? activeClasses : ""}
                       >
-                        <WatchtowerNavLink to={item.url}>
+                        <WatchtowerNavLink to={item.url} end={exact}>
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
                         </WatchtowerNavLink>
