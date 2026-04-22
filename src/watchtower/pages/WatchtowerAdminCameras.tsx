@@ -186,54 +186,13 @@ export default function WatchtowerAdminCameras() {
         </Table>
       </div>
 
-      <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Editar câmera" : "Nova câmera"}</DialogTitle>
-            <DialogDescription>Preencha os dados da câmera.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nome *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Câmera 01 - Entrada" />
-            </div>
-            <div className="space-y-2">
-              <Label>Slug (MediaMTX) *</Label>
-              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="cam-001-entrada" className="font-mono" />
-            </div>
-            <div className="space-y-2">
-              <Label>Localização</Label>
-              <Input value={form.locationName} onChange={(e) => setForm({ ...form, locationName: e.target.value })} placeholder="Portaria A" />
-            </div>
-            <div className="space-y-2">
-              <Label>HLS Base URL *</Label>
-              <Input value={form.hlsBaseUrl} onChange={(e) => setForm({ ...form, hlsBaseUrl: e.target.value })} placeholder="http://127.0.0.1:8888" className="font-mono" />
-            </div>
-            <div className="space-y-2">
-              <Label>Usuário dono</Label>
-              <Select value={form.ownerUserId || UNASSIGNED} onValueChange={(v) => setForm({ ...form, ownerUserId: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione um usuário" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={UNASSIGNED}>Sem dono</SelectItem>
-                  {users.map((u) => (
-                    <SelectItem key={u.userId} value={u.userId}>
-                      {u.userId.slice(0, 8)}… {u.planName ? `— ${u.planName}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <Label className="cursor-pointer">Câmera ativa</Label>
-              <Switch checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditorOpen(false)}>Cancelar</Button>
-            <Button onClick={save} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editing ? "Salvar" : "Cadastrar"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <WatchtowerCameraEditorDialog
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        editing={editing}
+        users={users}
+        onSaved={loadAll}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
