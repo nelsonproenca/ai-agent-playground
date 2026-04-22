@@ -3,8 +3,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+// Rota padrão para onde clientes são redirecionados ao tentar acessar área admin.
+const USER_HOME_ROUTE = "/watchtower/dashboard";
 import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
@@ -72,21 +75,40 @@ function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useWatchtowerAuth();
   const { isAdmin, loading: roleLoading } = useIsAdmin();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Quando o usuário está autenticado mas NÃO é admin, dispara um toast
-  // explicativo antes do redirecionamento. O guard `roleLoading` evita
+  // padronizado antes do redirecionamento. O guard `roleLoading` evita
   // disparos prematuros enquanto a checagem de role ainda está em andamento.
-  // A dependência em `pathname` garante uma única notificação por tentativa
-  // de acesso (em vez de uma a cada render).
+  // A dependência em `pathname` + `id` único garantem uma única notificação
+  // por tentativa de acesso (sem duplicatas em re-render).
   useEffect(() => {
     if (authLoading || roleLoading) return;
-    if (user && !isAdmin) {
-      toast.error("Acesso restrito", {
-        description: `A rota ${location.pathname} é exclusiva para administradores. Você foi redirecionado para o seu painel.`,
-        id: `admin-denied:${location.pathname}`,
-      });
-    }
-  }, [authLoading, roleLoading, user, isAdmin, location.pathname]);
+    if (!user || isAdmin) return;
+
+    const attemptedRoute = location.pathname;
+    toast.error("Acesso restrito — área administrativa", {
+      id: `admin-denied:${attemptedRoute}`,
+      duration: 7000,
+      description: (
+        <span className="block">
+          A rota{" "}
+          <code className="px-1.5 py-0.5 rounded bg-muted text-foreground font-mono text-xs">
+            {attemptedRoute}
+          </code>{" "}
+          é exclusiva para administradores. Redirecionando você para{" "}
+          <code className="px-1.5 py-0.5 rounded bg-muted text-foreground font-mono text-xs">
+            {USER_HOME_ROUTE}
+          </code>
+          .
+        </span>
+      ),
+      action: {
+        label: "Ir para meu painel",
+        onClick: () => navigate(USER_HOME_ROUTE),
+      },
+    });
+  }, [authLoading, roleLoading, user, isAdmin, location.pathname, navigate]);
 
   if (authLoading || roleLoading) {
     return (
@@ -96,7 +118,7 @@ function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/watchtower/auth" replace state={{ from: location.pathname }} />;
-  if (!isAdmin) return <Navigate to="/watchtower/dashboard" replace />;
+  if (!isAdmin) return <Navigate to={USER_HOME_ROUTE} replace />;
   return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
 }
 
