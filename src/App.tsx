@@ -12,6 +12,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
 import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
+import { useAccessStatus } from "@/watchtower/hooks/useAccessStatus";
 import { WatchtowerWhatsAppButton } from "@/watchtower/components/WatchtowerWhatsAppButton";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
@@ -49,6 +50,7 @@ import WatchtowerAdminCameras from "./watchtower/pages/WatchtowerAdminCameras";
 import WatchtowerAdminPayments from "./watchtower/pages/WatchtowerAdminPayments";
 import WatchtowerAdminAudit from "./watchtower/pages/WatchtowerAdminAudit";
 import WatchtowerResetPassword from "./watchtower/pages/WatchtowerResetPassword";
+import WatchtowerWaiting from "./watchtower/pages/WatchtowerWaiting";
 
 const queryClient = new QueryClient();
 
