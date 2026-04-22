@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+
+// Rota padrão para onde clientes são redirecionados ao tentar acessar área admin.
+const USER_HOME_ROUTE = "/watchtower/dashboard";
 import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
