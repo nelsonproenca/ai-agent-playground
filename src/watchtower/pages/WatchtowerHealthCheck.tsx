@@ -29,6 +29,7 @@ export default function WatchtowerHealthCheck() {
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
   const { toast } = useToast();
+  const backend = useBackendStatus(60_000);
 
   const [formWebhook, setFormWebhook] = useState("");
   const [formInterval, setFormInterval] = useState(5);
