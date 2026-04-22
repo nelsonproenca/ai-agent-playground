@@ -2,7 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
@@ -69,6 +71,22 @@ function WatchtowerProtectedRoute({ children }: { children: React.ReactNode }) {
 function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useWatchtowerAuth();
   const { isAdmin, loading: roleLoading } = useIsAdmin();
+  const location = useLocation();
+
+  // Quando o usuário está autenticado mas NÃO é admin, dispara um toast
+  // explicativo antes do redirecionamento. O guard `roleLoading` evita
+  // disparos prematuros enquanto a checagem de role ainda está em andamento.
+  // A dependência em `pathname` garante uma única notificação por tentativa
+  // de acesso (em vez de uma a cada render).
+  useEffect(() => {
+    if (authLoading || roleLoading) return;
+    if (user && !isAdmin) {
+      toast.error("Acesso restrito", {
+        description: "Esta área é exclusiva para administradores. Você foi redirecionado para o seu painel.",
+        id: `admin-denied:${location.pathname}`,
+      });
+    }
+  }, [authLoading, roleLoading, user, isAdmin, location.pathname]);
 
   if (authLoading || roleLoading) {
     return (
@@ -77,7 +95,7 @@ function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (!user) return <Navigate to="/watchtower/auth" replace />;
+  if (!user) return <Navigate to="/watchtower/auth" replace state={{ from: location.pathname }} />;
   if (!isAdmin) return <Navigate to="/watchtower/dashboard" replace />;
   return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
 }
