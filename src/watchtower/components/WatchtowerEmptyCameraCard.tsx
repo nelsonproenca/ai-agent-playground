@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { CameraOff, Plus, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { WatchtowerPlanModal } from "./WatchtowerPlanModal";
+import { WatchtowerCameraEditorDialog } from "./WatchtowerCameraEditorDialog";
 
 interface EmptyCameraCardProps {
-  /** Quando true, o CTA leva o admin ao cadastro de nova câmera. */
+  /** Quando true, o CTA abre o modal de cadastro de câmera (admin). */
   isAdmin: boolean;
   /** Índice do placeholder (1..n) — apenas para rotular visualmente. */
   index: number;
@@ -19,12 +19,12 @@ interface EmptyCameraCardProps {
  * estrutura visual do WatchtowerCameraCard para preservar o layout do grid.
  */
 export function WatchtowerEmptyCameraCard({ isAdmin, index }: EmptyCameraCardProps) {
-  const navigate = useNavigate();
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
 
   const handleAction = () => {
     if (isAdmin) {
-      navigate("/watchtower/dashboard/admin/cameras");
+      setShowEditor(true);
     } else {
       setShowPlanModal(true);
     }
@@ -41,7 +41,7 @@ export function WatchtowerEmptyCameraCard({ isAdmin, index }: EmptyCameraCardPro
               <CameraOff className="h-6 w-6 text-muted-foreground" />
             </div>
             <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground">
-              CÂMERA INATIVA
+              {isAdmin ? "SLOT DE CADASTRO" : "CÂMERA INATIVA"}
             </span>
           </div>
           <div className="absolute top-3 left-3">
@@ -86,6 +86,13 @@ export function WatchtowerEmptyCameraCard({ isAdmin, index }: EmptyCameraCardPro
           onClose={() => setShowPlanModal(false)}
           cameraId=""
           cameraName="Nova ativação"
+        />
+      )}
+
+      {isAdmin && (
+        <WatchtowerCameraEditorDialog
+          open={showEditor}
+          onOpenChange={setShowEditor}
         />
       )}
     </>
