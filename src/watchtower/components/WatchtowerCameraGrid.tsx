@@ -43,36 +43,50 @@ export function WatchtowerCameraGrid() {
 
   const isLoading = camerasLoading || statusLoading;
 
-  const cameraCount = cameras?.length ?? 0;
+  // Sanitiza pageSize: garante valor positivo presente nas opções aceitas.
+  const safePageSize: PageSize = (PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize)
+    ? pageSize
+    : 4;
+
+  // Garante contagem não-negativa mesmo se a API retornar payload inesperado.
+  const cameraCount = Math.max(0, cameras?.length ?? 0);
   // Sempre completar o grid até MIN_VISIBLE_SLOTS para evitar a tela vazia.
   const placeholderCount = Math.max(0, MIN_VISIBLE_SLOTS - cameraCount);
   const totalSlots = cameraCount + placeholderCount;
 
   const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(totalSlots / pageSize)),
-    [totalSlots, pageSize],
+    () => Math.max(1, Math.ceil(totalSlots / safePageSize)),
+    [totalSlots, safePageSize],
   );
 
-  const currentPage = Math.min(page, totalPages - 1);
+  // Clamp de página: nunca negativa, nunca além do total.
+  const currentPage = Math.min(Math.max(0, page), Math.max(0, totalPages - 1));
 
   const visibleCameras = useMemo(() => {
-    if (!cameras) return [];
-    const start = currentPage * pageSize;
-    return cameras.slice(start, start + pageSize);
-  }, [cameras, currentPage, pageSize]);
+    if (!cameras || cameraCount === 0) return [];
+    const start = Math.max(0, currentPage * safePageSize);
+    const end = Math.min(cameraCount, start + safePageSize);
+    return cameras.slice(start, end);
+  }, [cameras, cameraCount, currentPage, safePageSize]);
 
   // Quantos placeholders precisamos exibir nesta página.
+  // Usa índice global (placeholderStart + i + 1) para garantir slots únicos
+  // entre páginas — evitando IDs/keys duplicados no React.
   const visiblePlaceholders = useMemo(() => {
-    const start = currentPage * pageSize;
-    const end = start + pageSize;
+    const start = Math.max(0, currentPage * safePageSize);
+    const end = start + safePageSize;
     const placeholderStart = Math.max(0, start - cameraCount);
-    const placeholderEnd = Math.max(0, Math.min(end, totalSlots) - cameraCount);
+    const placeholderEnd = Math.max(placeholderStart, Math.min(end, totalSlots) - cameraCount);
     const count = Math.max(0, placeholderEnd - placeholderStart);
     return Array.from({ length: count }, (_, i) => placeholderStart + i + 1);
-  }, [currentPage, pageSize, cameraCount, totalSlots]);
+  }, [currentPage, safePageSize, cameraCount, totalSlots]);
 
   const handlePageSizeChange = (value: string) => {
-    setPageSize(Number(value) as PageSize);
+    const parsed = Number(value);
+    const next: PageSize = (PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)
+      ? (parsed as PageSize)
+      : 4;
+    setPageSize(next);
     setPage(0);
   };
 
