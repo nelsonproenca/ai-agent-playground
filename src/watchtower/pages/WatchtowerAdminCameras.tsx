@@ -3,18 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { adminService } from "@/watchtower/services/adminService";
 import { healthCheckService } from "@/watchtower/services/healthCheckService";
-import type { AdminCameraDto, AdminUserDto, CreateCameraPayload } from "@/watchtower/types/api";
+import type { AdminCameraDto, AdminUserDto } from "@/watchtower/types/api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,17 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Wifi, WifiOff, RefreshCw, Loader2 } from "lucide-react";
 import { logAdminEvent } from "@/watchtower/services/auditLogService";
-
-const UNASSIGNED = "__unassigned__";
-
-const emptyForm: CreateCameraPayload = {
-  ownerUserId: UNASSIGNED,
-  name: "",
-  slug: "",
-  locationName: "",
-  hlsBaseUrl: "",
-  isActive: true,
-};
+import { WatchtowerCameraEditorDialog } from "@/watchtower/components/WatchtowerCameraEditorDialog";
 
 export default function WatchtowerAdminCameras() {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
@@ -48,8 +29,6 @@ export default function WatchtowerAdminCameras() {
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<AdminCameraDto | null>(null);
-  const [form, setForm] = useState<CreateCameraPayload>(emptyForm);
-  const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminCameraDto | null>(null);
 
   useEffect(() => {
