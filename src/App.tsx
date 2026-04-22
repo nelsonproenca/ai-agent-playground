@@ -82,7 +82,7 @@ function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
     if (authLoading || roleLoading) return;
     if (user && !isAdmin) {
       toast.error("Acesso restrito", {
-        description: "Esta área é exclusiva para administradores. Você foi redirecionado para o seu painel.",
+        description: `A rota ${location.pathname} é exclusiva para administradores. Você foi redirecionado para o seu painel.`,
         id: `admin-denied:${location.pathname}`,
       });
     }
