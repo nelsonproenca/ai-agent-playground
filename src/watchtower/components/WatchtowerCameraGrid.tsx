@@ -1,15 +1,20 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
+import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { cameraService, paymentService } from "@/watchtower/services";
 import { WatchtowerCameraCard } from "./WatchtowerCameraCard";
+import { WatchtowerEmptyCameraCard } from "./WatchtowerEmptyCameraCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Camera, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 const PAGE_SIZE_OPTIONS = [2, 4, 8] as const;
 type PageSize = typeof PAGE_SIZE_OPTIONS[number];
+
+// Mínimo de slots visíveis no grid — completamos com placeholders quando faltam câmeras.
+const MIN_VISIBLE_SLOTS = 4;
 
 // Responsive grid classes tuned per page size to avoid awkward empty columns.
 const GRID_CLASSES: Record<PageSize, string> = {
