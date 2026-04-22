@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
+import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { WatchtowerWhatsAppButton } from "@/watchtower/components/WatchtowerWhatsAppButton";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
