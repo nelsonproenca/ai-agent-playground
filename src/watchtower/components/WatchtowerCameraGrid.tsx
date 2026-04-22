@@ -92,8 +92,8 @@ export function WatchtowerCameraGrid() {
 
   if (isLoading) {
     return (
-      <div className={GRID_CLASSES[pageSize]}>
-        {Array.from({ length: pageSize }).map((_, i) => (
+      <div className={GRID_CLASSES[safePageSize]}>
+        {Array.from({ length: safePageSize }).map((_, i) => (
           <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
             <Skeleton className="aspect-video w-full" />
             <div className="p-4 space-y-3">
@@ -121,7 +121,7 @@ export function WatchtowerCameraGrid() {
           <label htmlFor="cameras-per-page" className="text-xs tracking-[0.15em] text-muted-foreground">
             POR PÁGINA
           </label>
-          <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+          <Select value={String(safePageSize)} onValueChange={handlePageSizeChange}>
             <SelectTrigger id="cameras-per-page" className="h-9 w-20 bg-secondary border-border text-sm">
               <SelectValue />
             </SelectTrigger>
@@ -136,7 +136,7 @@ export function WatchtowerCameraGrid() {
         </div>
       </div>
 
-      <div className={GRID_CLASSES[pageSize]}>
+      <div className={GRID_CLASSES[safePageSize]}>
         {visibleCameras.map((camera) => (
           <WatchtowerCameraCard
             key={camera.id}
@@ -158,7 +158,7 @@ export function WatchtowerCameraGrid() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            onClick={() => setPage((p) => Math.max(0, Math.min(p, totalPages - 1) - 1))}
             disabled={currentPage === 0}
             aria-label="Página anterior"
           >
@@ -170,7 +170,7 @@ export function WatchtowerCameraGrid() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            onClick={() => setPage((p) => Math.min(Math.max(0, totalPages - 1), Math.max(0, p) + 1))}
             disabled={currentPage >= totalPages - 1}
             aria-label="Próxima página"
           >
