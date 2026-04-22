@@ -82,7 +82,7 @@ export function WatchtowerAppSidebar() {
 
         {isAdmin && (
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel>Administração</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel>Admin</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminItems.map((item) => {
