@@ -192,6 +192,7 @@ const App = () => (
                 <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerAdminRoute><WatchtowerAdminPayments /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerAdminRoute><WatchtowerAdminAudit /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
+                <Route path="/watchtower/waiting" element={<WatchtowerWaiting />} />
                 <Route path="/watchtower/about" element={<WatchtowerAbout />} />
                 <Route path="/watchtower/contact" element={<WatchtowerContact />} />
                 <Route path="/watchtower/blog" element={<WatchtowerBlog />} />
