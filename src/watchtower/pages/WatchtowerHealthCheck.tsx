@@ -36,20 +36,25 @@ export default function WatchtowerHealthCheck() {
   const [formFailures, setFormFailures] = useState(3);
 
   const fetchData = async () => {
-    const [logsData, configData] = await Promise.all([
-      healthCheckService.getLogs({ limit: 200 }),
-      healthCheckService.getConfig(),
-    ]);
-    setLogs(logsData);
-    setConfig(configData);
-    setFormWebhook(configData.n8nWebhookUrl ?? "");
-    setFormInterval(configData.checkIntervalMinutes);
-    setFormFailures(configData.notifyAfterFailures);
-    setLoading(false);
+    try {
+      const [logsData, configData] = await Promise.all([
+        healthCheckService.getLogs({ limit: 200 }).catch(() => [] as HealthLogDto[]),
+        healthCheckService.getConfig().catch(() => null),
+      ]);
+      setLogs(logsData);
+      if (configData) {
+        setConfig(configData);
+        setFormWebhook(configData.n8nWebhookUrl ?? "");
+        setFormInterval(configData.checkIntervalMinutes);
+        setFormFailures(configData.notifyAfterFailures);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchData().catch(() => setLoading(false));
+    void fetchData();
   }, []);
 
   const runHealthCheck = async () => {
