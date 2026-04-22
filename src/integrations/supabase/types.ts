@@ -182,26 +182,35 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string
+          hls_base_url: string | null
           id: string
           internal_stream_key: string
+          is_active: boolean
           location: string | null
           owner_user_id: string | null
+          slug: string | null
         }
         Insert: {
           created_at?: string
           display_name: string
+          hls_base_url?: string | null
           id?: string
           internal_stream_key: string
+          is_active?: boolean
           location?: string | null
           owner_user_id?: string | null
+          slug?: string | null
         }
         Update: {
           created_at?: string
           display_name?: string
+          hls_base_url?: string | null
           id?: string
           internal_stream_key?: string
+          is_active?: boolean
           location?: string | null
           owner_user_id?: string | null
+          slug?: string | null
         }
         Relationships: []
       }
