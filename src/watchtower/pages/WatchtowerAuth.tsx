@@ -256,45 +256,10 @@ export default function WatchtowerAuth() {
           <p className="text-xs text-muted-foreground mb-8">{isLogin ? "Acesse seu painel de monitoramento" : "Cadastre-se para começar"}</p>
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="wt-name" className="text-xs tracking-wider text-muted-foreground">NOME</Label>
-                  <Input id="wt-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Seu nome" className="bg-secondary border-border text-foreground h-11" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs tracking-wider text-muted-foreground">TIPO DE ACESSO</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setRequestedRole("user")}
-                      className={`flex flex-col items-center justify-center gap-1.5 rounded-md border-2 p-3 text-xs tracking-wider transition-all ${
-                        requestedRole === "user"
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground"
-                      }`}
-                      aria-pressed={requestedRole === "user"}
-                    >
-                      <UserIcon className="h-5 w-5" />
-                      CLIENTE
-                      <span className="text-[9px] opacity-70 normal-case tracking-normal">Acesso em 15 min</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRequestedRole("admin")}
-                      className={`flex flex-col items-center justify-center gap-1.5 rounded-md border-2 p-3 text-xs tracking-wider transition-all ${
-                        requestedRole === "admin"
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground"
-                      }`}
-                      aria-pressed={requestedRole === "admin"}
-                    >
-                      <Shield className="h-5 w-5" />
-                      ADMIN
-                      <span className="text-[9px] opacity-70 normal-case tracking-normal">Requer aprovação</span>
-                    </button>
-                  </div>
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label htmlFor="wt-name" className="text-xs tracking-wider text-muted-foreground">NOME</Label>
+                <Input id="wt-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Seu nome" className="bg-secondary border-border text-foreground h-11" />
+              </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="wt-email" className="text-xs tracking-wider text-muted-foreground">E-MAIL</Label>
@@ -327,6 +292,41 @@ export default function WatchtowerAuth() {
                 </div>
               )}
             </div>
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label className="text-xs tracking-wider text-muted-foreground">TIPO DE ACESSO</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRequestedRole("user")}
+                    className={`flex flex-col items-center justify-center gap-1.5 rounded-md border-2 p-3 text-xs tracking-wider transition-all ${
+                      requestedRole === "user"
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground"
+                    }`}
+                    aria-pressed={requestedRole === "user"}
+                  >
+                    <UserIcon className="h-5 w-5" />
+                    CLIENTE
+                    <span className="text-[9px] opacity-70 normal-case tracking-normal">Acesso em 15 min</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRequestedRole("admin")}
+                    className={`flex flex-col items-center justify-center gap-1.5 rounded-md border-2 p-3 text-xs tracking-wider transition-all ${
+                      requestedRole === "admin"
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground"
+                    }`}
+                    aria-pressed={requestedRole === "admin"}
+                  >
+                    <Shield className="h-5 w-5" />
+                    ADMIN
+                    <span className="text-[9px] opacity-70 normal-case tracking-normal">Requer aprovação</span>
+                  </button>
+                </div>
+              </div>
+            )}
             <Button
               type="submit"
               className="w-full gradient-primary text-primary-foreground h-11 font-semibold text-xs tracking-wider"
