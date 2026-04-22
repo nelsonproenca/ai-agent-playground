@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AuthProvider } from "@/hooks/useAuth";
 import { WatchtowerAuthProvider, useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { WatchtowerDashboardLayout } from "@/watchtower/components/WatchtowerDashboardLayout";
+import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
 import { WatchtowerWhatsAppButton } from "@/watchtower/components/WatchtowerWhatsAppButton";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
@@ -56,6 +57,28 @@ function WatchtowerProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
   if (!user) return <Navigate to="/watchtower/auth" replace />;
+  return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
+}
+
+/**
+ * Restringe rotas /watchtower/dashboard/admin/* a usuários com role 'admin'.
+ * Cliente autenticado: redirecionado para /watchtower/dashboard (área padrão).
+ * Não autenticado: redirecionado para /watchtower/auth.
+ * Enquanto o status de admin carrega, exibe spinner para evitar flash da rota.
+ */
+function WatchtowerAdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useWatchtowerAuth();
+  const { isAdmin, loading: roleLoading } = useIsAdmin();
+
+  if (authLoading || roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/watchtower/auth" replace />;
+  if (!isAdmin) return <Navigate to="/watchtower/dashboard" replace />;
   return <WatchtowerDashboardLayout>{children}</WatchtowerDashboardLayout>;
 }
 
@@ -117,11 +140,11 @@ const App = () => (
                 <Route path="/watchtower/dashboard/support" element={<WatchtowerProtectedRoute><WatchtowerSupport /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/dashboard/settings" element={<WatchtowerProtectedRoute><WatchtowerSettings /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/dashboard/health" element={<WatchtowerProtectedRoute><WatchtowerHealthCheck /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/users" element={<WatchtowerProtectedRoute><WatchtowerAdminUsers /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerProtectedRoute><WatchtowerAdminPlans /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerProtectedRoute><WatchtowerAdminCameras /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerProtectedRoute><WatchtowerAdminPayments /></WatchtowerProtectedRoute>} />
-                <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerProtectedRoute><WatchtowerAdminAudit /></WatchtowerProtectedRoute>} />
+                <Route path="/watchtower/dashboard/admin/users" element={<WatchtowerAdminRoute><WatchtowerAdminUsers /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/plans" element={<WatchtowerAdminRoute><WatchtowerAdminPlans /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerAdminRoute><WatchtowerAdminCameras /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerAdminRoute><WatchtowerAdminPayments /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerAdminRoute><WatchtowerAdminAudit /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
                 <Route path="/watchtower/about" element={<WatchtowerAbout />} />
                 <Route path="/watchtower/contact" element={<WatchtowerContact />} />
