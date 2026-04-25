@@ -6,20 +6,26 @@ import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import cctvBackground from "@/assets/watchtower/cctv-background.jpg";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/watchtower/services/apiClient";
+import type { AdminPlanDto } from "@/watchtower/types/api";
 
-type Plan = {
-  id: string;
-  sku: string;
-  num: string;
-  name: string;
-  period: string;
-  price: string;
-  suffix: string;
-  features: string[];
-  cta: string;
-  highlight: boolean;
-};
+function formatPrice(priceBrl: number): string {
+  return `R$ ${priceBrl.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function getPlanFeaturesList(plan: AdminPlanDto): string[] {
+  const list: string[] = ["Visualização ao vivo em tempo real"];
+  if (plan.features === "WithRecordings" || plan.features === "WithDownloads") {
+    list.push(`Gravações por ${plan.recordingDaysLimit ?? 0} dias`);
+  }
+  if (plan.features === "WithDownloads") {
+    list.push("Download de gravações");
+  }
+  if (plan.durationDays === 1) {
+    list.push("Acesso por 24 horas");
+  }
+  return list;
+}
 
 const stats = [
   { icon: Monitor, label: "STREAMING HLS EM TEMPO REAL" },
@@ -36,7 +42,7 @@ const steps = [
 export default function WatchtowerLanding() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plans, setPlans] = useState<AdminPlanDto[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 150]);
@@ -47,22 +53,10 @@ export default function WatchtowerLanding() {
   }, [scrollY]);
 
   useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase
-        .from("plans")
-        .select("id, sku, num, name, period, price, suffix, features, cta, highlight")
-        .eq("active", true)
-        .order("display_order", { ascending: true });
-      if (!error && data) {
-        setPlans(
-          data.map((p) => ({
-            ...p,
-            features: Array.isArray(p.features) ? (p.features as string[]) : [],
-          }))
-        );
-      }
-      setPlansLoading(false);
-    })();
+    apiClient.get<AdminPlanDto[]>("/api/plans", false)
+      .then(setPlans)
+      .catch(() => {})
+      .finally(() => setPlansLoading(false));
   }, []);
 
   return (
@@ -185,19 +179,25 @@ export default function WatchtowerLanding() {
             <p className="text-center text-sm text-muted-foreground py-16">Nenhum plano disponível no momento.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {plans.map((plan, i) => (
-                <motion.div key={plan.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} whileHover={{ y: -8, scale: 1.02 }} className={`rounded-lg border p-6 flex flex-col ${plan.highlight ? "border-primary bg-primary/5 shadow-glow relative" : "border-border bg-card"}`}>
-                  {plan.highlight && <span className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] tracking-wider font-semibold px-3 py-1 rounded-sm">MAIS POPULAR</span>}
-                  <span className="text-xs text-muted-foreground">{plan.num}</span>
-                  <h3 className="font-display text-sm font-semibold tracking-wider mt-2">{plan.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 mb-4">{plan.period}</p>
-                  <div className="mb-6"><span className="font-display text-3xl font-bold">{plan.price}</span><span className="text-xs text-muted-foreground">{plan.suffix}</span></div>
-                  <ul className="space-y-2 mb-8 flex-1">
-                    {plan.features.map((f) => (<li key={f} className="text-xs text-muted-foreground flex items-start gap-2"><span className="text-primary mt-0.5">•</span>{f}</li>))}
-                  </ul>
-                  <Button variant={plan.highlight ? "default" : "outline"} className={`w-full text-xs tracking-wider font-semibold ${plan.highlight ? "gradient-primary text-primary-foreground" : "border-border"}`} onClick={() => navigate("/watchtower/auth")}>{plan.cta}</Button>
-                </motion.div>
-              ))}
+              {plans.map((plan, i) => {
+                const highlight = plan.planTier === "Silver";
+                const price = formatPrice(plan.priceBrl);
+                const suffix = plan.durationDays === 1 ? "" : "/mês";
+                const period = plan.durationDays === 1 ? "Acesso por 24 horas" : "Plano Mensal";
+                const features = getPlanFeaturesList(plan);
+                return (
+                  <motion.div key={plan.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} whileHover={{ y: -8, scale: 1.02 }} className={`rounded-lg border p-6 flex flex-col ${highlight ? "border-primary bg-primary/5 shadow-glow relative" : "border-border bg-card"}`}>
+                    {highlight && <span className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] tracking-wider font-semibold px-3 py-1 rounded-sm">MAIS POPULAR</span>}
+                    <h3 className="font-display text-sm font-semibold tracking-wider mt-2">{plan.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 mb-4">{period}</p>
+                    <div className="mb-6"><span className="font-display text-3xl font-bold">{price}</span><span className="text-xs text-muted-foreground">{suffix}</span></div>
+                    <ul className="space-y-2 mb-8 flex-1">
+                      {features.map((f) => (<li key={f} className="text-xs text-muted-foreground flex items-start gap-2"><span className="text-primary mt-0.5">•</span>{f}</li>))}
+                    </ul>
+                    <Button variant={highlight ? "default" : "outline"} className={`w-full text-xs tracking-wider font-semibold ${highlight ? "gradient-primary text-primary-foreground" : "border-border"}`} onClick={() => navigate("/watchtower/auth")}>Contratar</Button>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} className="max-w-4xl mx-auto mt-12">

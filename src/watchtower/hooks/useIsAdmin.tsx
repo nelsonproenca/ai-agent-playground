@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/watchtower/services/apiClient";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 
 export function useIsAdmin() {
@@ -16,20 +16,20 @@ export function useIsAdmin() {
       return;
     }
     (async () => {
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (!cancelled) {
-        setIsAdmin(!error && !!data);
-        setLoading(false);
+      try {
+        const { isAdmin: flag } = await apiClient.get<{ isAdmin: boolean }>("/api/users/is-admin");
+        if (!cancelled) {
+          setIsAdmin(flag);
+          setLoading(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setIsAdmin(false);
+          setLoading(false);
+        }
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user, authLoading]);
 
   return { isAdmin, loading };

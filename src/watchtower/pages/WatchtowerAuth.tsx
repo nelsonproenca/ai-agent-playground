@@ -184,20 +184,6 @@ export default function WatchtowerAuth() {
         });
         if (error) throw error;
 
-        // Dispara e-mail de boas-vindas (não bloqueia o fluxo se falhar)
-        try {
-          await supabase.functions.invoke("watchtower-notify-access", {
-            body: {
-              event: requestedRole === "admin" ? "welcome_admin_request" : "welcome_user",
-              email,
-              displayName,
-              accessReleasedAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-            },
-          });
-        } catch (notifyErr) {
-          console.warn("[signup] falha ao enviar e-mail de boas-vindas:", notifyErr);
-        }
-
         const welcomeDescription =
           requestedRole === "admin"
             ? "Pedido de acesso ADMIN enviado. Outro admin irá aprovar — avisaremos por e-mail. Tempo médio: 15 min."
