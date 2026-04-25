@@ -118,6 +118,7 @@ export type Database = {
           check_interval_minutes: number
           created_at: string
           id: string
+          n8n_webhook_url: string | null
           notify_after_failures: number
           updated_at: string
         }
@@ -128,6 +129,7 @@ export type Database = {
           check_interval_minutes?: number
           created_at?: string
           id?: string
+          n8n_webhook_url?: string | null
           notify_after_failures?: number
           updated_at?: string
         }
@@ -138,6 +140,7 @@ export type Database = {
           check_interval_minutes?: number
           created_at?: string
           id?: string
+          n8n_webhook_url?: string | null
           notify_after_failures?: number
           updated_at?: string
         }
@@ -463,6 +466,45 @@ export type Database = {
       }
       plans: {
         Row: {
+          can_download: boolean
+          description: string
+          duration_days: number
+          features: string
+          id: string
+          is_active: boolean
+          name: string
+          plan_tier: string
+          price_brl: number
+          recording_days_limit: number | null
+        }
+        Insert: {
+          can_download?: boolean
+          description: string
+          duration_days: number
+          features: string
+          id: string
+          is_active?: boolean
+          name: string
+          plan_tier: string
+          price_brl: number
+          recording_days_limit?: number | null
+        }
+        Update: {
+          can_download?: boolean
+          description?: string
+          duration_days?: number
+          features?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          plan_tier?: string
+          price_brl?: number
+          recording_days_limit?: number | null
+        }
+        Relationships: []
+      }
+      plans_legacy: {
+        Row: {
           active: boolean
           created_at: string
           cta: string
@@ -651,6 +693,50 @@ export type Database = {
             columns: ["camera_id"]
             isOneToOne: false
             referencedRelation: "cameras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_access: {
+        Row: {
+          access_expires_at: string | null
+          can_download: boolean
+          created_at: string
+          id: string
+          plan_id: string
+          recording_days_limit: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          can_download?: boolean
+          created_at?: string
+          id?: string
+          plan_id: string
+          recording_days_limit?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          can_download?: boolean
+          created_at?: string
+          id?: string
+          plan_id?: string
+          recording_days_limit?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_access_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]
