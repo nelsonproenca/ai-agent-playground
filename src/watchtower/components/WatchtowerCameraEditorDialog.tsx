@@ -3,6 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { adminService } from "@/watchtower/services/adminService";
 import type { AdminCameraDto, AdminUserDto, CreateCameraPayload } from "@/watchtower/types/api";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,7 +104,12 @@ export function WatchtowerCameraEditorDialog({
           action: "updated",
           details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
         });
-        toast({ title: "Câmera atualizada" });
+        sonnerToast.success(`Câmera "${form.name}" atualizada com sucesso!`, {
+          description: `Slug: ${form.slug}${form.locationName ? ` • ${form.locationName}` : ""}`,
+          duration: 6000,
+          icon: <CheckCircle2 className="h-5 w-5 text-primary" />,
+          className: "border-primary/40 bg-card",
+        });
       } else {
         const newId = await adminService.createCamera(payload);
         await logAdminEvent({
@@ -112,10 +119,15 @@ export function WatchtowerCameraEditorDialog({
           action: "created",
           details: { slug: form.slug, ownerUserId: payload.ownerUserId || null, isActive: form.isActive },
         });
-        toast({ title: "Câmera cadastrada" });
+        sonnerToast.success(`Câmera "${form.name}" cadastrada com sucesso!`, {
+          description: `Já está disponível na lista. Slug: ${form.slug}`,
+          duration: 6000,
+          icon: <CheckCircle2 className="h-5 w-5 text-primary" />,
+          className: "border-primary/40 bg-card",
+        });
       }
-      // Invalida grid do dashboard para refletir a nova câmera.
-      queryClient.invalidateQueries({ queryKey: ["watchtower-cameras"] });
+      // Invalida grid do dashboard para refletir a nova câmera imediatamente.
+      await queryClient.invalidateQueries({ queryKey: ["watchtower-cameras"] });
       onOpenChange(false);
       onSaved?.();
     } catch (e: unknown) {
