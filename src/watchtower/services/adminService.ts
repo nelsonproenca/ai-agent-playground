@@ -1,4 +1,5 @@
 import { apiClient } from "./apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import type {
   AdminCameraDto,
   AdminPaymentDto,
