@@ -101,7 +101,8 @@ export function WatchtowerCameraGrid() {
     );
   }
 
-  const hasActiveAccess = accessStatus?.userAccessStatus === "Active";
+  // Admin sempre tem acesso a todas as câmeras (não depende de plano).
+  const hasActiveAccess = isAdmin || accessStatus?.userAccessStatus === "Active";
 
   return (
     <div className="space-y-8">
