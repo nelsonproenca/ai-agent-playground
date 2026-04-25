@@ -90,7 +90,7 @@ export function WatchtowerCameraEditorDialog({
     setSaving(true);
     const payload: CreateCameraPayload = {
       ...form,
-      ownerUserId: form.ownerUserId === UNASSIGNED ? "" : form.ownerUserId,
+      ownerUserId: form.ownerUserId === UNASSIGNED ? null : form.ownerUserId,
     };
     try {
       if (editing) {

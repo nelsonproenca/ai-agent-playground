@@ -129,7 +129,7 @@ export interface AdminPlanDto {
 
 export interface AdminCameraDto {
   id: string;
-  ownerUserId: string;
+  ownerUserId: string | null;
   name: string;
   slug: string;
   locationName: string;
@@ -169,7 +169,7 @@ export interface CreatePlanPayload {
 }
 
 export interface CreateCameraPayload {
-  ownerUserId: string;
+  ownerUserId: string | null;
   name: string;
   slug: string;
   locationName: string;

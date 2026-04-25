@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Watchtower <onboarding@resend.dev>",
+        from: "Watchtower Monitoramentos <noreply@nelson-proenca-info.com.br>",
         to: [payload.email],
         subject,
         html,
