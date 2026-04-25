@@ -181,34 +181,37 @@ export type Database = {
       cameras: {
         Row: {
           created_at: string
-          display_name: string
           hls_base_url: string | null
           id: string
-          internal_stream_key: string
+          internal_stream_key: string | null
           is_active: boolean
           location: string | null
+          location_name: string
+          name: string
           owner_user_id: string | null
           slug: string | null
         }
         Insert: {
           created_at?: string
-          display_name: string
           hls_base_url?: string | null
           id?: string
-          internal_stream_key: string
+          internal_stream_key?: string | null
           is_active?: boolean
           location?: string | null
+          location_name?: string
+          name: string
           owner_user_id?: string | null
           slug?: string | null
         }
         Update: {
           created_at?: string
-          display_name?: string
           hls_base_url?: string | null
           id?: string
-          internal_stream_key?: string
+          internal_stream_key?: string | null
           is_active?: boolean
           location?: string | null
+          location_name?: string
+          name?: string
           owner_user_id?: string | null
           slug?: string | null
         }
