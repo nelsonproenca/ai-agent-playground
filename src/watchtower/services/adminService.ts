@@ -29,20 +29,61 @@ const adminService = {
   },
 
   // ─── Cameras ───────────────────────────────────────────────────────────────
+  // Persistência via Supabase (RLS já restringe a admin). O backend externo
+  // continua sendo usado apenas para gerar URLs HLS assinadas.
   async getCameras(): Promise<AdminCameraDto[]> {
-    return apiClient.get<AdminCameraDto[]>("/api/admin/cameras");
+    const { data, error } = await supabase
+      .from("cameras")
+      .select("id, owner_user_id, name, slug, location_name, is_active")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((row) => ({
+      id: row.id,
+      ownerUserId: row.owner_user_id,
+      name: row.name,
+      slug: row.slug ?? "",
+      locationName: row.location_name ?? "",
+      isActive: row.is_active,
+    }));
   },
 
   async createCamera(payload: CreateCameraPayload): Promise<string> {
-    return apiClient.post<string>("/api/admin/cameras", payload);
+    const { data, error } = await supabase
+      .from("cameras")
+      .insert({
+        name: payload.name,
+        slug: payload.slug,
+        location_name: payload.locationName ?? "",
+        hls_base_url: payload.hlsBaseUrl || null,
+        is_active: payload.isActive,
+        owner_user_id: payload.ownerUserId || null,
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return data.id;
   },
 
   async updateCamera(id: string, payload: CreateCameraPayload): Promise<string> {
-    return apiClient.put<string>(`/api/admin/cameras/${id}`, payload);
+    const updates: Record<string, unknown> = {
+      name: payload.name,
+      slug: payload.slug,
+      location_name: payload.locationName ?? "",
+      is_active: payload.isActive,
+      owner_user_id: payload.ownerUserId || null,
+    };
+    // hlsBaseUrl é opcional no update — só sobrescreve se vier preenchido.
+    if (payload.hlsBaseUrl) updates.hls_base_url = payload.hlsBaseUrl;
+
+    const { error } = await supabase.from("cameras").update(updates).eq("id", id);
+    if (error) throw error;
+    return id;
   },
 
   async deleteCamera(id: string): Promise<string> {
-    return apiClient.delete<string>(`/api/admin/cameras/${id}`);
+    const { error } = await supabase.from("cameras").delete().eq("id", id);
+    if (error) throw error;
+    return id;
   },
 
   // ─── Users ─────────────────────────────────────────────────────────────────
