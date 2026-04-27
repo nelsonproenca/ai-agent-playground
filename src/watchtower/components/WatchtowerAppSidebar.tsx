@@ -44,7 +44,7 @@ export function WatchtowerAppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="pt-6 pb-2">
-        <Link to="/" className="flex items-center gap-3 px-2">
+        <Link to="/watchtower" className="flex items-center gap-3 px-2">
           <img
             src="/watchtower-favicon.png"
             alt="Watchtower"
