@@ -1,69 +1,46 @@
-import { useEffect, useState } from "react";
 import { User, LogOut, Mail, Hash, Layers, Camera as CameraIcon, Shield } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
 import { useWatchtowerAuth } from "@/watchtower/contexts/WatchtowerAuthContext";
 import { useIsAdmin } from "@/watchtower/hooks/useIsAdmin";
-import { supabase } from "@/integrations/supabase/client";
-
-interface UserInfo {
-  displayName: string | null;
-  email: string | null;
-  userCode: string;
-  planName: string | null;
-  cameraCount: number;
-}
+import { cameraService } from "@/watchtower/services/cameraService";
+import { paymentService } from "@/watchtower/services/paymentService";
 
 export function WatchtowerUserMenu() {
   const { user, signOut } = useWatchtowerAuth();
   const { isAdmin } = useIsAdmin();
-  const [info, setInfo] = useState<UserInfo | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      setInfo(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        const [{ data: profile }, { data: subs }, { count: cameraCount }] = await Promise.all([
-          supabase.from("profiles").select("display_name, email").eq("user_id", user.id).maybeSingle(),
-          supabase
-            .from("subscriptions")
-            .select("plan_type, expires_at")
-            .eq("user_id", user.id)
-            .gt("expires_at", new Date().toISOString())
-            .order("expires_at", { ascending: false })
-            .limit(1),
-          isAdmin
-            ? supabase.from("cameras").select("*", { count: "exact", head: true })
-            : supabase.from("cameras").select("*", { count: "exact", head: true }).eq("owner_user_id", user.id),
-        ]);
+  const { data: cameras } = useQuery({
+    queryKey: ["watchtower-cameras"],
+    queryFn: () => cameraService.getAll(),
+    enabled: !!user,
+    staleTime: 60_000,
+  });
 
-        if (cancelled) return;
-        const planName = isAdmin ? "Admin (acesso total)" : subs?.[0]?.plan_type ?? null;
-        setInfo({
-          displayName: profile?.display_name ?? null,
-          email: profile?.email ?? user.email ?? null,
-          userCode: user.id.slice(0, 8).toUpperCase(),
-          planName,
-          cameraCount: cameraCount ?? 0,
-        });
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user, isAdmin]);
+  const { data: paymentStatus } = useQuery({
+    queryKey: ["watchtower-payment-status", user?.id],
+    queryFn: () => paymentService.getStatus(),
+    enabled: !!user,
+    staleTime: 60_000,
+  });
 
-  const initials = (info?.displayName || info?.email || "U").slice(0, 2).toUpperCase();
+  const displayName = (user?.user_metadata?.display_name as string | undefined) ?? null;
+  const email = user?.email ?? null;
+  const userCode = user ? user.id.slice(0, 8).toUpperCase() : "—";
+  const cameraCount = cameras?.length ?? 0;
+
+  const planName = isAdmin
+    ? "Admin (acesso total)"
+    : paymentStatus?.userAccessStatus === "Active"
+      ? "Acesso ativo"
+      : paymentStatus?.userAccessStatus === "PendingSetup"
+        ? "Aguardando aprovação"
+        : null;
+
+  const initials = (displayName || email || "U").slice(0, 2).toUpperCase();
 
   return (
     <Popover>
@@ -82,7 +59,7 @@ export function WatchtowerUserMenu() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-display text-sm font-bold text-foreground tracking-wider truncate">
-              {info?.displayName || "USUÁRIO"}
+              {displayName || email?.split("@")[0]?.toUpperCase() || "USUÁRIO"}
             </p>
             <p className="text-[10px] tracking-[0.15em] text-muted-foreground mt-0.5">
               {isAdmin ? "ADMINISTRADOR" : "CLIENTE"}
@@ -96,15 +73,10 @@ export function WatchtowerUserMenu() {
         </div>
 
         <div className="p-4 space-y-3 text-xs">
-          <InfoRow icon={Mail} label="EMAIL" value={info?.email ?? "—"} loading={loading} />
-          <InfoRow icon={Hash} label="CÓDIGO" value={info?.userCode ?? "—"} loading={loading} mono />
-          <InfoRow icon={Layers} label="PLANO" value={info?.planName ?? "Sem plano ativo"} loading={loading} />
-          <InfoRow
-            icon={CameraIcon}
-            label="CÂMERAS VINCULADAS"
-            value={loading ? "…" : String(info?.cameraCount ?? 0)}
-            loading={loading}
-          />
+          <InfoRow icon={Mail} label="EMAIL" value={email ?? "—"} />
+          <InfoRow icon={Hash} label="CÓDIGO" value={userCode} mono />
+          <InfoRow icon={Layers} label="PLANO" value={planName ?? "Sem plano ativo"} />
+          <InfoRow icon={CameraIcon} label="CÂMERAS VINCULADAS" value={String(cameraCount)} />
         </div>
 
         <Separator />
@@ -128,13 +100,11 @@ function InfoRow({
   icon: Icon,
   label,
   value,
-  loading,
   mono,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
-  loading?: boolean;
   mono?: boolean;
 }) {
   return (
@@ -142,11 +112,8 @@ function InfoRow({
       <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <p className="text-[10px] tracking-[0.15em] text-muted-foreground">{label}</p>
-        <p
-          className={`text-foreground truncate ${mono ? "font-mono" : ""}`}
-          title={value}
-        >
-          {loading ? "…" : value}
+        <p className={`text-foreground truncate ${mono ? "font-mono" : ""}`} title={value}>
+          {value}
         </p>
       </div>
     </div>
