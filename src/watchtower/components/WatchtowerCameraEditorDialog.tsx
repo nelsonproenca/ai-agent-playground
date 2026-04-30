@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { adminService } from "@/watchtower/services/adminService";
-import type { AdminCameraDto, AdminUserDto, CreateCameraPayload } from "@/watchtower/types/api";
+import type { AdminCameraDto, AdminUserDto, CreateCameraPayload, StreamProtocol } from "@/watchtower/types/api";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import { CheckCircle2 } from "lucide-react";
@@ -26,6 +26,7 @@ const emptyForm: CreateCameraPayload = {
   slug: "",
   locationName: "",
   hlsBaseUrl: "",
+  protocol: "Rtsp",
   isActive: true,
 };
 
@@ -76,7 +77,8 @@ export function WatchtowerCameraEditorDialog({
         name: editing.name,
         slug: editing.slug,
         locationName: editing.locationName,
-        hlsBaseUrl: "",
+        hlsBaseUrl: editing.hlsBaseUrl ?? "",
+        protocol: editing.protocol ?? "Rtsp",
         isActive: editing.isActive,
       });
     } else {
@@ -160,6 +162,23 @@ export function WatchtowerCameraEditorDialog({
           <div className="space-y-2">
             <Label>HLS Base URL *</Label>
             <Input value={form.hlsBaseUrl} onChange={(e) => setForm({ ...form, hlsBaseUrl: e.target.value })} placeholder="http://127.0.0.1:8888" className="font-mono" />
+          </div>
+          <div className="space-y-2">
+            <Label>Protocolo de ingestão</Label>
+            <Select value={form.protocol} onValueChange={(v) => setForm({ ...form, protocol: v as StreamProtocol })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Rtsp">RTSP (padrão)</SelectItem>
+                <SelectItem value="Rtmp">RTMP (porta 1935)</SelectItem>
+              </SelectContent>
+            </Select>
+            {form.protocol === "Rtmp" && form.slug && (
+              <p className="text-xs text-muted-foreground font-mono">
+                rtmp://&lt;vps-ip&gt;:1935/live/{form.slug}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Usuário dono</Label>

@@ -11,7 +11,7 @@ import {
 
 // Itens disponíveis para todos (admins e clientes).
 const commonItems = [
-  { title: "Câmeras", url: "/watchtower/dashboard", icon: LayoutGrid, end: true },
+  { title: "Minhas Câmeras", url: "/watchtower/dashboard", icon: LayoutGrid, end: true },
   { title: "Configurações", url: "/watchtower/dashboard/settings", icon: Settings, end: false },
 ];
 

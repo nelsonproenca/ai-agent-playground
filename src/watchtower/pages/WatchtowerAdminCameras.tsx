@@ -134,6 +134,7 @@ export default function WatchtowerAdminCameras() {
               <TableHead>Status</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>Slug</TableHead>
+              <TableHead>Protocolo</TableHead>
               <TableHead>Localização</TableHead>
               <TableHead>Dono (userId)</TableHead>
               <TableHead>Ativo</TableHead>
@@ -143,13 +144,13 @@ export default function WatchtowerAdminCameras() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                   <Loader2 className="h-5 w-5 animate-spin inline" />
                 </TableCell>
               </TableRow>
             ) : cameras.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">Nenhuma câmera cadastrada.</TableCell>
+                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Nenhuma câmera cadastrada.</TableCell>
               </TableRow>
             ) : cameras.map((cam) => {
               const status = statusMap[cam.id];
@@ -166,6 +167,11 @@ export default function WatchtowerAdminCameras() {
                   </TableCell>
                   <TableCell className="font-medium">{cam.name}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{cam.slug}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={cam.protocol === "Rtmp" ? "border-orange-400/40 text-orange-400" : "text-muted-foreground"}>
+                      {cam.protocol ?? "RTSP"}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{cam.locationName || "—"}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{cam.ownerUserId ? cam.ownerUserId.slice(0, 8) + "…" : "—"}</TableCell>
                   <TableCell>

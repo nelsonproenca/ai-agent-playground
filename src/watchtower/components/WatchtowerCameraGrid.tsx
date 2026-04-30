@@ -6,7 +6,7 @@ import { cameraService, paymentService } from "@/watchtower/services";
 import { WatchtowerCameraCard } from "./WatchtowerCameraCard";
 import { WatchtowerEmptyCameraCard } from "./WatchtowerEmptyCameraCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
@@ -29,6 +29,8 @@ export function WatchtowerCameraGrid() {
   const { isAdmin } = useIsAdmin();
   const [pageSize, setPageSize] = useState<PageSize>(4);
   const [page, setPage] = useState(0);
+  const [addOpen, setAddOpen] = useState(true);
+  const [activesOpen, setActivesOpen] = useState(true);
 
   const { data: cameras, isLoading: camerasLoading } = useQuery({
     queryKey: ["watchtower-cameras"],
@@ -131,72 +133,88 @@ export function WatchtowerCameraGrid() {
         </div>
       </div>
 
-      {/* SEÇÃO ADMIN: slot de cadastro sempre no topo */}
+      {/* SEÇÃO ADMIN: slot de cadastro colapsável */}
       {isAdmin && (
         <section className="space-y-3">
-          <div className="flex items-center gap-3">
+          <button
+            onClick={() => setAddOpen((o) => !o)}
+            className="flex items-center gap-3 w-full group"
+          >
             <span className="text-[10px] font-bold tracking-[0.25em] text-primary">
               ADICIONAR CÂMERA
             </span>
             <div className="h-px flex-1 bg-border" />
-          </div>
-          <div className={GRID_CLASSES[safePageSize]}>
-            <WatchtowerEmptyCameraCard index={0} isAdmin />
-          </div>
+            {addOpen
+              ? <ChevronUp className="h-3.5 w-3.5 text-primary shrink-0" />
+              : <ChevronDown className="h-3.5 w-3.5 text-primary shrink-0" />}
+          </button>
+          {addOpen && (
+            <div className={GRID_CLASSES[safePageSize]}>
+              <WatchtowerEmptyCameraCard index={0} isAdmin />
+            </div>
+          )}
         </section>
       )}
 
-      {/* SEÇÃO: câmeras ativas */}
+      {/* SEÇÃO: câmeras ativas colapsável */}
       <section className="space-y-3">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => setActivesOpen((o) => !o)}
+          className="flex items-center gap-3 w-full group"
+        >
           <span className="text-[10px] font-bold tracking-[0.25em] text-muted-foreground">
             CÂMERAS ATIVAS {cameraCount > 0 && `(${cameraCount})`}
           </span>
           <div className="h-px flex-1 bg-border" />
-        </div>
+          {activesOpen
+            ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+        </button>
 
-        {cameraCount === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center border border-dashed border-border rounded-lg">
-            Nenhuma câmera ativa no momento.
-          </p>
-        ) : (
-          <>
-            <div className={GRID_CLASSES[safePageSize]}>
-              {visibleCameras.map((camera) => (
-                <WatchtowerCameraCard
-                  key={camera.id}
-                  camera={camera}
-                  hasAccess={hasActiveAccess}
-                />
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(0, Math.min(p, totalPages - 1) - 1))}
-                  disabled={currentPage === 0}
-                  aria-label="Página anterior"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-muted-foreground px-2">
-                  {currentPage + 1} / {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(Math.max(0, totalPages - 1), Math.max(0, p) + 1))}
-                  disabled={currentPage >= totalPages - 1}
-                  aria-label="Próxima página"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+        {activesOpen && (
+          cameraCount === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center border border-dashed border-border rounded-lg">
+              Nenhuma câmera ativa no momento.
+            </p>
+          ) : (
+            <>
+              <div className={GRID_CLASSES[safePageSize]}>
+                {visibleCameras.map((camera) => (
+                  <WatchtowerCameraCard
+                    key={camera.id}
+                    camera={camera}
+                    hasAccess={hasActiveAccess}
+                  />
+                ))}
               </div>
-            )}
-          </>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(0, Math.min(p, totalPages - 1) - 1))}
+                    disabled={currentPage === 0}
+                    aria-label="Página anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    {currentPage + 1} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(Math.max(0, totalPages - 1), Math.max(0, p) + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    aria-label="Próxima página"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )
         )}
       </section>
 
