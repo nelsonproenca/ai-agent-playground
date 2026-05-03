@@ -27,6 +27,7 @@ const emptyForm: CreateCameraPayload = {
   locationName: "",
   hlsBaseUrl: "",
   protocol: "Rtsp",
+  bridgeSourceUrl: null,
   isActive: true,
 };
 
@@ -79,6 +80,7 @@ export function WatchtowerCameraEditorDialog({
         locationName: editing.locationName,
         hlsBaseUrl: editing.hlsBaseUrl ?? "",
         protocol: editing.protocol ?? "Rtsp",
+        bridgeSourceUrl: editing.bridgeSourceUrl ?? null,
         isActive: editing.isActive,
       });
     } else {
@@ -165,21 +167,39 @@ export function WatchtowerCameraEditorDialog({
           </div>
           <div className="space-y-2">
             <Label>Protocolo de ingestão</Label>
-            <Select value={form.protocol} onValueChange={(v) => setForm({ ...form, protocol: v as StreamProtocol })}>
+            <Select value={form.protocol} onValueChange={(v) => setForm({ ...form, protocol: v as StreamProtocol, bridgeSourceUrl: v === "Bridge" ? (form.bridgeSourceUrl ?? "") : null })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Rtsp">RTSP (padrão)</SelectItem>
                 <SelectItem value="Rtmp">RTMP (porta 1935)</SelectItem>
+                <SelectItem value="Bridge">Bridge via go2rtc</SelectItem>
               </SelectContent>
             </Select>
             {form.protocol === "Rtmp" && form.slug && (
               <p className="text-xs text-muted-foreground font-mono">
-                rtmp://&lt;vps-ip&gt;:1935/live/{form.slug}
+                rtmp://&lt;vps-ip&gt;:1935/{form.slug}
               </p>
             )}
           </div>
+          {form.protocol === "Bridge" && (
+            <div className="space-y-2">
+              <Label>URL de origem (go2rtc) *</Label>
+              <Input
+                value={form.bridgeSourceUrl ?? ""}
+                onChange={(e) => setForm({ ...form, bridgeSourceUrl: e.target.value || null })}
+                placeholder="dvrip://admin:senha@192.168.1.100:34567"
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">
+                Exemplos: <span className="font-mono">dvrip://</span> (V380/ICSee) · <span className="font-mono">rtsp://</span> · <span className="font-mono">http://ip/video.mjpeg</span>
+              </p>
+              <p className="text-xs text-amber-500/80">
+                O slug deve começar com <span className="font-mono">bridge_</span> para ser roteado pelo MediaMTX.
+              </p>
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Usuário dono</Label>
             <Select value={form.ownerUserId || UNASSIGNED} onValueChange={(v) => setForm({ ...form, ownerUserId: v })}>

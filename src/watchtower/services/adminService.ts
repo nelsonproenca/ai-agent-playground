@@ -69,6 +69,23 @@ const adminService = {
   async rejectPayment(paymentId: string): Promise<string> {
     return apiClient.post<string>(`/api/admin/payments/${paymentId}/reject`, {});
   },
+
+  // ─── Bridge Config ─────────────────────────────────────────────────────────
+  async downloadBridgeConfig(userId: string | null): Promise<void> {
+    const path = userId ? `/api/admin/bridge/${userId}` : `/api/admin/bridge/unassigned`;
+    const defaultName = userId
+      ? `watchtower-bridge-${userId.replace(/-/g, "")}.zip`
+      : `watchtower-bridge-sem-dono.zip`;
+    const { blob, filename } = await apiClient.getBlob(path);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename ?? defaultName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
 };
 
 export { adminService };

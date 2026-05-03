@@ -12,7 +12,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Wifi, WifiOff, RefreshCw, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Wifi, WifiOff, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
 import { logAdminEvent } from "@/watchtower/services/auditLogService";
 import { WatchtowerCameraEditorDialog } from "@/watchtower/components/WatchtowerCameraEditorDialog";
 
@@ -30,6 +30,7 @@ export default function WatchtowerAdminCameras() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<AdminCameraDto | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminCameraDto | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) navigate("/watchtower/dashboard", { replace: true });
@@ -71,6 +72,7 @@ export default function WatchtowerAdminCameras() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+    setDeleting(true);
     try {
       await adminService.deleteCamera(deleteTarget.id);
       await logAdminEvent({
@@ -80,11 +82,13 @@ export default function WatchtowerAdminCameras() {
         action: "deleted",
         details: { slug: deleteTarget.slug },
       });
-      toast({ title: "Câmera excluída" });
+      toast({ title: "Câmera excluída com sucesso." });
       setDeleteTarget(null);
       loadAll();
     } catch (e: unknown) {
       toast({ title: "Erro ao excluir", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -200,17 +204,55 @@ export default function WatchtowerAdminCameras() {
         onSaved={loadAll}
       />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir câmera?</AlertDialogTitle>
-            <AlertDialogDescription>
-              A câmera <strong>{deleteTarget?.name}</strong> e seus logs relacionados serão removidos. Esta ação não pode ser desfeita.
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 shrink-0">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <AlertDialogTitle className="text-lg">Excluir câmera permanentemente?</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Você está prestes a excluir a câmera{" "}
+                  <span className="font-semibold text-foreground">{deleteTarget?.name}</span>.
+                  Esta ação <span className="font-semibold text-destructive">não pode ser desfeita</span>.
+                </p>
+                <div className="rounded-md border border-border bg-muted/50 px-3 py-2 text-xs space-y-1">
+                  <div className="flex gap-2">
+                    <span className="text-muted-foreground w-16 shrink-0">Slug</span>
+                    <span className="font-mono text-foreground">{deleteTarget?.slug}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-muted-foreground w-16 shrink-0">Protocolo</span>
+                    <span className="text-foreground">{deleteTarget?.protocol ?? "RTSP"}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-muted-foreground w-16 shrink-0">Localização</span>
+                    <span className="text-foreground">{deleteTarget?.locationName || "—"}</span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Todos os logs de health check vinculados também serão removidos.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Excluindo...</>
+              ) : (
+                <><Trash2 className="h-4 w-4 mr-2" /> Excluir câmera</>
+              )}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

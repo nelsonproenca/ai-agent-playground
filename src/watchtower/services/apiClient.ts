@@ -92,4 +92,19 @@ async function del<T>(path: string): Promise<T> {
   return handleResponse<T>(res);
 }
 
-export const apiClient = { get, post, postForm, put, delete: del };
+async function getBlob(path: string): Promise<{ blob: Blob; filename?: string }> {
+  const headers = await getAuthHeader();
+  const res = await fetch(`${BASE_URL}${path}`, { headers });
+  if (!res.ok) {
+    let problem: ApiProblem | undefined;
+    try { problem = (await res.json()) as ApiProblem; } catch { /* não é JSON */ }
+    const detail = problem?.detail ?? problem?.title ?? `HTTP ${res.status} ${res.statusText}`;
+    throw new ApiError(res.status, detail, problem);
+  }
+  const blob = await res.blob();
+  const cd = res.headers.get("content-disposition");
+  const filename = cd?.match(/filename[*]?=(?:UTF-8''|")?([^";\n]+)"?/i)?.[1];
+  return { blob, filename };
+}
+
+export const apiClient = { get, post, postForm, put, delete: del, getBlob };

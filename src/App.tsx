@@ -49,6 +49,7 @@ import WatchtowerAdminPlans from "./watchtower/pages/WatchtowerAdminPlans";
 import WatchtowerAdminCameras from "./watchtower/pages/WatchtowerAdminCameras";
 import WatchtowerAdminPayments from "./watchtower/pages/WatchtowerAdminPayments";
 import WatchtowerAdminAudit from "./watchtower/pages/WatchtowerAdminAudit";
+import WatchtowerAdminBridges from "./watchtower/pages/WatchtowerAdminBridges";
 import WatchtowerResetPassword from "./watchtower/pages/WatchtowerResetPassword";
 import WatchtowerWaiting from "./watchtower/pages/WatchtowerWaiting";
 
@@ -140,7 +141,10 @@ function WatchtowerThemeWrapper({ children }: { children: React.ReactNode }) {
   const isWatchtower = pathname.startsWith("/watchtower");
   // Oculta o botão flutuante em telas de autenticação para não competir com o formulário
   const hideWhatsApp =
-    pathname === "/watchtower/auth" || pathname === "/watchtower/reset-password";
+    pathname === "/watchtower/auth" ||
+    pathname === "/watchtower/reset-password" ||
+    pathname.startsWith("/watchtower/dashboard/admin") ||
+    pathname === "/watchtower/dashboard/health";
   return (
     <div className={isWatchtower ? "watchtower-theme min-h-screen" : ""}>
       {children}
@@ -191,6 +195,7 @@ const App = () => (
                 <Route path="/watchtower/dashboard/admin/cameras" element={<WatchtowerAdminRoute><WatchtowerAdminCameras /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/dashboard/admin/payments" element={<WatchtowerAdminRoute><WatchtowerAdminPayments /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/dashboard/admin/audit" element={<WatchtowerAdminRoute><WatchtowerAdminAudit /></WatchtowerAdminRoute>} />
+                <Route path="/watchtower/dashboard/admin/bridges" element={<WatchtowerAdminRoute><WatchtowerAdminBridges /></WatchtowerAdminRoute>} />
                 <Route path="/watchtower/reset-password" element={<WatchtowerResetPassword />} />
                 <Route path="/watchtower/waiting" element={<WatchtowerWaiting />} />
                 <Route path="/watchtower/about" element={<WatchtowerAbout />} />

@@ -113,7 +113,7 @@ export interface RunHealthCheckResult {
 
 export type PlanTier = "Acesso24h" | "Bronze" | "Silver" | "Gold";
 export type PlanFeatures = "LiveOnly" | "WithRecordings" | "WithDownloads";
-export type StreamProtocol = "Rtsp" | "Rtmp";
+export type StreamProtocol = "Rtsp" | "Rtmp" | "Bridge";
 
 export interface AdminPlanDto {
   id: string;
@@ -136,6 +136,7 @@ export interface AdminCameraDto {
   locationName: string;
   hlsBaseUrl: string;
   protocol: StreamProtocol;
+  bridgeSourceUrl: string | null;
   isActive: boolean;
 }
 
@@ -145,6 +146,8 @@ export interface AdminUserDto {
   accessStatus: UserAccessStatus | null;
   accessExpiresAt: string | null;
   planName: string | null;
+  email: string | null;
+  displayName: string | null;
 }
 
 export interface AdminPaymentDto {
@@ -178,6 +181,7 @@ export interface CreateCameraPayload {
   locationName: string;
   hlsBaseUrl: string;
   protocol: StreamProtocol;
+  bridgeSourceUrl: string | null;
   isActive: boolean;
 }
 
