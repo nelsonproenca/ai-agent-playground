@@ -183,6 +183,7 @@ export type Database = {
       }
       cameras: {
         Row: {
+          bridge_source_url: string | null
           created_at: string
           hls_base_url: string | null
           id: string
@@ -192,9 +193,11 @@ export type Database = {
           location_name: string
           name: string
           owner_user_id: string | null
+          protocol: string
           slug: string | null
         }
         Insert: {
+          bridge_source_url?: string | null
           created_at?: string
           hls_base_url?: string | null
           id?: string
@@ -204,9 +207,11 @@ export type Database = {
           location_name?: string
           name: string
           owner_user_id?: string | null
+          protocol?: string
           slug?: string | null
         }
         Update: {
+          bridge_source_url?: string | null
           created_at?: string
           hls_base_url?: string | null
           id?: string
@@ -216,6 +221,7 @@ export type Database = {
           location_name?: string
           name?: string
           owner_user_id?: string | null
+          protocol?: string
           slug?: string | null
         }
         Relationships: []
@@ -416,6 +422,53 @@ export type Database = {
           visto_pelo_nelson?: boolean | null
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          comprovante_url: string
+          cpf: string
+          created_at: string
+          id: string
+          n8n_notified_at: string | null
+          nome: string
+          plan_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comprovante_url: string
+          cpf: string
+          created_at?: string
+          id?: string
+          n8n_notified_at?: string | null
+          nome: string
+          plan_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comprovante_url?: string
+          cpf?: string
+          created_at?: string
+          id?: string
+          n8n_notified_at?: string | null
+          nome?: string
+          plan_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pending_payments: {
         Row: {
@@ -740,6 +793,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_notification_preferences: {
+        Row: {
+          id: string
+          maintenance_notices: boolean
+          movement_alerts: boolean
+          updated_at: string
+          user_id: string
+          weekly_email_reports: boolean
+        }
+        Insert: {
+          id?: string
+          maintenance_notices?: boolean
+          movement_alerts?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_email_reports?: boolean
+        }
+        Update: {
+          id?: string
+          maintenance_notices?: boolean
+          movement_alerts?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_email_reports?: boolean
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
