@@ -53,6 +53,7 @@ export function WatchtowerCameraGrid() {
 
   // Garante contagem não-negativa mesmo se a API retornar payload inesperado.
   const cameraCount = Math.max(0, cameras?.length ?? 0);
+  const onlineCount = cameras?.filter((c) => c.isActive).length ?? 0;
 
   // Para admin: sempre exibimos exatamente 1 slot de cadastro no topo.
   // Para usuário: completamos até MIN_VISIBLE_SLOTS_USER se houver poucas câmeras.
@@ -109,10 +110,13 @@ export function WatchtowerCameraGrid() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <p className="text-xs tracking-[0.15em] text-muted-foreground">
-          {cameraCount} {cameraCount === 1 ? "CÂMERA ATIVA" : "CÂMERAS ATIVAS"}
-          {!isAdmin && placeholderCount > 0 && ` • ${placeholderCount} ${placeholderCount === 1 ? "SLOT DISPONÍVEL" : "SLOTS DISPONÍVEIS"}`}
-          {cameraCount > safePageSize && ` • PÁGINA ${currentPage + 1}/${totalPages}`}
+        <p className="font-mono text-xs tracking-widest text-muted-foreground">
+          {cameraCount} {cameraCount === 1 ? "câmera" : "câmeras"}
+          {cameras && (
+            <span className="text-primary/60"> · {onlineCount} online</span>
+          )}
+          {!isAdmin && placeholderCount > 0 && ` · ${placeholderCount} ${placeholderCount === 1 ? "slot livre" : "slots livres"}`}
+          {cameraCount > safePageSize && ` · pág. ${currentPage + 1}/${totalPages}`}
         </p>
         <div className="flex items-center gap-2">
           <label htmlFor="cameras-per-page" className="text-xs tracking-[0.15em] text-muted-foreground">

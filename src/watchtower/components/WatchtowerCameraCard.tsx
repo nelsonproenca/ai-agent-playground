@@ -246,6 +246,9 @@ export function WatchtowerCameraCard({ camera, hasAccess }: CameraCardProps) {
                   : "border-border text-muted-foreground"
               }`}
             >
+              {isStreaming && (
+                <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse mr-1.5" />
+              )}
               {hasAccess ? (isStreaming ? "AO VIVO" : "ATIVO") : "SEM PLANO"}
             </Badge>
           </div>

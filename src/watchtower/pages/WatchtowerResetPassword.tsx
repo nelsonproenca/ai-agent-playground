@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, ChevronLeft } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft, CheckCircle2 } from "lucide-react";
 import { evaluatePassword, PasswordStrengthMeter, PasswordRulesHint } from "@/watchtower/components/WatchtowerPasswordStrength";
 
 export default function WatchtowerResetPassword() {
@@ -14,6 +14,7 @@ export default function WatchtowerResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [validSession, setValidSession] = useState<boolean | null>(null);
+  const [resetDone, setResetDone] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -66,8 +67,7 @@ export default function WatchtowerResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      toast({ title: "Senha redefinida!", description: "Sua nova senha foi salva. Você já está logado." });
-      navigate("/watchtower/dashboard");
+      setResetDone(true);
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally {
@@ -96,7 +96,21 @@ export default function WatchtowerResetPassword() {
           <h2 className="font-display text-2xl font-bold text-foreground mb-1">NOVA SENHA</h2>
           <p className="text-xs text-muted-foreground mb-8">Defina uma nova senha para acessar sua conta.</p>
 
-          {validSession === false ? (
+          {resetDone ? (
+            <div className="text-center space-y-6">
+              <CheckCircle2 className="h-12 w-12 text-primary mx-auto" />
+              <div className="space-y-1">
+                <p className="font-mono text-sm font-bold tracking-widest text-foreground">SENHA REDEFINIDA!</p>
+                <p className="text-xs text-muted-foreground">Sua nova senha foi salva com sucesso. Você já está autenticado.</p>
+              </div>
+              <Button
+                className="w-full h-11 font-mono text-xs tracking-widest"
+                onClick={() => navigate("/watchtower/dashboard")}
+              >
+                IR PARA O PAINEL →
+              </Button>
+            </div>
+          ) : validSession === false ? (
             <div className="space-y-4">
               <p className="text-xs text-destructive">Link inválido ou expirado. Solicite um novo e-mail de recuperação.</p>
               <Button onClick={() => navigate("/watchtower/auth")} className="w-full h-11 font-semibold text-xs tracking-wider">

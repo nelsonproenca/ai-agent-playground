@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Inbox, Users, Building2, QrCode, FileText, CalendarDays, ShoppingBag, LogOut } from "lucide-react";
+import { Inbox, Users, Building2, QrCode, FileText, CalendarDays, ShoppingBag, LogOut, FolderKanban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -9,6 +9,7 @@ const adminLinks = [
   { to: "/admin/agendamentos", icon: CalendarDays, label: "Agendamentos", desc: "Dashboard de reuniões e pipeline" },
   { to: "/admin/colaboradores", icon: Users, label: "Colaboradores", desc: "Equipe e departamentos" },
   { to: "/admin/clientes", icon: Building2, label: "Clientes", desc: "Empresas e contatos" },
+  { to: "/admin/projetos", icon: FolderKanban, label: "Projetos", desc: "Portfólio e portal do cliente" },
   { to: "/convites", icon: QrCode, label: "Gerador de Convites", desc: "QR Codes e links" },
   { to: "/admin/produtos", icon: ShoppingBag, label: "Produtos DTC", desc: "Loja e inventário" },
   { to: "/landing", icon: FileText, label: "Flyer para Impressão", desc: "Landing page com QR personalizado" },

@@ -23,6 +23,7 @@ import Admin from "./pages/Admin";
 import LeadsPage from "./pages/LeadsPage";
 import ColabsPage from "./pages/ColabsPage";
 import ClientesPage from "./pages/ClientesPage";
+import ProjetosPage from "./pages/ProjetosPage";
 import GeradorConvites from "./pages/GeradorConvites";
 import Contato from "./pages/Contato";
 import SuccessBooking from "./pages/SuccessBooking";
@@ -30,6 +31,7 @@ import LandingPage from "./pages/LandingPage";
 import DashboardAgendamentos from "./pages/DashboardAgendamentos";
 import LojaPage from "./pages/LojaPage";
 import ProdutosPage from "./pages/ProdutosPage";
+import Claw3D from "./pages/Claw3D";
 import NotFound from "./pages/NotFound";
 
 // Watchtower pages
@@ -52,6 +54,7 @@ import WatchtowerAdminAudit from "./watchtower/pages/WatchtowerAdminAudit";
 import WatchtowerAdminBridges from "./watchtower/pages/WatchtowerAdminBridges";
 import WatchtowerResetPassword from "./watchtower/pages/WatchtowerResetPassword";
 import WatchtowerWaiting from "./watchtower/pages/WatchtowerWaiting";
+import WatchtowerPlans from "./watchtower/pages/WatchtowerPlans";
 
 const queryClient = new QueryClient();
 
@@ -173,6 +176,7 @@ const App = () => (
                 <Route path="/admin/leads" element={<LeadsPage />} />
                 <Route path="/admin/colaboradores" element={<ColabsPage />} />
                 <Route path="/admin/clientes" element={<ClientesPage />} />
+                <Route path="/admin/projetos" element={<ProjetosPage />} />
                 <Route path="/convites" element={<GeradorConvites />} />
                 <Route path="/contato" element={<Contato />} />
                 <Route path="/booking-success" element={<SuccessBooking />} />
@@ -180,9 +184,11 @@ const App = () => (
                 <Route path="/admin/agendamentos" element={<DashboardAgendamentos />} />
                 <Route path="/admin/produtos" element={<ProdutosPage />} />
                 <Route path="/loja" element={<LojaPage />} />
+                <Route path="/claw3d" element={<Claw3D />} />
 
                 {/* Watchtower Hub routes */}
                 <Route path="/watchtower" element={<WatchtowerPublicRoute><WatchtowerLanding /></WatchtowerPublicRoute>} />
+                <Route path="/watchtower/plans" element={<WatchtowerPlans />} />
                 <Route path="/watchtower/auth" element={<WatchtowerPublicRoute><WatchtowerAuth /></WatchtowerPublicRoute>} />
                 <Route path="/watchtower/dashboard" element={<WatchtowerProtectedRoute><WatchtowerDashboard /></WatchtowerProtectedRoute>} />
                 <Route path="/watchtower/dashboard/live" element={<WatchtowerProtectedRoute><WatchtowerLive /></WatchtowerProtectedRoute>} />
