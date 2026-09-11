@@ -24,6 +24,11 @@ import LeadsPage from "./pages/LeadsPage";
 import ColabsPage from "./pages/ColabsPage";
 import ClientesPage from "./pages/ClientesPage";
 import ProjetosPage from "./pages/ProjetosPage";
+import ProjetoDetalhePage from "./pages/ProjetoDetalhePage";
+import PortalPage from "./pages/PortalPage";
+import PortalProjetoDetalhePage from "./pages/PortalProjetoDetalhePage";
+import PortfolioPage from "./pages/PortfolioPage";
+import { ClientAuthProvider } from "@/features/portfolio/useClientAuth";
 import GeradorConvites from "./pages/GeradorConvites";
 import Contato from "./pages/Contato";
 import SuccessBooking from "./pages/SuccessBooking";
@@ -170,6 +175,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/colabs" element={<Colabs />} />
                 <Route path="/clientes" element={<Clientes />} />
+                <Route path="/projetos" element={<PortfolioPage />} />
                 <Route path="/playground" element={<Playground />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/admin" element={<Admin />} />
@@ -177,6 +183,9 @@ const App = () => (
                 <Route path="/admin/colaboradores" element={<ColabsPage />} />
                 <Route path="/admin/clientes" element={<ClientesPage />} />
                 <Route path="/admin/projetos" element={<ProjetosPage />} />
+                <Route path="/admin/projetos/:id" element={<ProjetoDetalhePage />} />
+                <Route path="/portal" element={<ClientAuthProvider><PortalPage /></ClientAuthProvider>} />
+                <Route path="/portal/:id" element={<ClientAuthProvider><PortalProjetoDetalhePage /></ClientAuthProvider>} />
                 <Route path="/convites" element={<GeradorConvites />} />
                 <Route path="/contato" element={<Contato />} />
                 <Route path="/booking-success" element={<SuccessBooking />} />

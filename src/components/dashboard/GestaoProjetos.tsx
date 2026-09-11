@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ const visibilidadeLabel: Record<string, string> = {
 };
 
 const GestaoProjetos = () => {
+  const navigate = useNavigate();
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,7 +214,11 @@ const GestaoProjetos = () => {
                 </TableRow>
               ) : (
                 projetos.map((p) => (
-                  <TableRow key={p.id} className="border-border">
+                  <TableRow
+                    key={p.id}
+                    className="border-border cursor-pointer hover:bg-secondary/50"
+                    onClick={() => navigate(`/admin/projetos/${p.id}`)}
+                  >
                     <TableCell className="font-medium text-foreground">{p.nome}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{clienteNome(p.cliente_id)}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{p.categoria ?? "—"}</TableCell>

@@ -135,6 +135,54 @@ export type Database = {
         }
         Relationships: []
       }
+      artefatos: {
+        Row: {
+          created_at: string
+          etapa_id: string | null
+          id: string
+          nome: string
+          projeto_id: string
+          tipo: string
+          uploaded_by: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          etapa_id?: string | null
+          id?: string
+          nome: string
+          projeto_id: string
+          tipo?: string
+          uploaded_by?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          etapa_id?: string | null
+          id?: string
+          nome?: string
+          projeto_id?: string
+          tipo?: string
+          uploaded_by?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artefatos_etapa_id_fkey"
+            columns: ["etapa_id"]
+            isOneToOne: false
+            referencedRelation: "etapas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artefatos_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       camera_health_config: {
         Row: {
           admin_email: string | null
@@ -409,6 +457,41 @@ export type Database = {
         }
         Relationships: []
       }
+      etapas: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          projeto_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          projeto_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          projeto_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etapas_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads_ia: {
         Row: {
           analise_ia: string | null
@@ -491,6 +574,83 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedido_respostas: {
+        Row: {
+          arquivo_url: string | null
+          created_at: string
+          id: string
+          pedido_id: string
+          texto: string
+        }
+        Insert: {
+          arquivo_url?: string | null
+          created_at?: string
+          id?: string
+          pedido_id: string
+          texto: string
+        }
+        Update: {
+          arquivo_url?: string | null
+          created_at?: string
+          id?: string
+          pedido_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_respostas_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos: {
+        Row: {
+          created_at: string
+          etapa_id: string | null
+          id: string
+          projeto_id: string
+          status: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          etapa_id?: string | null
+          id?: string
+          projeto_id: string
+          status?: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          created_at?: string
+          etapa_id?: string | null
+          id?: string
+          projeto_id?: string
+          status?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_etapa_id_fkey"
+            columns: ["etapa_id"]
+            isOneToOne: false
+            referencedRelation: "etapas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
             referencedColumns: ["id"]
           },
         ]
