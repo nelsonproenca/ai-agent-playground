@@ -10,16 +10,20 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { login: authLogin } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "nelson2024") {
-      authLogin();
-      navigate("/admin");
-    } else {
-      setPasswordError("Senha incorreta.");
+    setSubmitting(true);
+    setPasswordError("");
+    const { error } = await authLogin(password);
+    setSubmitting(false);
+    if (error) {
+      setPasswordError(error);
+      return;
     }
+    navigate("/admin");
   };
 
   return (
@@ -43,8 +47,8 @@ const Dashboard = () => {
             {passwordError && (
               <p className="text-sm text-destructive font-mono">{passwordError}</p>
             )}
-            <Button type="submit" className="w-full font-mono">
-              Acessar
+            <Button type="submit" className="w-full font-mono" disabled={submitting}>
+              {submitting ? "Verificando..." : "Acessar"}
             </Button>
             <Button asChild variant="ghost" className="w-full font-mono text-muted-foreground">
               <Link to="/">← Voltar para Home</Link>
