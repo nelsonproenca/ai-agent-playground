@@ -10,9 +10,9 @@ import {
 import { Building2, Plus, Loader2, UserPlus, Contact, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import { listClientes, createCliente, updateCliente, type Cliente } from "@/features/clientes/api";
 import ImageUpload from "./ImageUpload";
 
-type Cliente = Tables<"clientes">;
 type Contato = Tables<"contatos_clientes">;
 
 const maskPhone = (value: string) => {
@@ -36,6 +36,7 @@ const GestaoClientes = () => {
   const [segmento, setSegmento] = useState("");
   const [siteUrl, setSiteUrl] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Contact form
@@ -51,11 +52,11 @@ const GestaoClientes = () => {
 
   const fetchClientes = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("clientes")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setClientes(data);
+    try {
+      setClientes(await listClientes());
+    } catch {
+      toast.error("Erro ao carregar clientes.");
+    }
     setLoading(false);
   };
 
@@ -83,7 +84,7 @@ const GestaoClientes = () => {
   // --- Client form helpers ---
   const resetClientForm = () => {
     setEditId(null);
-    setNome(""); setEmail(""); setEmpresa(""); setSegmento(""); setSiteUrl(""); setLogoUrl(null); setErrors({});
+    setNome(""); setEmail(""); setEmpresa(""); setSegmento(""); setSiteUrl(""); setLogoUrl(null); setStatus(null); setErrors({});
   };
 
   const handleEditCliente = (c: Cliente) => {
@@ -92,8 +93,9 @@ const GestaoClientes = () => {
     setEmail(c.email);
     setEmpresa(c.empresa ?? "");
     setSegmento(c.segmento ?? "");
-    setSiteUrl(c.site_url ?? "");
-    setLogoUrl(c.logo_url);
+    setSiteUrl(c.siteUrl ?? "");
+    setLogoUrl(c.logoUrl);
+    setStatus(c.status);
     setErrors({});
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -123,18 +125,23 @@ const GestaoClientes = () => {
       email: email.trim(),
       empresa: empresa.trim() || null,
       segmento: segmento.trim() || null,
-      site_url: siteUrl.trim() || null,
-      logo_url: logoUrl,
+      siteUrl: siteUrl.trim() || null,
+      logoUrl,
+      status,
     };
 
-    if (editId) {
-      const { error } = await supabase.from("clientes").update(payload).eq("id", editId);
-      if (error) { toast.error("Erro ao atualizar cliente."); }
-      else { toast.success("Cliente atualizado!"); resetClientForm(); fetchClientes(); }
-    } else {
-      const { error } = await supabase.from("clientes").insert(payload);
-      if (error) { toast.error("Erro ao cadastrar cliente."); }
-      else { toast.success("Cliente cadastrado!"); resetClientForm(); fetchClientes(); }
+    try {
+      if (editId) {
+        await updateCliente(editId, payload);
+        toast.success("Cliente atualizado!");
+      } else {
+        await createCliente(payload);
+        toast.success("Cliente cadastrado!");
+      }
+      resetClientForm();
+      fetchClientes();
+    } catch {
+      toast.error(editId ? "Erro ao atualizar cliente." : "Erro ao cadastrar cliente.");
     }
     setSaving(false);
   };

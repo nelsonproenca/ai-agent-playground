@@ -12,6 +12,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
 import type { Tables } from "@/integrations/supabase/types";
+import { createCliente } from "@/features/clientes/api";
 
 type Lead = Tables<"leads_ia">;
 type FilterKey = "all" | "alta_complexidade" | "automacao" | "consultoria_dotnet";
@@ -78,13 +79,12 @@ const GestaoLeads = () => {
     const email = lead.contato ?? "";
     const empresa = (lead as any).empresa ?? null;
 
-    const { data: cliente, error: clienteError } = await supabase
-      .from("clientes")
-      .insert({ nome, email, empresa, segmento: null, site_url: null })
-      .select()
-      .single();
-
-    if (clienteError || !cliente) {
+    let cliente;
+    try {
+      cliente = await createCliente({
+        nome, email, empresa, segmento: null, siteUrl: null, logoUrl: null, status: null,
+      });
+    } catch {
       toast.error("Erro ao criar cliente.");
       setConverting(false);
       return;

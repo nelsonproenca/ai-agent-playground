@@ -1,29 +1,19 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Terminal, Building2, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NavLink } from "@/components/NavLink";
-import type { Tables } from "@/integrations/supabase/types";
-
-type Cliente = Tables<"clientes">;
+import { listClientesPublicos, type Cliente } from "@/features/clientes/api";
 
 const Clientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase
-        .from("clientes")
-        .select("*")
-        .eq("status", "ativo")
-        .order("empresa", { ascending: true });
-      if (data) setClientes(data);
-      setLoading(false);
-    };
-    fetch();
+    listClientesPublicos()
+      .then(setClientes)
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -65,8 +55,8 @@ const Clientes = () => {
                 <Card className="border-border bg-card hover:border-primary/40 transition-colors group h-full">
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                     <Avatar className="h-20 w-20 rounded-lg border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
-                      {c.logo_url ? (
-                        <AvatarImage src={c.logo_url} alt={c.empresa ?? c.nome} className="object-contain p-2" />
+                      {c.logoUrl ? (
+                        <AvatarImage src={c.logoUrl} alt={c.empresa ?? c.nome} className="object-contain p-2" />
                       ) : null}
                       <AvatarFallback className="bg-secondary text-foreground font-mono text-lg rounded-lg">
                         {(c.empresa ?? c.nome).slice(0, 2).toUpperCase()}
@@ -78,9 +68,9 @@ const Clientes = () => {
                         <p className="text-xs text-muted-foreground font-mono">{c.segmento}</p>
                       )}
                     </div>
-                    {c.site_url && (
+                    {c.siteUrl && (
                       <a
-                        href={c.site_url.startsWith("http") ? c.site_url : `https://${c.site_url}`}
+                        href={c.siteUrl.startsWith("http") ? c.siteUrl : `https://${c.siteUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs font-mono text-primary hover:underline flex items-center gap-1.5"
