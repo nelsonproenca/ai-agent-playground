@@ -40,3 +40,23 @@ export async function getCurrentAdmin(): Promise<{ email: string } | null> {
   if (!res.ok) return null;
   return res.json();
 }
+
+/** Troca a própria senha do admin (ticket #22). */
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ error: string } | null> {
+  const res = await fetch(`${BASE_URL}/change-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1" },
+    credentials: "same-origin",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  if (res.ok) return null;
+  if (res.status === 400) {
+    const body = await res.json();
+    return { error: body.error ?? "Senha atual incorreta." };
+  }
+  return { error: `Erro inesperado (HTTP ${res.status}).` };
+}

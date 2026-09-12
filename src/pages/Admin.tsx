@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Inbox, Users, Building2, QrCode, FileText, CalendarDays, ShoppingBag, LogOut, FolderKanban } from "lucide-react";
+import { Inbox, Users, Building2, QrCode, FileText, CalendarDays, ShoppingBag, LogOut, FolderKanban, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import ChangePasswordDialog from "@/components/admin/ChangePasswordDialog";
 
 const adminLinks = [
   { to: "/admin/leads", icon: Inbox, label: "Leads", desc: "Leads e análises IA" },
@@ -18,6 +19,7 @@ const adminLinks = [
 const Admin = () => {
   const navigate = useNavigate();
   const { authenticated, logout } = useAuth();
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   useEffect(() => {
     if (!authenticated) navigate("/login", { replace: true });
@@ -32,12 +34,20 @@ const Admin = () => {
           <h1 className="font-mono font-bold text-foreground text-lg">
             Gerenciamento <span className="text-primary">do Site</span>
           </h1>
-          <Button variant="ghost" size="sm" className="font-mono gap-2 text-muted-foreground" onClick={() => { logout(); navigate("/login"); }}>
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="font-mono gap-2 text-muted-foreground" onClick={() => setChangePasswordOpen(true)}>
+              <KeyRound className="h-4 w-4" />
+              Trocar senha
+            </Button>
+            <Button variant="ghost" size="sm" className="font-mono gap-2 text-muted-foreground" onClick={() => { logout(); navigate("/login"); }}>
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
+
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
 
       <main className="container max-w-4xl py-16 px-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
