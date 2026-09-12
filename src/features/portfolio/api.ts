@@ -93,37 +93,15 @@ export type NovaEtapa = TablesInsert<"etapas">;
 export type AtualizacaoEtapa = TablesUpdate<"etapas">;
 
 export async function createEtapa(input: NovaEtapa): Promise<Etapa> {
-  const { data, error } = await supabase
-    .from("etapas")
-    .insert(input)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  return portalApi.post<Etapa>("/etapas", input);
 }
 
 export async function listEtapas(projetoId: string): Promise<Etapa[]> {
-  const { data, error } = await supabase
-    .from("etapas")
-    .select("*")
-    .eq("projeto_id", projetoId)
-    .order("ordem", { ascending: true });
-
-  if (error) throw error;
-  return data ?? [];
+  return portalApi.get<Etapa[]>(`/etapas?projetoId=${encodeURIComponent(projetoId)}`);
 }
 
 export async function updateEtapa(id: string, updates: AtualizacaoEtapa): Promise<Etapa> {
-  const { data, error } = await supabase
-    .from("etapas")
-    .update(updates)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  return portalApi.put<Etapa>(`/etapas/${id}`, updates);
 }
 
 export async function updateEtapaStatus(id: string, status: Etapa["status"]): Promise<Etapa> {
