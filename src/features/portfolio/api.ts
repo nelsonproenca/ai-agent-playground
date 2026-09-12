@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import { portalApi, PortalApiError } from "@/features/portal-shared/apiClient";
 
 /**
  * Camada de serviço da feature Portfólio/Portal do Cliente (issue #1).
@@ -45,42 +46,26 @@ async function getProjetoNomePorPedido(pedidoId: string): Promise<string | null>
   return Array.isArray(projetos) ? projetos[0]?.nome ?? null : projetos?.nome ?? null;
 }
 
+// `Projeto`/`NovoProjeto` migraram pro portal-backend (ticket #16) — o shape
+// (snake_case) é mantido de propósito igual ao que o Supabase gerava, pra não
+// precisar reescrever os componentes que consomem isso (ver spec, "Frontend
+// changes"). `listProjetosDoCliente` ainda fica no Supabase (ticket #19, portal
+// do cliente com escopo por e-mail) — projetos criados aqui só aparecem lá
+// depois que aquele ticket migrar a leitura também.
 export type Projeto = Tables<"projetos">;
 export type NovoProjeto = TablesInsert<"projetos">;
 
 export async function createProjeto(input: NovoProjeto): Promise<Projeto> {
-  const { data, error } = await supabase
-    .from("projetos")
-    .insert(input)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  return portalApi.post<Projeto>("/projetos", input);
 }
 
 export async function listProjetos(): Promise<Projeto[]> {
-  const { data, error } = await supabase
-    .from("projetos")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data ?? [];
+  return portalApi.get<Projeto[]>("/projetos");
 }
 
 export async function listProjetosPublicos(status?: Projeto["status_publico"]): Promise<Projeto[]> {
-  let query = supabase
-    .from("projetos")
-    .select("*")
-    .eq("visibilidade", "publico")
-    .order("created_at", { ascending: false });
-
-  if (status) query = query.eq("status_publico", status);
-
-  const { data, error } = await query;
-  if (error) throw error;
-  return data ?? [];
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return portalApi.get<Projeto[]>(`/projetos/public${query}`);
 }
 
 export async function listProjetosDoCliente(clienteId: string): Promise<Projeto[]> {
@@ -95,14 +80,12 @@ export async function listProjetosDoCliente(clienteId: string): Promise<Projeto[
 }
 
 export async function getProjeto(id: string): Promise<Projeto | null> {
-  const { data, error } = await supabase
-    .from("projetos")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data;
+  try {
+    return await portalApi.get<Projeto>(`/projetos/${id}`);
+  } catch (err) {
+    if (err instanceof PortalApiError && err.status === 404) return null;
+    throw err;
+  }
 }
 
 export type Etapa = Tables<"etapas">;

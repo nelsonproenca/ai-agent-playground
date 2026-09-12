@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,8 @@ import {
 } from "@/components/ui/table";
 import { FolderKanban, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 import { createProjeto, listProjetos, type Projeto } from "@/features/portfolio/api";
-
-type Cliente = Tables<"clientes">;
+import { listClientes, type Cliente } from "@/features/clientes/api";
 
 const statusLabel: Record<string, string> = {
   em_andamento: "Em andamento",
@@ -56,11 +53,12 @@ const GestaoProjetos = () => {
   };
 
   const fetchClientes = async () => {
-    const { data } = await supabase
-      .from("clientes")
-      .select("*")
-      .order("nome", { ascending: true });
-    if (data) setClientes(data);
+    try {
+      const data = await listClientes();
+      setClientes([...data].sort((a, b) => a.nome.localeCompare(b.nome)));
+    } catch {
+      toast.error("Erro ao carregar clientes.");
+    }
   };
 
   useEffect(() => {
