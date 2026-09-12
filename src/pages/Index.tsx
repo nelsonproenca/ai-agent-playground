@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard, ShoppingBag, Eye, Box } from "lucide-react";
+import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard, ShoppingBag, Box } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import InstagramCTA from "@/components/InstagramCTA";
@@ -168,30 +168,6 @@ const Index = () => {
                   </h3>
                   <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
                     Produtos premium com entrega rápida.
-                  </p>
-                </div>
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Watchtower Hub */}
-        <div className="max-w-4xl mx-auto mt-4">
-          <motion.div variants={hoverCard} initial="rest" whileHover="hover">
-            <motion.div variants={glowCard}>
-              <Link
-                to="/watchtower"
-                className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-                  <Eye className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-0.5 text-left">
-                  <h3 className="text-lg font-extrabold text-foreground font-mono">
-                    Watchtower <span className="text-primary">Hub</span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                    Monitoramento inteligente de câmeras.
                   </p>
                 </div>
               </Link>
