@@ -103,10 +103,6 @@ export async function updateEtapaStatus(id: string, status: Etapa["status"]): Pr
 
 export type Artefato = Tables<"artefatos">;
 
-// Usado só por submitRespostaPedido (ticket #20 — pedido_respostas continua no
-// Supabase por enquanto). Os artefatos "de verdade" (acima) já migraram.
-const ARTEFATOS_BUCKET = "portfolio-privado";
-
 export async function uploadArtefatoArquivo(input: {
   projetoId: string;
   etapaId?: string | null;
@@ -176,13 +172,7 @@ export type Pedido = Tables<"pedidos">;
 export type NovoPedido = TablesInsert<"pedidos">;
 
 export async function createPedido(input: NovoPedido): Promise<Pedido> {
-  const { data, error } = await supabase
-    .from("pedidos")
-    .insert(input)
-    .select()
-    .single();
-
-  if (error) throw error;
+  const data = await portalApi.post<Pedido>("/pedidos", input);
 
   const contexto = await getProjetoNomeECliente(input.projeto_id);
   if (contexto?.clienteEmail) {
@@ -198,14 +188,7 @@ export async function createPedido(input: NovoPedido): Promise<Pedido> {
 }
 
 export async function listPedidos(projetoId: string): Promise<Pedido[]> {
-  const { data, error } = await supabase
-    .from("pedidos")
-    .select("*")
-    .eq("projeto_id", projetoId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data ?? [];
+  return portalApi.get<Pedido[]>(`/pedidos?projetoId=${encodeURIComponent(projetoId)}`);
 }
 
 export interface ProjetoDetalhado {
@@ -228,53 +211,21 @@ export async function getProjetoDetalhado(projetoId: string): Promise<ProjetoDet
 
 export type PedidoResposta = Tables<"pedido_respostas">;
 
-const RESPOSTA_ARQUIVO_MAX_BYTES = 10 * 1024 * 1024; // 10MB
-const RESPOSTA_TIPOS_ACEITOS = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
-
-function validarArquivoResposta(file: File): void {
-  if (file.size > RESPOSTA_ARQUIVO_MAX_BYTES) {
-    throw new Error("O arquivo excede o limite de 10MB.");
-  }
-  const isImagem = file.type.startsWith("image/");
-  if (!isImagem && !RESPOSTA_TIPOS_ACEITOS.includes(file.type)) {
-    throw new Error("Tipo de arquivo não permitido. Envie uma imagem, PDF ou documento (Word).");
-  }
-}
-
 /** Resposta do cliente a um pedido tipo "pergunta" — texto + arquivo
- * opcional. Marca o pedido como "respondido" ao final. */
+ * opcional. Marca o pedido como "respondido" ao final (feito no backend). */
 export async function submitRespostaPedido(input: {
   pedidoId: string;
   projetoId: string;
   texto: string;
   file?: File | null;
 }): Promise<PedidoResposta> {
-  let arquivoUrl: string | null = null;
+  const formData = new FormData();
+  formData.append("pedidoId", input.pedidoId);
+  formData.append("projetoId", input.projetoId);
+  formData.append("texto", input.texto);
+  if (input.file) formData.append("file", input.file);
 
-  if (input.file) {
-    validarArquivoResposta(input.file);
-    const path = `${input.projetoId}/respostas/${crypto.randomUUID()}-${input.file.name}`;
-    const { error: uploadError } = await supabase.storage.from(ARTEFATOS_BUCKET).upload(path, input.file);
-    if (uploadError) throw uploadError;
-    arquivoUrl = path;
-  }
-
-  const { data, error } = await supabase
-    .from("pedido_respostas")
-    .insert({ pedido_id: input.pedidoId, texto: input.texto, arquivo_url: arquivoUrl })
-    .select()
-    .single();
-  if (error) throw error;
-
-  const { error: statusError } = await supabase
-    .from("pedidos")
-    .update({ status: "respondido" })
-    .eq("id", input.pedidoId);
-  if (statusError) throw statusError;
+  const data = await portalApi.postForm<PedidoResposta>("/pedido-respostas", formData);
 
   const projetoNome = await getProjetoNomePorPedido(input.pedidoId);
   if (projetoNome) {
@@ -285,30 +236,12 @@ export async function submitRespostaPedido(input: {
 }
 
 export async function listRespostas(pedidoId: string): Promise<PedidoResposta[]> {
-  const { data, error } = await supabase
-    .from("pedido_respostas")
-    .select("*")
-    .eq("pedido_id", pedidoId)
-    .order("created_at", { ascending: true });
-
-  if (error) throw error;
-  return data ?? [];
+  return portalApi.get<PedidoResposta[]>(`/pedido-respostas?pedidoId=${encodeURIComponent(pedidoId)}`);
 }
 
 /** Aprova um pedido tipo "validacao". Comentário é opcional aqui. */
 export async function approvePedido(input: { pedidoId: string; comentario?: string }): Promise<PedidoResposta> {
-  const { data, error } = await supabase
-    .from("pedido_respostas")
-    .insert({ pedido_id: input.pedidoId, texto: input.comentario?.trim() || "Aprovado." })
-    .select()
-    .single();
-  if (error) throw error;
-
-  const { error: statusError } = await supabase
-    .from("pedidos")
-    .update({ status: "aprovado" })
-    .eq("id", input.pedidoId);
-  if (statusError) throw statusError;
+  const data = await portalApi.post<PedidoResposta>(`/pedidos/${input.pedidoId}/aprovar`, { comentario: input.comentario ?? null });
 
   const projetoNome = await getProjetoNomePorPedido(input.pedidoId);
   if (projetoNome) {
@@ -318,24 +251,14 @@ export async function approvePedido(input: { pedidoId: string; comentario?: stri
   return data;
 }
 
-/** Pede ajustes num pedido tipo "validacao". Comentário é obrigatório. */
+/** Pede ajustes num pedido tipo "validacao". Comentário é obrigatório
+ * (validado no backend também). */
 export async function requestChangesPedido(input: { pedidoId: string; comentario: string }): Promise<PedidoResposta> {
   if (!input.comentario.trim()) {
     throw new Error("Comentário é obrigatório ao pedir ajustes.");
   }
 
-  const { data, error } = await supabase
-    .from("pedido_respostas")
-    .insert({ pedido_id: input.pedidoId, texto: input.comentario.trim() })
-    .select()
-    .single();
-  if (error) throw error;
-
-  const { error: statusError } = await supabase
-    .from("pedidos")
-    .update({ status: "ajuste_solicitado" })
-    .eq("id", input.pedidoId);
-  if (statusError) throw statusError;
+  const data = await portalApi.post<PedidoResposta>(`/pedidos/${input.pedidoId}/ajustar`, { comentario: input.comentario.trim() });
 
   const projetoNome = await getProjetoNomePorPedido(input.pedidoId);
   if (projetoNome) {

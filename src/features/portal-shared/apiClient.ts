@@ -50,7 +50,7 @@ export const portalApi = {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       credentials: "same-origin",
-      headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1" },
+      headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
       body: JSON.stringify(body),
     });
     return handle<T>(res);
@@ -60,7 +60,7 @@ export const portalApi = {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "PUT",
       credentials: "same-origin",
-      headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1" },
+      headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
       body: JSON.stringify(body),
     });
     return handle<T>(res);
@@ -70,7 +70,7 @@ export const portalApi = {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "DELETE",
       credentials: "same-origin",
-      headers: { [CSRF_HEADER]: "1" },
+      headers: { [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
     });
     return handle<T>(res);
   },
@@ -80,7 +80,7 @@ export const portalApi = {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       credentials: "same-origin",
-      headers: { [CSRF_HEADER]: "1" },
+      headers: { [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
       body: formData,
     });
     return handle<T>(res);
