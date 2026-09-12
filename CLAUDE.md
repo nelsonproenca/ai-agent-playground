@@ -1,6 +1,6 @@
 # nelson-proenca-info
 
-Site institucional de Nelson Proença (`nelson-proenca-info.com.br`) — apresentação profissional, vitrine de clientes/parceiros, CRM interno (leads, colaboradores, clientes, agendamentos) e uma loja simples.
+Site institucional de Nelson Proença (`nelson-proenca-info.com.br`) — apresentação profissional, vitrine de clientes/parceiros e CRM interno (leads, colaboradores, clientes, agendamentos).
 
 ## Stack
 
@@ -14,8 +14,8 @@ Projeto originado no Lovable — pode ser editado localmente ou pela plataforma,
 
 ## Estrutura de páginas
 
-- **Público**: `/` (Index/landing), `/landing`, `/contato`, `/loja`, `/claw3d`, `/colabs`, `/clientes` (vitrine de logos de empresas parceiras — **não confundir** com o CRM de clientes)
-- **Admin** (autenticado via `/login`, hook `useAuth`): `/admin`, `/admin/leads`, `/admin/colaboradores`, `/admin/clientes` (CRM — "Gestão de Clientes"), `/admin/agendamentos`, `/admin/produtos`
+- **Público**: `/` (Index/landing), `/landing`, `/contato`, `/claw3d`, `/colabs`, `/clientes` (vitrine de logos de empresas parceiras — **não confundir** com o CRM de clientes), `/projetos` (vitrine pública de portfólio, fala com o `portal-backend`)
+- **Admin** (autenticado via `/login`, hook `useAuth`): `/admin`, `/admin/leads`, `/admin/colaboradores`, `/admin/clientes` (CRM — "Gestão de Clientes"), `/admin/agendamentos`, `/admin/projetos`
 - **Watchtower** (`/watchtower/*`): produto SaaS de monitoramento de câmeras hospedado no mesmo repositório e mesmo VPS por conveniência de deploy, mas é um **produto distinto** em processo de separação em projeto próprio. Não usar os padrões do Watchtower (rotas, auth, services) como referência para novas features do site institucional.
 
 ## Dados

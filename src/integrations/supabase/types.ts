@@ -423,15 +423,7 @@ export type Database = {
           nome?: string
           telefone?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "contatos_clientes_cliente_id_fkey"
-            columns: ["cliente_id"]
-            isOneToOne: false
-            referencedRelation: "clientes"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       enrich_company: {
         Row: {
@@ -816,48 +808,6 @@ export type Database = {
           output_ia?: string | null
           status?: string | null
           tipo_analise?: string | null
-        }
-        Relationships: []
-      }
-      produtos_dtc: {
-        Row: {
-          active: boolean
-          created_at: string
-          description: string | null
-          descriptionhtml: string | null
-          id: string
-          image_url: string | null
-          name: string
-          price: number
-          producttype: string | null
-          shopify_id: string | null
-          shopify_variant_id: string | null
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          description?: string | null
-          descriptionhtml?: string | null
-          id?: string
-          image_url?: string | null
-          name: string
-          price: number
-          producttype?: string | null
-          shopify_id?: string | null
-          shopify_variant_id?: string | null
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          description?: string | null
-          descriptionhtml?: string | null
-          id?: string
-          image_url?: string | null
-          name?: string
-          price?: number
-          producttype?: string | null
-          shopify_id?: string | null
-          shopify_variant_id?: string | null
         }
         Relationships: []
       }

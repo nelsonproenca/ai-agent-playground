@@ -34,8 +34,6 @@ import Contato from "./pages/Contato";
 import SuccessBooking from "./pages/SuccessBooking";
 import LandingPage from "./pages/LandingPage";
 import DashboardAgendamentos from "./pages/DashboardAgendamentos";
-import LojaPage from "./pages/LojaPage";
-import ProdutosPage from "./pages/ProdutosPage";
 import Claw3D from "./pages/Claw3D";
 import NotFound from "./pages/NotFound";
 
@@ -191,8 +189,6 @@ const App = () => (
                 <Route path="/booking-success" element={<SuccessBooking />} />
                 <Route path="/landing" element={<LandingPage />} />
                 <Route path="/admin/agendamentos" element={<DashboardAgendamentos />} />
-                <Route path="/admin/produtos" element={<ProdutosPage />} />
-                <Route path="/loja" element={<LojaPage />} />
                 <Route path="/claw3d" element={<Claw3D />} />
 
                 {/* Watchtower Hub routes */}
