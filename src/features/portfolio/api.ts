@@ -110,6 +110,8 @@ export async function updateEtapaStatus(id: string, status: Etapa["status"]): Pr
 
 export type Artefato = Tables<"artefatos">;
 
+// Usado só por submitRespostaPedido (ticket #20 — pedido_respostas continua no
+// Supabase por enquanto). Os artefatos "de verdade" (acima) já migraram.
 const ARTEFATOS_BUCKET = "portfolio-privado";
 
 export async function uploadArtefatoArquivo(input: {
@@ -118,26 +120,13 @@ export async function uploadArtefatoArquivo(input: {
   nome: string;
   file: File;
 }): Promise<Artefato> {
-  const path = `${input.projetoId}/${crypto.randomUUID()}-${input.file.name}`;
+  const formData = new FormData();
+  formData.append("projetoId", input.projetoId);
+  if (input.etapaId) formData.append("etapaId", input.etapaId);
+  formData.append("nome", input.nome);
+  formData.append("file", input.file);
 
-  const { error: uploadError } = await supabase.storage
-    .from(ARTEFATOS_BUCKET)
-    .upload(path, input.file);
-  if (uploadError) throw uploadError;
-
-  const { data, error } = await supabase
-    .from("artefatos")
-    .insert({
-      projeto_id: input.projetoId,
-      etapa_id: input.etapaId ?? null,
-      nome: input.nome,
-      url: path,
-      tipo: "arquivo",
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
+  const data = await portalApi.postForm<Artefato>("/artefatos/upload", formData);
 
   const contexto = await getProjetoNomeECliente(input.projetoId);
   if (contexto?.clienteEmail) {
@@ -158,19 +147,7 @@ export async function createArtefatoLink(input: {
   nome: string;
   linkUrl: string;
 }): Promise<Artefato> {
-  const { data, error } = await supabase
-    .from("artefatos")
-    .insert({
-      projeto_id: input.projetoId,
-      etapa_id: input.etapaId ?? null,
-      nome: input.nome,
-      url: input.linkUrl,
-      tipo: "link",
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
+  const data = await portalApi.post<Artefato>("/artefatos/link", input);
 
   const contexto = await getProjetoNomeECliente(input.projetoId);
   if (contexto?.clienteEmail) {
@@ -186,28 +163,20 @@ export async function createArtefatoLink(input: {
 }
 
 export async function listArtefatos(projetoId: string): Promise<Artefato[]> {
-  const { data, error } = await supabase
-    .from("artefatos")
-    .select("*")
-    .eq("projeto_id", projetoId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data ?? [];
+  return portalApi.get<Artefato[]>(`/artefatos?projetoId=${encodeURIComponent(projetoId)}`);
 }
 
-/** Para artefatos do tipo "link", retorna a própria URL. Para "arquivo",
- * gera uma URL assinada e temporária a partir do path guardado no bucket
- * privado — o bucket nunca expõe URLs públicas permanentes. */
+/** Para artefatos do tipo "link", retorna a própria URL. Para "arquivo", gera
+ * uma URL de download assinada e temporária (token HMAC de curta duração,
+ * emitido pelo portal-backend) — nunca um path permanente/público. */
 export async function getArtefatoUrl(artefato: Artefato): Promise<string> {
   if (artefato.tipo === "link") return artefato.url;
 
-  const { data, error } = await supabase.storage
-    .from(ARTEFATOS_BUCKET)
-    .createSignedUrl(artefato.url, 60 * 10); // 10 minutos
-
-  if (error) throw error;
-  return data.signedUrl;
+  // O backend devolve um path relativo às próprias rotas (não conhece o prefixo
+  // /api/portal — quem monta isso é o Caddy). O front precisa completar o path
+  // pra abrir/baixar de verdade (window.open exige URL navegável).
+  const { url } = await portalApi.get<{ url: string }>(`/artefatos/${artefato.id}/signed-url`);
+  return `/api/portal${url}`;
 }
 
 export type Pedido = Tables<"pedidos">;

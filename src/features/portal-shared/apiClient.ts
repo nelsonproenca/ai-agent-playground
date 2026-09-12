@@ -59,4 +59,15 @@ export const portalApi = {
     });
     return handle<T>(res);
   },
+
+  async postForm<T>(path: string, formData: FormData): Promise<T> {
+    // Sem Content-Type — o browser seta multipart/form-data + boundary sozinho.
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { [CSRF_HEADER]: "1" },
+      body: formData,
+    });
+    return handle<T>(res);
+  },
 };
