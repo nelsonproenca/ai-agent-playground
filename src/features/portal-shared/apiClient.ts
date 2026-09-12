@@ -8,6 +8,8 @@
  * site; em dev, o proxy do Vite (`vite.config.ts`) replica isso.
  */
 
+import { supabase } from "@/integrations/supabase/client";
+
 const BASE_URL = "/api/portal";
 const CSRF_HEADER = "X-Portal-Admin";
 
@@ -25,9 +27,22 @@ async function handle<T>(res: Response): Promise<T> {
   throw new PortalApiError(res.status, `HTTP ${res.status} ${res.statusText}`);
 }
 
+/** Anexa o Bearer do Supabase quando existir sessão (ticket #19) — leitura sem
+ * custo quando não há: alguns endpoints (projeto/etapas/artefatos por id) são
+ * compartilhados entre a tela do admin (cookie) e a do portal do cliente
+ * (Bearer), então o GET tenta os dois; o backend decide o que cada um vê. */
+async function getSupabaseAuthHeader(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export const portalApi = {
   async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, { credentials: "same-origin" });
+    const res = await fetch(`${BASE_URL}${path}`, {
+      credentials: "same-origin",
+      headers: await getSupabaseAuthHeader(),
+    });
     return handle<T>(res);
   },
 
@@ -68,6 +83,17 @@ export const portalApi = {
       headers: { [CSRF_HEADER]: "1" },
       body: formData,
     });
+    return handle<T>(res);
+  },
+};
+
+/**
+ * Cliente HTTP exclusivo do Portal do Cliente (ticket #19) — endpoints que só
+ * fazem sentido pro cliente autenticado (ex: "meus projetos"), nunca pro admin.
+ */
+export const portalClientApi = {
+  async get<T>(path: string): Promise<T> {
+    const res = await fetch(`${BASE_URL}${path}`, { headers: await getSupabaseAuthHeader() });
     return handle<T>(res);
   },
 };

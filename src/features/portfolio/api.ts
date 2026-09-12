@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
-import { portalApi, PortalApiError } from "@/features/portal-shared/apiClient";
+import { portalApi, portalClientApi, PortalApiError } from "@/features/portal-shared/apiClient";
 
 /**
  * Camada de serviço da feature Portfólio/Portal do Cliente (issue #1).
@@ -49,9 +49,7 @@ async function getProjetoNomePorPedido(pedidoId: string): Promise<string | null>
 // `Projeto`/`NovoProjeto` migraram pro portal-backend (ticket #16) — o shape
 // (snake_case) é mantido de propósito igual ao que o Supabase gerava, pra não
 // precisar reescrever os componentes que consomem isso (ver spec, "Frontend
-// changes"). `listProjetosDoCliente` ainda fica no Supabase (ticket #19, portal
-// do cliente com escopo por e-mail) — projetos criados aqui só aparecem lá
-// depois que aquele ticket migrar a leitura também.
+// changes").
 export type Projeto = Tables<"projetos">;
 export type NovoProjeto = TablesInsert<"projetos">;
 
@@ -68,15 +66,10 @@ export async function listProjetosPublicos(status?: Projeto["status_publico"]): 
   return portalApi.get<Projeto[]>(`/projetos/public${query}`);
 }
 
-export async function listProjetosDoCliente(clienteId: string): Promise<Projeto[]> {
-  const { data, error } = await supabase
-    .from("projetos")
-    .select("*")
-    .eq("cliente_id", clienteId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data ?? [];
+/** Projetos do cliente autenticado (ticket #19) — o backend resolve o dono a
+ * partir do JWT do Supabase (token Bearer), não de um id passado pelo front. */
+export async function listProjetosDoCliente(): Promise<Projeto[]> {
+  return portalClientApi.get<Projeto[]>("/projetos/mine");
 }
 
 export async function getProjeto(id: string): Promise<Projeto | null> {

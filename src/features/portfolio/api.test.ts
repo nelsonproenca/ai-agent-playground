@@ -21,7 +21,6 @@ import {
  */
 
 const FIXTURE_EMAIL_A = "portfolio-tests-fixture-a@example.com";
-const FIXTURE_EMAIL_B = "portfolio-tests-fixture-b@example.com";
 
 async function findOrCreateClienteFixture(email: string, nome: string): Promise<string> {
   const existing = await testDb.from("clientes").select("id").eq("email", email).maybeSingle();
@@ -202,33 +201,14 @@ describe("features/portfolio/api", () => {
     });
   });
 
-  describe("portal do cliente", () => {
-    let clienteBId: string;
-    let projetoClienteA: string;
-    let projetoClienteB: string;
-
-    beforeAll(async () => {
-      clienteBId = await findOrCreateClienteFixture(FIXTURE_EMAIL_B, "Cliente B de Teste (fixture)");
-
-      const a = await createProjeto({ cliente_id: clienteId, nome: "Projeto do Cliente A" });
-      const b = await createProjeto({ cliente_id: clienteBId, nome: "Projeto do Cliente B" });
-      criados.push(a.id, b.id);
-      projetoClienteA = a.id;
-      projetoClienteB = b.id;
-    });
-
-    it("listProjetosDoCliente retorna só os projetos do cliente informado", async () => {
-      const listaA = await listProjetosDoCliente(clienteId);
-      expect(listaA.some((p) => p.id === projetoClienteA)).toBe(true);
-      expect(listaA.some((p) => p.id === projetoClienteB)).toBe(false);
-    });
-
-    it("listProjetosDoCliente nunca retorna projetos de outro cliente", async () => {
-      const listaB = await listProjetosDoCliente(clienteBId);
-      expect(listaB.some((p) => p.id === projetoClienteB)).toBe(true);
-      expect(listaB.some((p) => p.id === projetoClienteA)).toBe(false);
-    });
-  });
+  // "portal do cliente" (listProjetosDoCliente) removido daqui no ticket #19: a
+  // função deixou de aceitar um cliente_id arbitrário (era exatamente o padrão
+  // inseguro que o ticket eliminou) — agora resolve o dono via o e-mail do JWT
+  // do Supabase, validado no portal-backend. Testar isso de verdade exige um
+  // JWT real de dois usuários distintos (não dá pra simular só com a anon key),
+  // o que é um investimento de infra de teste à parte. A garantia em si
+  // (cliente A nunca vê projeto de B) está coberta por verificação manual do
+  // portal-backend (ClientAccessService), conforme decisão de testes da spec.
 
   describe("pedidos", () => {
     let projetoId: string;

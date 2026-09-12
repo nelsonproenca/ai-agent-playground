@@ -80,7 +80,7 @@ const PortalLista = () => {
 
   useEffect(() => {
     if (!cliente) return;
-    listProjetosDoCliente(cliente.id)
+    listProjetosDoCliente()
       .then(setProjetos)
       .finally(() => setLoading(false));
   }, [cliente]);
