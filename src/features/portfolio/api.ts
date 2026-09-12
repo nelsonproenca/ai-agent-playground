@@ -1,50 +1,14 @@
-import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { portalApi, portalClientApi, PortalApiError } from "@/features/portal-shared/apiClient";
 
 /**
  * Camada de serviço da feature Portfólio/Portal do Cliente (issue #1).
- * Único seam da feature: toda operação contra Supabase para projetos, etapas,
- * artefatos e pedidos deve passar por este módulo — componentes de UI nunca
- * chamam `supabase.from(...)` diretamente para estas tabelas.
+ * Único seam da feature: toda operação de projetos/etapas/artefatos/pedidos
+ * passa por este módulo — componentes de UI nunca chamam `fetch`/Supabase
+ * diretamente. Desde o ticket #21, tudo aqui fala com o portal-backend
+ * (tickets #15-#20); os tipos continuam usando `Tables<...>` do Supabase só
+ * pra manter o shape (nomes de campo) que os componentes já esperavam.
  */
-
-type NotifyEvent = "novo_pedido" | "novo_artefato" | "pedido_respondido" | "pedido_decidido";
-
-/** Fire-and-forget (issue #11): nunca lança erro, nunca bloqueia quem chamou. */
-function notifyPortfolioEvent(payload: {
-  event: NotifyEvent;
-  projetoNome: string;
-  detalhe: string;
-  clienteEmail?: string;
-}): void {
-  supabase.functions.invoke("portfolio-notify-email", { body: payload }).catch((err) => {
-    console.error("Falha ao notificar por e-mail (não bloqueia a operação):", err);
-  });
-}
-
-async function getProjetoNomeECliente(projetoId: string): Promise<{ nome: string; clienteEmail: string | null } | null> {
-  const { data } = await supabase
-    .from("projetos")
-    .select("nome, clientes(email)")
-    .eq("id", projetoId)
-    .maybeSingle();
-  if (!data) return null;
-  const clientes = data.clientes as { email: string } | { email: string }[] | null;
-  const email = Array.isArray(clientes) ? clientes[0]?.email ?? null : clientes?.email ?? null;
-  return { nome: data.nome, clienteEmail: email };
-}
-
-async function getProjetoNomePorPedido(pedidoId: string): Promise<string | null> {
-  const { data } = await supabase
-    .from("pedidos")
-    .select("projetos(nome)")
-    .eq("id", pedidoId)
-    .maybeSingle();
-  if (!data) return null;
-  const projetos = data.projetos as { nome: string } | { nome: string }[] | null;
-  return Array.isArray(projetos) ? projetos[0]?.nome ?? null : projetos?.nome ?? null;
-}
 
 // `Projeto`/`NovoProjeto` migraram pro portal-backend (ticket #16) — o shape
 // (snake_case) é mantido de propósito igual ao que o Supabase gerava, pra não
@@ -115,19 +79,7 @@ export async function uploadArtefatoArquivo(input: {
   formData.append("nome", input.nome);
   formData.append("file", input.file);
 
-  const data = await portalApi.postForm<Artefato>("/artefatos/upload", formData);
-
-  const contexto = await getProjetoNomeECliente(input.projetoId);
-  if (contexto?.clienteEmail) {
-    notifyPortfolioEvent({
-      event: "novo_artefato",
-      projetoNome: contexto.nome,
-      detalhe: input.nome,
-      clienteEmail: contexto.clienteEmail,
-    });
-  }
-
-  return data;
+  return portalApi.postForm<Artefato>("/artefatos/upload", formData);
 }
 
 export async function createArtefatoLink(input: {
@@ -136,19 +88,7 @@ export async function createArtefatoLink(input: {
   nome: string;
   linkUrl: string;
 }): Promise<Artefato> {
-  const data = await portalApi.post<Artefato>("/artefatos/link", input);
-
-  const contexto = await getProjetoNomeECliente(input.projetoId);
-  if (contexto?.clienteEmail) {
-    notifyPortfolioEvent({
-      event: "novo_artefato",
-      projetoNome: contexto.nome,
-      detalhe: input.nome,
-      clienteEmail: contexto.clienteEmail,
-    });
-  }
-
-  return data;
+  return portalApi.post<Artefato>("/artefatos/link", input);
 }
 
 export async function listArtefatos(projetoId: string): Promise<Artefato[]> {
@@ -172,19 +112,7 @@ export type Pedido = Tables<"pedidos">;
 export type NovoPedido = TablesInsert<"pedidos">;
 
 export async function createPedido(input: NovoPedido): Promise<Pedido> {
-  const data = await portalApi.post<Pedido>("/pedidos", input);
-
-  const contexto = await getProjetoNomeECliente(input.projeto_id);
-  if (contexto?.clienteEmail) {
-    notifyPortfolioEvent({
-      event: "novo_pedido",
-      projetoNome: contexto.nome,
-      detalhe: data.titulo,
-      clienteEmail: contexto.clienteEmail,
-    });
-  }
-
-  return data;
+  return portalApi.post<Pedido>("/pedidos", input);
 }
 
 export async function listPedidos(projetoId: string): Promise<Pedido[]> {
@@ -197,9 +125,10 @@ export interface ProjetoDetalhado {
   artefatos: Artefato[];
 }
 
-/** Usado pelo portal do cliente (issue #8): se o `projetoId` não pertencer
- * ao cliente autenticado, o RLS faz `getProjeto` retornar null e as demais
- * listas virem vazias — sem precisar de checagem manual de dono aqui. */
+/** Usado pelo portal do cliente (issue #8): se o `projetoId` não pertencer ao
+ * cliente autenticado, o backend (ClientAccessService, ticket #19) faz
+ * `getProjeto` retornar null e as demais listas virem vazias — sem precisar
+ * de checagem manual de dono aqui. */
 export async function getProjetoDetalhado(projetoId: string): Promise<ProjetoDetalhado> {
   const [projeto, etapas, artefatos] = await Promise.all([
     getProjeto(projetoId),
@@ -225,14 +154,7 @@ export async function submitRespostaPedido(input: {
   formData.append("texto", input.texto);
   if (input.file) formData.append("file", input.file);
 
-  const data = await portalApi.postForm<PedidoResposta>("/pedido-respostas", formData);
-
-  const projetoNome = await getProjetoNomePorPedido(input.pedidoId);
-  if (projetoNome) {
-    notifyPortfolioEvent({ event: "pedido_respondido", projetoNome, detalhe: input.texto });
-  }
-
-  return data;
+  return portalApi.postForm<PedidoResposta>("/pedido-respostas", formData);
 }
 
 export async function listRespostas(pedidoId: string): Promise<PedidoResposta[]> {
@@ -241,14 +163,7 @@ export async function listRespostas(pedidoId: string): Promise<PedidoResposta[]>
 
 /** Aprova um pedido tipo "validacao". Comentário é opcional aqui. */
 export async function approvePedido(input: { pedidoId: string; comentario?: string }): Promise<PedidoResposta> {
-  const data = await portalApi.post<PedidoResposta>(`/pedidos/${input.pedidoId}/aprovar`, { comentario: input.comentario ?? null });
-
-  const projetoNome = await getProjetoNomePorPedido(input.pedidoId);
-  if (projetoNome) {
-    notifyPortfolioEvent({ event: "pedido_decidido", projetoNome, detalhe: `Aprovado: ${data.texto}` });
-  }
-
-  return data;
+  return portalApi.post<PedidoResposta>(`/pedidos/${input.pedidoId}/aprovar`, { comentario: input.comentario ?? null });
 }
 
 /** Pede ajustes num pedido tipo "validacao". Comentário é obrigatório
@@ -258,12 +173,5 @@ export async function requestChangesPedido(input: { pedidoId: string; comentario
     throw new Error("Comentário é obrigatório ao pedir ajustes.");
   }
 
-  const data = await portalApi.post<PedidoResposta>(`/pedidos/${input.pedidoId}/ajustar`, { comentario: input.comentario.trim() });
-
-  const projetoNome = await getProjetoNomePorPedido(input.pedidoId);
-  if (projetoNome) {
-    notifyPortfolioEvent({ event: "pedido_decidido", projetoNome, detalhe: `Ajuste solicitado: ${data.texto}` });
-  }
-
-  return data;
+  return portalApi.post<PedidoResposta>(`/pedidos/${input.pedidoId}/ajustar`, { comentario: input.comentario.trim() });
 }

@@ -352,20 +352,15 @@ describe("features/portfolio/api", () => {
   });
 
   /**
-   * Notificações por e-mail (issue #11): `notifyPortfolioEvent` é
-   * fire-and-forget por construção — não é `await`ado nem propaga erro pra
-   * quem chamou (`createPedido`, `submitRespostaPedido` etc.), então os
-   * testes acima já provam isso indiretamente: toda operação retorna
-   * normalmente mesmo com um cliente de teste (`@example.com`) cujo e-mail
-   * o Resend rejeita.
-   *
-   * Disparo real validado MANUALMENTE via curl direto na função implantada:
-   * - "pedido_respondido" (→ Nelson): envio bem-sucedido de verdade,
-   *   confirmado pelo Resend com um id de mensagem real.
-   * - "novo_pedido" (→ cliente): a função montou e tentou o envio
-   *   corretamente; o Resend rejeitou por causa do domínio de teste
-   *   (`@example.com`, bloqueado pela própria Resend), confirmando que a
-   *   lógica de construção do e-mail e a chamada à API estão corretas.
+   * Notificações por e-mail (ticket #21): desde a migração pro portal-backend,
+   * quem dispara os 4 eventos é o próprio backend (`PortfolioNotificationService`,
+   * chamado direto de `ArtefatoService`/`PedidoService`) — não existe mais
+   * nenhum código de notificação no frontend (`notifyPortfolioEvent` foi
+   * removido junto com a edge function `portfolio-notify-email`, que não é
+   * mais chamada por nada). A falha de e-mail é engolida no backend (nunca
+   * propaga pra quem chamou), então os testes acima já provam isso
+   * indiretamente: toda operação retorna normalmente mesmo com um cliente de
+   * teste (`@example.com`) cujo e-mail o Resend rejeita.
    */
 
   describe("lista pública de portfólio", () => {
