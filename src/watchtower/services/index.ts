@@ -1,6 +1,7 @@
 export { apiClient } from "./apiClient";
 export { cameraService } from "./cameraService";
 export { streamService } from "./streamService";
+export { recordingService } from "./recordingService";
 export { paymentService } from "./paymentService";
 export { billingService } from "./billingService";
 export { userService } from "./userService";

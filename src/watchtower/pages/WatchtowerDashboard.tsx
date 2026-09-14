@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WatchtowerCameraGrid } from "@/watchtower/components/WatchtowerCameraGrid";
-import { WatchtowerTimeline } from "@/watchtower/components/WatchtowerTimeline";
+import { WatchtowerRecordingsHub } from "@/watchtower/components/WatchtowerRecordingsHub";
 
 const TAB_KEY = "wt-dashboard-tab";
 
@@ -41,7 +41,7 @@ const WatchtowerDashboard = () => {
         </TabsContent>
 
         <TabsContent value="recordings" className="mt-6">
-          <WatchtowerTimeline />
+          <WatchtowerRecordingsHub />
         </TabsContent>
       </Tabs>
     </div>

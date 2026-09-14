@@ -8,27 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Video } from "lucide-react";
-
-// ─── Date helpers ────────────────────────────────────────────────────────────
-
-function getDateGroup(iso: string): string {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today.getTime() - 86400000);
-  const weekAgo = new Date(today.getTime() - 7 * 86400000);
-  const d = new Date(iso);
-  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  if (day >= today) return "Hoje";
-  if (day >= yesterday) return "Ontem";
-  if (day >= weekAgo) return "Esta semana";
-  return "Anterior";
-}
-
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-}
-
-const GROUP_ORDER = ["Hoje", "Ontem", "Esta semana", "Anterior"];
+import { getDateGroup, formatTime, DATE_GROUP_ORDER } from "@/watchtower/lib/dateGroups";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "Todos os status" },
@@ -120,7 +100,7 @@ export function WatchtowerTimeline() {
       if (!byGroup[g]) byGroup[g] = [];
       byGroup[g].push(log);
     }
-    return GROUP_ORDER.filter((g) => (byGroup[g]?.length ?? 0) > 0).map((g) => ({
+    return DATE_GROUP_ORDER.filter((g) => (byGroup[g]?.length ?? 0) > 0).map((g) => ({
       label: g,
       logs: byGroup[g],
     }));

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Lock, Download, Maximize2, Minimize2, Eye, Play, Square, Loader2 } from "lucide-react";
+import { Lock, Maximize2, Minimize2, Eye, Play, Square, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { WatchtowerHLSPlayer } from "./WatchtowerHLSPlayer";
 import { WatchtowerPlanModal } from "./WatchtowerPlanModal";
 import { streamService } from "@/watchtower/services";
-import { useToast } from "@/hooks/use-toast";
 import type { CameraDto } from "@/watchtower/types/api";
 
 interface CameraCardProps {
@@ -23,7 +22,6 @@ export function WatchtowerCameraCard({ camera, hasAccess }: CameraCardProps) {
   const [theaterOpen, setTheaterOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const videoContainerRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
 
   const { data: streamData, isFetching: streamLoading } = useQuery({
     queryKey: ["watchtower-stream", camera.slug],
@@ -51,13 +49,6 @@ export function WatchtowerCameraCard({ camera, hasAccess }: CameraCardProps) {
     } else {
       document.exitFullscreen();
     }
-  };
-
-  const handleDownload = () => {
-    toast({
-      title: "Download indisponível para streaming ao vivo",
-      description: "Gravações estão disponíveis nos planos Prata e Ouro.",
-    });
   };
 
   const handleOpenTheater = () => {
@@ -191,18 +182,6 @@ export function WatchtowerCameraCard({ camera, hasAccess }: CameraCardProps) {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent><p>Parar stream</p></TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={handleDownload}
-                    >
-                      <Download className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Download de gravação</p></TooltipContent>
                 </Tooltip>
 
                 <Tooltip>

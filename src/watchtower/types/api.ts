@@ -23,6 +23,13 @@ export interface StreamUrlDto {
   expiresAt: string; // ISO 8601
 }
 
+// ─── Gravações ────────────────────────────────────────────────────────────────
+
+export interface RecordingWindowDto {
+  start: string; // ISO 8601
+  durationSeconds: number;
+}
+
 // ─── Pagamentos ───────────────────────────────────────────────────────────────
 
 export type PaymentStatus = "Pending" | "Approved" | "Rejected";

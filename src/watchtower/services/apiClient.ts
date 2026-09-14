@@ -103,7 +103,11 @@ async function getBlob(path: string): Promise<{ blob: Blob; filename?: string }>
   }
   const blob = await res.blob();
   const cd = res.headers.get("content-disposition");
-  const filename = cd?.match(/filename[*]?=(?:UTF-8''|")?([^";\n]+)"?/i)?.[1];
+  // Prioriza filename*=UTF-8''... (correto p/ acentos) — filename="..." puro é
+  // só o fallback ASCII que o ASP.NET Core também manda no mesmo header.
+  const utf8Match = cd?.match(/filename\*=UTF-8''([^;\n]+)/i);
+  const asciiMatch = cd?.match(/filename="?([^";\n]+)"?/i);
+  const filename = utf8Match ? decodeURIComponent(utf8Match[1]) : asciiMatch?.[1];
   return { blob, filename };
 }
 
