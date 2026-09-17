@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Terminal, FolderKanban, ExternalLink } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Terminal, FolderKanban, ExternalLink, X } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -13,16 +14,27 @@ const statusLabel: Record<string, string> = {
 };
 
 const PortfolioPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const clienteId = searchParams.get("clienteId") ?? undefined;
+  const clienteNome = searchParams.get("clienteNome") ?? undefined;
+
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<string>("todos");
 
   useEffect(() => {
     setLoading(true);
-    listProjetosPublicos(status === "todos" ? undefined : (status as Projeto["status_publico"]))
+    listProjetosPublicos(status === "todos" ? undefined : (status as Projeto["status_publico"]), clienteId)
       .then(setProjetos)
       .finally(() => setLoading(false));
-  }, [status]);
+  }, [status, clienteId]);
+
+  const limparFiltroCliente = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("clienteId");
+    next.delete("clienteNome");
+    setSearchParams(next);
+  };
 
   return (
     <div className="min-h-screen bg-background grid-pattern">
@@ -45,6 +57,25 @@ const PortfolioPage = () => {
           <h1 className="text-4xl md:text-5xl font-extrabold text-foreground leading-tight">
             Projetos <span className="text-gradient-primary">recentes</span>
           </h1>
+          {clienteId && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 pl-4 pr-2 py-1.5 text-sm font-mono text-muted-foreground">
+              {clienteNome ? (
+                <span>
+                  Filtrado por <span className="text-foreground">{clienteNome}</span>
+                </span>
+              ) : (
+                <span>Filtrado por cliente</span>
+              )}
+              <button
+                type="button"
+                onClick={limparFiltroCliente}
+                className="rounded-full p-1 hover:bg-secondary hover:text-foreground transition-colors"
+                aria-label="Remover filtro de cliente"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="max-w-xs mx-auto mb-10">

@@ -25,8 +25,14 @@ export async function listProjetos(): Promise<Projeto[]> {
   return portalApi.get<Projeto[]>("/projetos");
 }
 
-export async function listProjetosPublicos(status?: Projeto["status_publico"]): Promise<Projeto[]> {
-  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+export async function listProjetosPublicos(
+  status?: Projeto["status_publico"],
+  clienteId?: string,
+): Promise<Projeto[]> {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (clienteId) params.set("clienteId", clienteId);
+  const query = params.toString() ? `?${params.toString()}` : "";
   return portalApi.get<Projeto[]>(`/projetos/public${query}`);
 }
 

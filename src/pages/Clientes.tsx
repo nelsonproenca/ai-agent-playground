@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Terminal, Building2, ExternalLink } from "lucide-react";
+import { Terminal, Building2, ExternalLink, FolderKanban } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NavLink } from "@/components/NavLink";
@@ -44,13 +45,14 @@ const Clientes = () => {
         ) : clientes.length === 0 ? (
           <p className="text-center text-muted-foreground font-mono">Nenhum cliente cadastrado.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
             {clientes.map((c, i) => (
               <motion.div
                 key={c.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
               >
                 <Card className="border-border bg-card hover:border-primary/40 transition-colors group h-full">
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
@@ -68,17 +70,26 @@ const Clientes = () => {
                         <p className="text-xs text-muted-foreground font-mono">{c.segmento}</p>
                       )}
                     </div>
-                    {c.siteUrl && (
-                      <a
-                        href={c.siteUrl.startsWith("http") ? c.siteUrl : `https://${c.siteUrl}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <div className="flex flex-col items-center gap-2">
+                      {c.siteUrl && (
+                        <a
+                          href={c.siteUrl.startsWith("http") ? c.siteUrl : `https://${c.siteUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-mono text-primary hover:underline flex items-center gap-1.5"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Visitar site
+                        </a>
+                      )}
+                      <Link
+                        to={`/projetos?clienteId=${encodeURIComponent(c.id)}&clienteNome=${encodeURIComponent(c.empresa ?? c.nome)}`}
                         className="text-xs font-mono text-primary hover:underline flex items-center gap-1.5"
                       >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        Visitar site
-                      </a>
-                    )}
+                        <FolderKanban className="h-3.5 w-3.5" />
+                        Projetos
+                      </Link>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
