@@ -19,13 +19,14 @@ Projeto originado no Lovable — pode ser editado localmente ou pela plataforma,
 
 - **Público**: `/` (Index/landing), `/landing`, `/contato`, `/claw3d`, `/colabs`, `/clientes` (vitrine de logos de empresas parceiras — **não confundir** com o CRM de clientes), `/projetos` (vitrine pública de portfólio, fala com o `portal-backend`)
 - **Admin** (autenticado via `/login`, hook `useAuth`): `/admin`, `/admin/leads`, `/admin/colaboradores`, `/admin/clientes` (CRM — "Gestão de Clientes"), `/admin/agendamentos`, `/admin/projetos`
-- **Watchtower** (`/watchtower/*`, pasta `src/watchtower/`): **legado** — o Watchtower já foi extraído
-  pra repositório e domínio próprios (`saas/watchtower/watchtower-web`, servido em
-  `watchtower.nelson-proenca-info.com.br`). O código aqui dentro não recebe mais features novas (a
-  cópia daqui ficou parada em 13/09); só existe ainda porque as rotas `/watchtower/*` continuam
-  registradas no `App.tsx` deste app. Não usar como referência — qualquer mudança no Watchtower vai
-  em `saas/watchtower/`, não aqui. Pendência de limpeza: remover `src/watchtower/` e as rotas daqui
-  quando o standalone estiver 100% assumido em produção.
+- **Watchtower**: **não vive mais aqui.** Foi extraído pra repositório e domínio próprios
+  (`saas/watchtower/watchtower-web`, servido em `watchtower.nelson-proenca-info.com.br`). O
+  `src/watchtower/` e as rotas `/watchtower/*` foram removidos deste app (commit `23dc038`); qualquer
+  mudança no Watchtower vai em `saas/watchtower/`. Restos conhecidos, ainda sem limpeza: assets em
+  `src/assets/watchtower/` (sem referência no código) e as Edge Functions `watchtower-*`,
+  `camera-health-check` e `send-health-alert-email` em `supabase/functions/` — o Watchtower saiu do
+  Supabase em 01/10/2026, então provavelmente estão obsoletas; checar se algo ainda as chama (n8n,
+  cron) antes de remover.
 
 ## Dados
 
