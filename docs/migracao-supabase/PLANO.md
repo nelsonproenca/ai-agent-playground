@@ -1,201 +1,234 @@
-# Plano: tirar o site institucional do Supabase (portal-web + portal-api + n8n)
+# Plano em fases: Watchtower ↔ n8n e saída do Supabase (portal-web + portal-api + n8n)
 
-Criado em 01/10/2026 e **refeito em 02/10/2026** depois de validar os workflows do n8n. Mesma direção da
-migração do Watchtower: **MySQL do `portal-api`, auth próprio, storage em disco, e-mail por Resend**. O
-inventário completo (tabelas, colunas, quem usa, RLS, fluxos do n8n) está em [MAPEAMENTO.md](MAPEAMENTO.md).
-A convenção de nomes do n8n está em `.claude/rules/n8n-workflows.md` (workspace).
+Criado em 01/10/2026, **refeito em 02/10/2026** com a validação dos workflows do n8n, e **reorganizado em fases
+para validação** (com testes do n8n do Watchtower). Inventário em [MAPEAMENTO.md](MAPEAMENTO.md); convenção de nomes
+do n8n em `.claude/rules/n8n-workflows.md`.
 
-## Situação e premissas
+**Escopo (decisão de 02/10/2026):** só contam os workflows de `SiteNPI`, `WTower` e `BeHair`. O resto era teste e
+é ignorado.
 
-- O projeto Supabase está **pausado**: login do cliente, CRM (leads, colaboradores, agendamentos, contatos),
-  vitrine `/clientes`, landing de convites e os formulários do site que gravam lá estão **fora do ar**. Não há
-  um corte "sem parada" a proteger; a migração é restaurar o serviço.
-- O `portal-api` **já** tem MySQL, login de admin por cookie (`admin_users`), Resend, storage em disco e as
-  entidades `clientes`, `projetos`, `etapas`, `artefatos`, `pedidos`, `pedido_respostas`. Falta o resto do CRM,
-  o login do cliente, os uploads públicos e a ponte com o n8n.
-- Seis tabelas restantes: `colaboradores`, `contatos_clientes`, `leads_ia`, `agendamentos`, `enrich_company`,
-  `playground_analise`. O resto do Supabase (tabelas do Watchtower, Edge Functions) é descartado.
-- **O n8n é parte do trabalho, não só uma troca de node.** Validado no n8n vivo: o Playground e o Enricher já
-  estavam quebrados antes da pausa (payload, `LeadID`, tabela de destino e URL `webhook-test` no front), e os
-  4 fluxos que gravam no Supabase têm webhooks sem autenticação. Detalhes no MAPEAMENTO (seção 7).
-- Dados: ainda há valor (leads, agendamentos, contatos, imagens). A **Fase 0 vem antes de qualquer outra**.
+## Visão geral
 
-## Decisões a tomar (recomendação em negrito)
-
-1. **Login do cliente:** magic link ou código de 6 dígitos? → **magic link de uso único (hash, 15 min), sessão
-   por cookie httpOnly com papel `cliente`**, igual ao admin.
-2. **Imagens públicas:** Caddy direto do volume ou endpoint da API? → **endpoint público de leitura no
-   `portal-api`**; upload e remoção só admin.
-3. **Dados históricos:** importar ou começar vazio? → **importar**.
-4. ~~**Workflow "Validação Comprovante PIX":**~~ **feito em 02/10/2026** (arquivado; receptor novo criado)
-   (`[PRD]WTower-NotificarPagamento`).
-5. **Workflows de outros contextos que estão com prefixo `SiteNPI`** (`AgentIA-FAQ` de e-commerce,
-   `CadastroUsuariosSite` do site de astrologia, `Forms-SendEmail`): ficam em produção ou saem? → **decidir caso
-   a caso**; o `AgentIA-FAQ` está quebrado (tool `produtos_dtc`) e o `CadastroUsuariosSite` reenvia senha em
-   texto por e-mail.
-
-## Contrato portal-api ↔ n8n (substitui o Database Webhook do Supabase)
-
-Hoje: o front insere no Supabase e chama o n8n **do navegador**; o n8n escreve de volta direto no Supabase. Novo:
-
-1. O front chama **só o `portal-api`** (nunca a URL do n8n).
-2. O `portal-api` grava o registro e dispara o webhook do n8n **do servidor**, com `X-Webhook-Secret`, corpo
-   **simples e sem envelope** (ex.: `{ "id": "...", "nomeEmpresa": "...", "segmento": "..." }`). Falha do n8n não
-   derruba a requisição do usuário (log e segue).
-3. O n8n responde ao produto por **HTTP Request ao endpoint de callback** do `portal-api` (mesmo segredo), por
-   `id`, nunca por nó de banco.
-4. O front faz polling no `portal-api` (`GET /.../{id}`), que devolve só o resultado.
-
-| Fluxo (novo nome do path) | Disparado por | Corpo para o n8n | Callback do n8n |
+| Fase | O quê | Depende de | Risco em produção |
 |---|---|---|---|
-| `/webhook/sitenpi-leads` (`[PRD]SiteNPI-AddLeads`) | `POST /leads` (form do site) | `{id, nome, empresa, contato, canal, desafioTecnico}` | `PATCH /leads/{id}/analise` `{analise}` |
-| `/webhook/sitenpi-playground` (`[PRD]SiteNPI-AddChallenger`) | `POST /playground` | `{id, tipoAnalise, inputTecnico}` | `PATCH /playground/{id}/resultado` `{output}` |
-| `/webhook/sitenpi-enriquecer-empresa` (`[PRD]SiteNPI-SearchCompany`) | `POST /enrich` | `{id, nomeEmpresa, segmento}` | `PATCH /enrich/{id}/resultado` `{output}` |
-| `/webhook/atendimento_instagram` (`[PRD]SiteNPI-AutomatedServiceInstagram`) | Meta (não muda) | payload da Meta | `POST /agendamentos` |
+| **A** | Watchtower ↔ n8n: testar e ativar os 2 fluxos `WTower`, ligar a API, teste de ponta a ponta | nada (já criados, inativos) | baixo (só envia Telegram) |
+| **B** | Watchtower: agendador do health check e dedup do alerta (achados novos) | A | médio (mexe na API em produção) |
+| **0** | Portal: restaurar o Supabase e exportar tudo | nada (urgente: prazo de restauração) | nenhum |
+| **1** | `portal-api`: tabelas do CRM, endpoints e ponte com o n8n | 0 | baixo (não deployado até a Fase 5) |
+| **2** | `portal-api`: login do cliente e uploads | 1 | baixo |
+| **3** | `portal-web`: trocar Supabase pela API | 1, 2 | baixo |
+| **4** | n8n do site: corrigir os 4 fluxos e tirar o Supabase | 1 | médio (fluxos de IA em produção) |
+| **5** | Deploy do portal, importação e smoke test | 0–4 | médio |
+| **6** | Limpeza e encerramento do Supabase | 5 + 1 semana estável | alto se feito cedo |
 
-Os paths antigos (`leads-site`, `analise-tecnica`, `enriquecer-empresa`) ficam ativos até o corte e depois saem.
-O webhook da Meta continua público, mas **precisa validar a assinatura** (`X-Hub-Signature-256`) em vez de
-aceitar qualquer POST.
+As fases **A** e **0** são independentes e podem andar em paralelo; `B` só depois de `A`.
 
-## Fases
+## Decisões a validar (recomendação em negrito)
 
-### Fase 0: Salvar o que existe (antes de tudo)
+1. **Login do cliente:** **magic link de uso único (hash, 15 min), sessão por cookie httpOnly com papel `cliente`**
+   (igual ao admin) ou código de 6 dígitos?
+2. **Imagens públicas:** **endpoint público de leitura no `portal-api`**, ou Caddy direto do volume?
+3. **Dados históricos:** **importar** ou começar vazio?
+4. **Health check do Watchtower:** **agendador dentro do `watchtower-api`** (`BackgroundService` usando o
+   `check_interval_minutes` que já existe) ou um workflow n8n chamando `/api/health-check/run` com uma chave de
+   serviço dedicada?
+5. **Alerta de health:** **um aviso por incidente** (na transição para offline, mais "voltou" ao se recuperar) em
+   vez de repetir a cada verificação?
 
-1. **Restaurar o projeto no Supabase** (projetos pausados têm prazo para restauração; conferir o prazo no
-   dashboard).
-2. Exportar as 6 tabelas (CSV pelo dashboard ou `pg_dump --data-only -t ...`), o bucket `uploads` completo
-   (`clientes/`, `colaboradores/`, `convites/`) e o schema real (`information_schema.columns`) para validar os
-   tipos do MAPEAMENTO.
+---
+
+## Fase A: Watchtower ↔ n8n (testar, ativar e ligar)
+
+Estado: `[PRD]WTower-NotificarPagamento` (`wHEGtQZA90DrN0M2`, webhook `/webhook/wtower-pagamento`) e
+`[PRD]WTower-AlertaHealthCamera` (`c8CvoUXg6SbLqGux`, `/webhook/wtower-health-alerta`) criados, **inativos**,
+conexões verificadas. Ambos exigem o header `X-Webhook-Secret` (credencial `Watchtower Webhook Secret`) e avisam
+no Telegram do Nelson.
+
+### A1. Teste isolado no n8n (envia 2 a 4 mensagens de teste no seu Telegram; precisa do seu OK)
+
+Feito por `test_workflow` do MCP ou pelo editor do n8n, com dados falsos. Casos e resultado esperado:
+
+| # | Fluxo | Entrada | Esperado |
+|---|---|---|---|
+| T1 | pagamento | payload normal (nome, CPF de 11 dígitos, plano, URL do comprovante com `&`) | HTTP 200 `{"ok":true}`; 1 mensagem com **CPF mascarado** (`***.***.***-NN`), nome, plano e os 2 links |
+| T2 | pagamento | nome `<b>x</b> & Cia` e e-mail com `<`/`&` | mensagem **não quebra** e mostra o texto literal (escape de HTML); o link do comprovante preserva os `&` |
+| T3 | pagamento | corpo sem campos (`{}`) | 200 e mensagem com campos vazios, sem erro de execução |
+| T4 | pagamento | **sem** o header de segredo | rejeitado (401/403), **nenhuma** mensagem, nenhuma execução de sucesso |
+| T5 | pagamento | header **errado** | rejeitado, nenhuma mensagem |
+| T6 | health | payload normal (câmera, 3 falhas, erro, `checkedAt` UTC) | 200; mensagem com a hora em **America/Sao_Paulo** (`dd/MM/yyyy HH:mm`) e link do painel |
+| T7 | health | `lastError` com 500 caracteres e `<script>` | erro truncado em 300, sem quebrar o HTML |
+| T8 | health | sem `checkedAt` | mensagem com "agora" |
+| T9 | health | sem header / header errado | rejeitado, sem mensagem |
+
+Verificação: 1 execução `success` por caso aceito em `search_workflow_executions`; nenhuma execução para os casos
+rejeitados (T4, T5, T9). O caminho de falha do Telegram (resposta 502) é conferido só pela fiação
+(`main[1]` → `Responder 502`) para não depender de derrubar o bot.
+
+### A2. Ativar
+
+`publish` dos dois fluxos (só depois de A1 verde). As URLs de produção passam a responder.
+
+### A3. Ligar a API (VPS)
+
+Sem imprimir segredo, pelo padrão do `scripts/vps-prepare.sh`:
+1. Novo subcomando `set-n8n` no script: grava `N8n__WebhookUrl=https://n8n.nelson-proenca-info.com.br/webhook/wtower-pagamento`
+   e `N8n__WebhookSecret` (lido da entrada, sem eco) no `watchtower.env`.
+2. `docker compose up -d --force-recreate` no `watchtower-api` (o `env_file` só é lido na subida).
+3. No painel admin, em Configurações de health: URL do webhook =
+   `https://n8n.nelson-proenca-info.com.br/webhook/wtower-health-alerta`.
+4. O valor de `N8n__WebhookSecret` precisa ser igual ao da credencial do n8n (a mesma dos dois webhooks).
+
+### A4. Teste de ponta a ponta
+
+| # | Cenário | Esperado |
+|---|---|---|
+| E1 | Conta de teste envia um comprovante pelo site | em poucos segundos chega o Telegram com o **link do comprovante abrindo** o arquivo e o link do painel; o pagamento aparece em `/dashboard/admin/payments` |
+| E2 | Admin aprova o pagamento | `user_access` fica `Active` e o cliente passa a ver as câmeras |
+| E3 | **n8n fora do ar / URL errada** (temporário) | o comprovante **continua sendo gravado** e o cliente recebe a confirmação; o log da API mostra o aviso de falha do webhook (o envio é fire-and-forget) |
+| E4 | Segredo diferente entre API e n8n (temporário) | n8n rejeita; comprovante gravado; aviso no log; **nenhuma** mensagem |
+| E5 | Câmera de teste com URL HLS inválida + URL de health configurada; rodar o health check repetidas vezes (`/api/health-check/run` pelo painel) até atingir `NotifyAfterFailures` | **1 Telegram** de câmera sem sinal com o nome, o slug e a hora corretos |
+| E6 | Continuar rodando o health check com a câmera ainda offline | **achado do código atual:** o alerta é reenviado a cada verificação (sem dedup). Registrar o resultado; a correção é a Fase B |
+| E7 | Remover a câmera de teste e a URL de teste | volta ao estado inicial |
+
+**Critério de aceite da Fase A:** T1–T9 e E1–E5 passando, com E6 documentado. Rollback: despublicar os dois fluxos e
+limpar `N8n__WebhookUrl` (a API volta a ignorar o webhook).
+
+---
+
+## Fase B: Watchtower, agendador e dedup do health check (achados novos)
+
+Descobertos ao preparar a Fase A:
+- **Não existe agendador do health check.** Não há `BackgroundService` nem chamada externa; só o `/run`, que
+  hoje exige admin. Sem alguém clicando, **nenhum alerta automático acontece**, e o fluxo `AlertaHealthCamera`
+  nunca dispara sozinho.
+- **O alerta repete a cada verificação** enquanto as últimas N leituras forem offline (a condição continua
+  verdadeira), ou seja, 1 mensagem a cada ciclo.
+
+Entregas (conforme as decisões 4 e 5):
+1. `BackgroundService` no `watchtower-api` que executa o `RunHealthCheckHandler` a cada
+   `check_interval_minutes` (padrão 5), com proteção contra execuções sobrepostas e log.
+2. Dedup: alertar **na transição** para offline (a N-ésima falha seguida) e opcionalmente avisar "voltou ao ar";
+   guardar o estado do último alerta por câmera (coluna ou tabela nova + migration).
+3. Testes xUnit do handler (EF InMemory): não alerta antes de N falhas; alerta uma vez ao atingir N; não repete
+   nas seguintes; volta a alertar após recuperar e cair de novo.
+4. Re-rodar E5–E6 depois do deploy: 1 aviso por incidente.
+
+**Aceite:** com uma câmera de teste fora, chega 1 Telegram por incidente sem ninguém abrir o painel. Reversível
+desligando o serviço por configuração.
+
+---
+
+## Fase 0: Portal, salvar o que existe (antes de tudo)
+
+1. **Restaurar o projeto no Supabase** (projetos pausados têm prazo de restauração; conferir no dashboard).
+2. Exportar as 6 tabelas (`colaboradores`, `contatos_clientes`, `leads_ia`, `agendamentos`, `enrich_company`,
+   `playground_analise`), o bucket `uploads` completo (`clientes/`, `colaboradores/`, `convites/`) e o schema real
+   (`information_schema.columns`) para validar os tipos do MAPEAMENTO.
 3. Guardar o backup fora do VPS e fora do repo (tem e-mail e telefone de terceiros).
-4. Com o projeto ativo, **fechar as policies públicas** das tabelas ou pausar de novo logo após exportar.
-5. No n8n: só os workflows de `SiteNPI`, `WTower` e `BeHair` contam (decisão de 02/10/2026); os de teste ficam
-   ignorados. `ChatCriarEventos` já foi verificado (sem Supabase).
+4. Com o projeto ativo, **fechar as policies públicas** ou pausar de novo logo após exportar.
 
-### Fase 1: `portal-api`, dados do CRM e ponte com o n8n
+**Aceite:** contagem de linhas por tabela anotada, arquivos do bucket baixados, schema salvo, backup conferido.
 
-Padrão do projeto (Clean Architecture, handlers registrados à mão, `Result<T>`).
+## Fase 1: `portal-api`, dados do CRM e ponte com o n8n
+
 1. Entidades e configurations das 6 tabelas e **uma migration**; `contatos_clientes` com FK real para `clientes`
    (`ON DELETE CASCADE`). Ids `Guid`, preservando os do Supabase.
-2. Endpoints em `/api/portal/...`:
-   - **Públicos com rate limit e limite de tamanho:** `POST /leads`, `POST /enrich`, `POST /playground`,
-     `GET /enrich/{id}` e `GET /playground/{id}` (só `status` e resultado), `GET /colaboradores`,
-     `GET /convites`.
-   - **Admin (cookie + CSRF):** CRUD de `colaboradores` e `contatos_clientes`; leitura e marcação de `leads_ia`;
-     leitura e edição de `agendamentos` (status, comissão); conversão lead → contato.
-   - **n8n (header `X-Webhook-Secret`):** `PATCH /leads/{id}/analise`, `PATCH /playground/{id}/resultado`,
-     `PATCH /enrich/{id}/resultado`, `POST /agendamentos`.
-3. **Cliente do n8n** (`INotificadorN8n`): dispara os webhooks da tabela do contrato, com timeout curto e sem
-   propagar falha. URLs e segredo em configuração (`N8n:*`), gerados/guardados só na VPS.
-4. Importadores únicos (`dotnet run -- import-<tabela> <arquivo>`) lendo os CSV/JSON da Fase 0, preservando ids e
-   `created_at`, no padrão do `ImportClientesCommand`, mas lendo de arquivo e não da API do Supabase.
+2. Endpoints em `/api/portal/...`: **públicos com rate limit e limite de tamanho** (`POST /leads`, `/enrich`,
+   `/playground`; `GET /enrich/{id}`, `/playground/{id}`, `/colaboradores`, `/convites`); **admin** (CRUD de
+   colaboradores e contatos; leitura e marcação de leads; agendamentos; lead → contato); **n8n** com
+   `X-Webhook-Secret` (`PATCH /leads/{id}/analise`, `/playground/{id}/resultado`, `/enrich/{id}/resultado`,
+   `POST /agendamentos`).
+3. **Cliente do n8n** (`INotificadorN8n`): dispara os webhooks do contrato abaixo, com timeout curto e sem
+   propagar falha.
+4. Importadores únicos lendo os arquivos da Fase 0, preservando ids e `created_at`.
 5. Testes xUnit (EF InMemory) dos handlers e do cliente do n8n, no padrão do `watchtower-api`.
 
-### Fase 2: `portal-api`, login do cliente e uploads
+**Aceite:** build com 0 avisos e testes verdes; endpoints públicos limitados; admin só com cookie.
 
-1. **Login do cliente:** tabela `cliente_login_tokens` (hash, e-mail, expiração, uso único);
-   `POST /auth/cliente/solicitar` (rate limit; resposta igual exista o e-mail ou não; só envia se houver
-   `clientes.email`), `GET /auth/cliente/verificar?token=` (consome e emite o cookie com papel `cliente`),
-   `POST /auth/cliente/logout`. O e-mail sai pelo `IEmailService` (Resend) que já existe.
-2. A policy `AdminOrClient` passa a usar **só** o esquema de cookie (admin ou cliente). **Remover o esquema
-   `SupabaseJwt`** e a exigência de `Supabase:Url` no startup. `GET /clientes/me` lê o e-mail do cookie; a regra
-   "cliente só vê o que é seu" continua dentro dos handlers.
+### Contrato `portal-api` ↔ n8n (substitui o Database Webhook do Supabase)
+
+O front chama **só o `portal-api`**; o `portal-api` grava e dispara o webhook do n8n do servidor (`X-Webhook-Secret`,
+corpo simples, sem envelope `record`); o n8n responde por **callback HTTP** no `portal-api`; o front faz polling
+no `portal-api`.
+
+| Webhook novo (n8n) | Disparado por | Corpo | Callback |
+|---|---|---|---|
+| `/webhook/sitenpi-leads` (`[PRD]SiteNPI-AddLeads`) | `POST /leads` | `{id, nome, empresa, contato, canal, desafioTecnico}` | `PATCH /leads/{id}/analise` |
+| `/webhook/sitenpi-playground` (`[PRD]SiteNPI-AddChallenger`) | `POST /playground` | `{id, tipoAnalise, inputTecnico}` | `PATCH /playground/{id}/resultado` |
+| `/webhook/sitenpi-enriquecer-empresa` (`[PRD]SiteNPI-SearchCompany`) | `POST /enrich` | `{id, nomeEmpresa, segmento}` | `PATCH /enrich/{id}/resultado` |
+| `/webhook/atendimento_instagram` (`[PRD]SiteNPI-AutomatedServiceInstagram`) | Meta | payload da Meta | `POST /agendamentos` |
+
+Os paths antigos (`leads-site`, `analise-tecnica`, `enriquecer-empresa`) ficam até o corte. O webhook da Meta deve
+**validar `X-Hub-Signature-256`**.
+
+## Fase 2: `portal-api`, login do cliente e uploads
+
+1. **Login do cliente:** `cliente_login_tokens` (hash, e-mail, expiração, uso único); `POST /auth/cliente/solicitar`
+   (rate limit, resposta igual exista o e-mail ou não), `GET /auth/cliente/verificar?token=` (consome e emite o
+   cookie com papel `cliente`), `POST /auth/cliente/logout`; e-mail pelo `IEmailService` (Resend).
+2. `AdminOrClient` usa só o esquema de cookie; **remover o esquema `SupabaseJwt`** e a exigência de `Supabase:Url`
+   no startup. `GET /clientes/me` lê o e-mail do cookie.
 3. **Uploads:** `POST /uploads/{pasta}` (admin; tipo e tamanho validados, máx. 2 MB, nome gerado pelo servidor),
-   `DELETE /uploads/...` (admin) e `GET /uploads/{pasta}/{arquivo}` público. Volume Docker dedicado; pastas
-   `clientes`, `colaboradores`, `convites`. Copiar os arquivos do bucket (Fase 0) e reescrever
-   `logo_url`/`foto_url` no import.
+   `DELETE /uploads/...` (admin), `GET /uploads/{pasta}/{arquivo}` público; volume Docker; pastas `clientes`,
+   `colaboradores`, `convites`; reescrever `logo_url`/`foto_url` no import.
 
-### Fase 3: `portal-web`
+**Aceite:** testes de token (uso único, expiração, resposta genérica) e de upload (tipo, tamanho, path traversal).
 
-Trocar cada chamada ao Supabase por funções em `src/features/<dominio>/api.ts` (cliente HTTP central, sem `fetch`
-solto). Arquivos:
-- Dados: `GestaoClientes`, `GestaoColabs`, `GestaoLeads`, `LeadEnricher`, `LeadForm`, `TechPlayground`,
-  `pages/Colabs`, `pages/DashboardAgendamentos`, `pages/GeradorConvites`, `pages/LandingPage`.
-- **`LeadEnricher` e `TechPlayground` deixam de chamar o n8n** (`fetch` para `n8n.nelson-proenca-info.com.br`,
-  inclusive a URL `webhook-test`): chamam `POST /enrich` e `POST /playground` e fazem polling no `portal-api`.
-- Storage: `ImageUpload`, `GeradorConvites`, `LandingPage`.
-- Auth do cliente: `useClientAuth.tsx` (magic link pelo `portal-api`) e `portal-shared/apiClient.ts` (sem
-  `supabase.auth.getSession`; passa a usar o cookie com `credentials: "include"`), mais `portfolio/api.ts` e
-  `api.test.ts`.
-- Remover: `src/integrations/supabase/`, a pasta `supabase/` (migrations e functions), `@supabase/supabase-js`,
-  `VITE_SUPABASE_*` do `.env` e do `.env.example`.
-- **Lovable:** o projeto nasceu no Lovable, que regenera `integrations/supabase` e `supabase/`. Desconectar a
-  sincronização antes de começar.
-Pronto = `npm run lint`, `npm test`, `npm run build`.
+## Fase 3: `portal-web`
 
-### Fase 4: n8n (corrigir, separar por projeto e desligar o Supabase)
+Trocar cada chamada ao Supabase por funções em `src/features/<dominio>/api.ts`: `GestaoClientes`, `GestaoColabs`,
+`GestaoLeads`, `LeadEnricher`, `LeadForm`, `TechPlayground`, `pages/{Colabs,DashboardAgendamentos,GeradorConvites,
+LandingPage}`, `ImageUpload`, `useClientAuth`, `portal-shared/apiClient`, `portfolio/api`. **`LeadEnricher` e
+`TechPlayground` deixam de chamar o n8n** (inclusive a URL `webhook-test`). Remover `src/integrations/supabase/`,
+`supabase/`, `@supabase/supabase-js` e `VITE_SUPABASE_*`. **Desconectar a sincronização do Lovable** antes de
+começar.
 
-**4.1 Corrigir e migrar os 4 fluxos** (contrato acima):
-- `AddLeads`: webhook com header auth e path novo; ler o corpo sem envelope; corrigir o typo `Contacto`; trocar
-  "Update a row" por HTTP Request `PATCH /leads/{id}/analise`; manter o aviso no Telegram.
-- `AddChallenger`: corrigir o filtro (`LeadID` × `AnaliseID`) **e o prompt** (campos `TipoAnalise`/
-  `InputTecnico`); callback `PATCH /playground/{id}/resultado`.
-- `SearchCompany`: ler também o `id`; callback `PATCH /enrich/{id}/resultado` (hoje grava na tabela errada).
-- `AutomatedServiceInstagram`: trocar "Create a row" por `POST /agendamentos`; **validar a assinatura da Meta**;
-  revisar as expressões `json.xxx` (sem `$`) que provavelmente não resolvem; mover o **Bearer da Meta para
-  credencial do n8n e rotacionar o token**.
-- Credencial nova de header (`X-Webhook-Secret`) no n8n, igual ao segredo do `portal-api`.
-- Testar cada fluxo com dado de teste antes de ativar (regra do n8n).
+**Aceite:** `npm run lint`, `npm test`, `npm run build` verdes; nenhuma ocorrência de `supabase` em `src/`.
 
-**4.2 Separar por projeto** (convenção `[PRD]<Projeto>-<Fluxo>`; tabela de renomes em MAPEAMENTO 7.3, só com o OK
-do Nelson):
-- `SiteNPI`: os 4 fluxos acima e os já prefixados; decidir os de outros contextos (decisão 5).
-- `BeHair`: renomear `BeautyHairApp - Assistente Telegram` → `[PRD]BeHair-AssistenteTelegram` e
-  `BeautyHairApp - RAG: Carregar Conteudo` → `[PRD]BeHair-RAGCarregarConteudo`.
-- `WTower`: arquivar `Validação Comprovante PIX`; **criar** `[PRD]WTower-NotificarPagamento` (recebe o
-  `PaymentWebhookPayload` do `watchtower-api`, avisa o Nelson e leva ao painel de aprovação) e
-  `[PRD]WTower-AlertaHealthCamera` (`HealthAlertWebhookPayload`). Depois preencher `N8n__WebhookUrl` em
-  `watchtower.env` na VPS.
-- Atualizar `documentacao/02-Inventario_de_Fluxos_n8n.md` (hoje lista só 4 fluxos) com o inventário por projeto.
+## Fase 4: n8n do site (corrigir e desligar o Supabase)
 
-**4.3 Segurança do que sobrou:** `CadastroUsuariosSite` reenvia a senha em texto e a guarda em planilha
-(trocar por fluxo de definição de senha ou desativar); webhooks restantes sem autenticação passam a exigir header.
+1. **Corrigir e migrar os 4 fluxos** (contrato acima): webhook com header auth e path novo; leitura do corpo sem
+   envelope; `AddLeads` (typo `Contacto`), `AddChallenger` (filtro `LeadID`×`AnaliseID` **e** prompt),
+   `SearchCompany` (ler o `id`, gravar na tabela certa); trocar "Update a row" por HTTP Request ao callback;
+   `AutomatedServiceInstagram`: "Create a row" → `POST /agendamentos`, validar assinatura da Meta, corrigir as
+   expressões `json.xxx`, **mover o Bearer da Meta para credencial e rotacionar**.
+2. Credencial de header (`X-Webhook-Secret`) igual ao segredo do `portal-api`.
+3. **Testes do n8n do site** (dados de teste, antes de ativar): para cada fluxo, (a) sem header → rejeitado;
+   (b) payload válido → callback chega e o registro no `portal-api` é atualizado; (c) polling do front devolve o
+   resultado; (d) falha do callback → registro fica com status de erro e o front mostra timeout amigável.
+4. Remover os nodes Supabase e só então apagar a credencial `Supabase account 2`.
 
-**4.4 Desligar o Supabase no n8n:** remover os nodes Supabase (inclusive a tool `produtos_dtc` do `AgentIA-FAQ`,
-que já está quebrada) e só então apagar a credencial `Supabase account 2`.
+**Aceite:** os 4 fluxos sem nenhum node Supabase, testes (a)–(d) verdes, token da Meta rotacionado.
 
-### Fase 5: Deploy e validação (portal-api e portal-web)
+## Fase 5: Deploy do portal e validação
 
-1. `.env` do `portal-api` na VPS: segredo e URLs do n8n, base URL pública do link do e-mail, volume de uploads,
-   remoção de `Supabase__*`. Segredos gerados na VPS, sem imprimir (padrão `scripts/vps-prepare.sh` do
-   Watchtower).
-2. `bash deploy.sh portal back` e `bash deploy.sh portal front`.
-3. Rodar os importadores e conferir as contagens por tabela.
-4. Smoke test: login admin; CRUD de colaboradores e contatos; formulário de lead com a análise chegando no
-   Telegram e no painel; enrich e playground com polling; agendamento criado pelo fluxo do Instagram; landing de
-   convites; vitrine `/clientes`; login do cliente por e-mail e `GET /clientes/me`; upload e remoção de imagem.
-5. Sem usuários dependendo hoje, não há janela de manutenção a combinar.
+1. `.env` do `portal-api` na VPS (segredo e URLs do n8n, base URL do link do e-mail, volume de uploads; sem
+   `Supabase__*`), segredos gerados na VPS e sem imprimir.
+2. `bash deploy.sh portal back` e `bash deploy.sh portal front`; rodar os importadores; conferir contagens.
+3. **Smoke test:** login admin; CRUD de colaboradores e contatos; formulário de lead com a análise chegando;
+   enrich e playground com polling; agendamento pelo fluxo do Instagram; landing de convites; vitrine `/clientes`;
+   login do cliente por e-mail e `GET /clientes/me`; upload e remoção de imagem.
 
-### Fase 6: Limpeza
+**Aceite:** todos os itens do smoke test passando; contagens iguais às da Fase 0.
 
-- `portal-api`: apagar `ImportClientesCommand`, `ImportProjetosCommand`, a config `Supabase:*` e os comentários
-  que citam o Supabase.
-- Workspace: `CLAUDE.md` (remover a pendência), `.claude/rules/*`, `.claude/settings.local.json` (permissões do
-  CLI `supabase`), `documentacao/01-Dicionario_de_Dados.md` (reescrever para MySQL) e o inventário do n8n. Os PRDs
-  de `.llm/` ficam como histórico.
-- Encerrar de vez o projeto Supabase só depois de: backup confirmado, dados importados e validados, os workflows
-  do n8n sem nenhum node Supabase (inclusive `ChatCriarEventos`) e uma semana de produção estável.
-- Rotacionar o que passou por lugares inseguros: token Bearer da Meta (Instagram) e a chave anon do Supabase (já
-  no histórico do git e no bundle).
+## Fase 6: Limpeza e encerramento do Supabase
 
-## Ordem e dependências
-
-`Fase 0` (salvar) → `1` e `2` (backend, andam juntas) → `3` (front, depende dos endpoints) → `4` (n8n; o 4.1
-depende dos endpoints de callback e o 4.2 pode ser feito antes, independentemente) → `5` (deploy e importação) →
-`6` (limpeza). A Fase 0 é urgente por causa do prazo de restauração; os renomes do 4.2 e a criação dos fluxos
-`WTower` podem ser feitos já, sem esperar o resto.
+- `portal-api`: apagar `ImportClientesCommand`, `ImportProjetosCommand`, config `Supabase:*` e comentários.
+- Workspace: `CLAUDE.md`, `.claude/rules/*`, `.claude/settings.local.json`, `documentacao/01-Dicionario_de_Dados.md`
+  e `02-Inventario_de_Fluxos_n8n.md` (por projeto).
+- Encerrar o Supabase só com: backup confirmado, dados validados, **os workflows de `SiteNPI`/`WTower`/`BeHair` sem
+  nenhum node Supabase** e uma semana de produção estável.
+- Rotacionar token da Meta e a chave anon do Supabase (já no histórico do git e no bundle).
 
 ## Riscos
 
-1. **Prazo de restauração do projeto pausado:** perder = perder leads, agendamentos e imagens. Fase 0 primeiro.
-2. **Schema real diferente do documentado:** o dicionário de dados está desatualizado. Validar com
-   `information_schema` antes das migrations.
-3. **Login do cliente é a peça sensível:** token de uso único e curto (só o hash no banco), rate limit, resposta
-   genérica, cookie `HttpOnly`/`Secure`/`SameSite`, CSRF nas escritas.
-4. **Endpoints públicos que acionam IA** (`leads`, `enrich`, `playground`): rate limit por IP e limite de tamanho;
-   cada chamada vira um fluxo de IA no n8n (custo de Gemini/SerpAPI e canal de abuso).
-5. **Webhooks do n8n sem autenticação hoje** (e o da Meta sem validar assinatura): resolvidos na Fase 4.
-6. **Fluxos quebrados antes da migração:** o comportamento "esperado" não existe para comparar. Definir o
-   resultado correto na Fase 4 e testar com dado de teste.
+1. **Prazo de restauração do Supabase** (Fase 0 primeiro).
+2. **Schema real diferente do documentado** (validar com `information_schema`).
+3. **Login do cliente é a peça sensível** (token curto e de uso único, só o hash, rate limit, resposta genérica,
+   cookie `HttpOnly`/`Secure`/`SameSite`, CSRF).
+4. **Endpoints públicos que acionam IA:** rate limit e limite de tamanho (custo e abuso).
+5. **Alerta de health sem dedup e sem agendador** (Fase B) pode gerar spam ou silêncio.
+6. **Mensagens de teste no Telegram** dos testes A1/A4: avisar antes de rodar.
 7. **Lovable reintroduzindo o Supabase** se a sincronização continuar ligada.
-8. **Renomear workflows:** o path do webhook não muda com o nome, mas conferir referências por nome
-   (sub-workflows como `Forms-SendEmail`, documentação) antes de renomear.
+8. **Fluxos do site quebrados antes da pausa:** não há comportamento anterior para comparar; definir o resultado
+   correto na Fase 4 e testar com dado de teste.
