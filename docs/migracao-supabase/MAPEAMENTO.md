@@ -26,14 +26,15 @@ O e-mail de notificação do portfólio já foi portado para o backend (`Portfol
 | `enrich_company` | id, company_name, segment, output_ai, created_at | `LeadEnricher` (insert + polling de resposta) | anon: insert, select | `enrich_company`; `POST` público com rate limit + `GET` do resultado por id |
 | `playground_analise` | id, input_tecnico, tipo_analise, output_ia, status, created_at | `TechPlayground` (insert + polling), n8n **AddChallenger** e **SearchCompany** (update de `output_ia`) | anon: insert, select | `playground_analise`; mesmo padrão do `enrich_company` |
 
-Pendências de conferência nessa tabela:
-- **`enrich_company` × `playground_analise`:** o front (`LeadEnricher`) usa `enrich_company`, mas o export do
-  n8n SearchCompany atualiza `playground_analise`. Ver no n8n vivo qual tabela cada fluxo realmente grava.
-- `agendamentos.indicado_por` guarda o **nome** do colaborador (não o id): manter como texto ou migrar para FK
-  em `colaboradores`.
-- Os 3 fluxos do n8n (AddLeads, AddChallenger, SearchCompany) recebem `body.record.*`, ou seja, o payload de um
-  **Database Webhook do Supabase** (disparado por insert). No novo desenho o próprio portal-api chama o webhook
-  do n8n depois do insert, mantendo o formato `{ record: {...} }` para quase não mexer nos fluxos.
+Pontos confirmados no n8n vivo (detalhes na seção 7):
+- **`enrich_company` × `playground_analise` está de fato errado hoje:** o front lê o resultado em
+  `enrich_company.output_ai`, mas o fluxo SearchCompany grava em `playground_analise.output_ia` (e ainda com o
+  filtro quebrado). Na migração, cada fluxo grava na sua tabela pelo callback do `portal-api`.
+- `agendamentos.indicado_por` é texto livre (nome do Nelson ou o `ref` do referral do Instagram), sem relação
+  com `colaboradores`: manter como texto.
+- Os 3 fluxos "AddX" esperam o envelope `body.record.*` de um **Database Webhook do Supabase**, o que deixa de
+  existir. Em vez de imitar esse formato, o novo desenho define um contrato simples (seção 4 do PLANO) e corrige os
+  fluxos.
 
 ## 3. Tabelas do Supabase que NÃO migram (descartar após backup)
 
@@ -73,25 +74,70 @@ As `logo_url` e `foto_url` gravadas hoje são URLs públicas do Supabase: reescr
 | `portfolio-notify-email` | já portada para o `portal-api` (`PortfolioNotificationService`) | apagar |
 | `camera-health-check`, `send-health-alert-email`, `watchtower-notify-access`, `watchtower-send-email` | Watchtower antigo, sem chamadores no `portal-web`; o `watchtower-api` tem health check próprio | apagar |
 
-## 7. n8n (workflows ativos que usam Supabase; todos com a credencial `Supabase account 2`)
+## 7. n8n
 
-| Workflow | Node | Uso | Ação |
+Validado em 02/10/2026 lendo os workflows ativos pelo MCP (somente leitura). Todos os nodes Supabase usam a
+credencial `Supabase account 2`. Não há HTTP Request para `supabase.co`, nem Postgres, nem Supabase Vector Store
+nos workflows lidos.
+
+### 7.1 Fluxos que gravam no Supabase
+
+| Workflow | Webhook (sem autenticação) | Entrada esperada | Supabase | Problemas encontrados |
+|---|---|---|---|---|
+| `[PRD]SiteNPI-AddLeads` (`Xb6IvquUoQ6l94WN`) | `/webhook/leads-site` | envelope `body.record.{id,nome,contato,desafio_tecnico,canal}` (Database Webhook) | `leads_ia` update: `analise_ia`, `visto_pelo_nelson` (filtro por `LeadID`) | `$json.Contacto` (typo) no prompt vem vazio; também avisa por Telegram (chatId fixo) |
+| `[PRD]SiteNPI-AddChallenger` (`G8znRFLuaeQyeeaS`) | `/webhook/analise-tecnica` | `body.record.{id,input_tecnico,tipo_analise}` | `playground_analise` update: `output_ia` | filtro usa `LeadID`, mas o node cria `AnaliseID` → **o update nunca acha a linha**; o prompt lê `tipo_analise`/`input_tecnico` e os campos criados são `TipoAnalise`/`InputTecnico` → **prompt vazio** |
+| `[PRD]SiteNPI-SearchCompany` (`H2xEDyr0NjYsBnii`) | `/webhook/enriquecer-empresa` | `body.record.{nome_empresa,segmento_empresa}` (não lê o `id`) | `playground_analise` update: `output_ia` | não cria `LeadID` → **update não acha a linha**; grava em `playground_analise`, mas o front espera o resultado em `enrich_company.output_ai` → **o enriquecimento não fecha o ciclo hoje** |
+| `[PRD]SiteNPI-AutomatedServiceInstagram` (`ltYe2RxTxW5TNcQo`) | `/webhook/atendimento_instagram` (payload da Meta, não é Database Webhook) | `body.entry[0].messaging[0]...` | `agendamentos` insert: `cliente_nome`, `cliente_email`, `cliente_whatsapp`, `data_reuniao`, `status="confirmado"`, `instagram_user_id`, `indicado_por`, `origem` (`site_instagram` ou `folder_fisico`) | expressões escritas `json.xxx` (sem `$`), provavelmente não resolvem; **Bearer da Meta escrito direto no node HTTP Request** (mover para credencial e rotacionar). Agenda sempre com o Nelson (único expert, calendário Google); `indicado_por` é só texto |
+
+Como o **front chama o n8n hoje** (do navegador, `mode: "no-cors"`):
+- `LeadEnricher` → `/webhook/enriquecer-empresa` com `{id, nome_empresa, segmento_empresa}` (corpo solto, sem
+  `record`), e depois faz polling em `enrich_company.output_ai`.
+- `TechPlayground` → **`/webhook-test/leads-site`** (URL de teste, que só responde com o editor aberto, e é o
+  path de leads, não o de análise) com `{id, input_tecnico, tipo_analise}`, e depois polling em
+  `playground_analise.output_ia`.
+- `LeadForm` só insere em `leads_ia` (quem dispara o n8n é o Database Webhook do Supabase).
+
+Conclusão: **o Playground e o Enricher já estavam inconsistentes antes da pausa** (contrato do payload,
+`LeadID`, tabela de destino, URL de teste). A migração é a oportunidade de definir um contrato único e corrigir
+os três fluxos, não só de trocar o node de banco.
+
+### 7.2 Outros workflows ativos
+
+| Workflow | Gatilho | Observação |
+|---|---|---|
+| `[PRD]SiteNPI-Validação Comprovante PIX` (`nc6px6dcRJigkUQe`) | webhook `/validar-pagamento` (header auth) | **Watchtower antigo**: usa `profiles` e `subscriptions` do Supabase e espera outro payload; não bate com o `watchtower-api`. Arquivar |
+| `[PRD]SiteNPI-AgentIA-FAQ` (`1pOv6396VsYt6gTs`) | WhatsApp Trigger | agente de FAQ de e-commerce (curso); tool Supabase `produtos_dtc` getAll — **tabela removida em 12/09/2026, tool quebrada**; também usa Pinecone (não é Supabase) |
+| `[PRD]SiteNPI-CadastroUsuariosSite` (`JC1ytFdRKYjRAOhm`) | Form Trigger | cadastro do "site de astrologia"; usa **Google Sheets**, sem Supabase. **Reenvia a senha em texto por e-mail e a guarda na planilha**: risco |
+| `[PRD]SiteNPI-Forms-SendEmail` (`kpLRdPGtoFFxJ7xm`) | Execute Workflow (sub-workflow) | e-mail de funcionário pelo Gmail; sem Supabase |
+| `[PRD]SiteNPI-AjudanteCadastro`, `-AjudanteTelegranAtividades` | Form / Telegram | Google Sheets e Gemini; sem Supabase |
+| `[PRD]LinkedInPost`, `[PRD]LinkedInInsights` | Telegram | Gemini, Gmail, Docs, SerpAPI; sem Supabase |
+| `BeautyHairApp - Assistente Telegram` (`7naUAYLjSKSPPs6s`) | webhook | chama `beautyhairapp-api`; sem Supabase |
+
+**Ainda não verificado:** `[PRD]SiteNPI-ChatCriarEventos` (`1Xgl5uys9ge3IV78`) segue com "MCP desabilitado"
+(o flag não ficou ligado depois do renome; reativar no card do workflow). Também fechados para o MCP, ambos
+inativos: `AgenteIASite` e `[AulasHA]AgentIA-CreateVector` (este último pode ter Supabase Vector Store).
+
+### 7.3 Separação por projeto (regra em `.claude/rules/n8n-workflows.md`)
+
+Convenção: `[PRD]<Projeto>-<Fluxo>` com `SiteNPI` (site institucional), `WTower` (Watchtower) e `BeHair`
+(BeautyHairApp). Situação hoje e renomes propostos (executar só com o OK do Nelson):
+
+| Hoje | Projeto | Nome proposto | Obs. |
 |---|---|---|---|
-| `[PRD]SiteNPI-AddLeads` | Update a row | `leads_ia.update` (`analise_ia`, `visto_pelo_nelson`) | trocar por HTTP Request ao portal-api (com segredo) |
-| `[PRD]SiteNPI-AddChallenger` | Update a row | `playground_analise.update` (`output_ia`) | idem |
-| `[PRD]SiteNPI-SearchCompany` | Update a row | `playground_analise.update` (`output_ia`) | idem (confirmar tabela, ver acima) |
-| `[PRD]SiteNPI-AutomatedServiceInstagram` | Create a row | `agendamentos.create` | idem; **também há um Bearer token escrito direto num node HTTP Request**: mover para credencial e rotacionar |
-| `[PRD]SiteNPI-Validação Comprovante PIX` | 3 nodes | `profiles` / `subscriptions` (Watchtower antigo) | **arquivar**: já não corresponde ao `watchtower-api` (outro schema e outro payload) |
+| `[PRD]SiteNPI-AddLeads` / `-AddChallenger` / `-SearchCompany` / `-AutomatedServiceInstagram` | SiteNPI | já corretos | corrigir os fluxos (Fase 4) |
+| `[PRD]SiteNPI-AjudanteCadastro`, `-AjudanteTelegranAtividades`, `-AgentIA-FAQ`, `-CadastroUsuariosSite`, `-Forms-SendEmail`, `-ChatCriarEventos` | SiteNPI | já corretos | conteúdo vem de curso/outros contextos; decidir se ficam em produção |
+| `BeautyHairApp - Assistente Telegram` | BeHair | `[PRD]BeHair-AssistenteTelegram` | |
+| `BeautyHairApp - RAG: Carregar Conteudo` (inativo) | BeHair | `[PRD]BeHair-RAGCarregarConteudo` | setup único |
+| `[PRD]SiteNPI-Validação Comprovante PIX` | WTower (legado) | arquivar | substituído pelo fluxo novo abaixo |
+| `C6 Bank - Pix Conciliação` (inativo) | WTower? | `[PRD]WTower-ConciliacaoPixC6` ou arquivar | decidir |
+| `[PRD]LinkedInPost`, `[PRD]LinkedInInsights` | SiteNPI? | `[PRD]SiteNPI-LinkedInPost` / `-LinkedInInsights` | conteúdo do próprio Nelson; confirmar |
+| `[PROD]AjudanteTelegran`, `AgenteIASite`, `LeitorPlanilhasCB`, `TranscreverPDFSite` (inativos) | ? | classificar ou arquivar | |
+| `[AulasHA]*` (inativos) | fora dos 3 projetos | manter | prefixo próprio |
 
-Os webhooks dos 3 fluxos "AddX" não têm autenticação (qualquer um pode disparar a IA): passar a exigir header
-secreto.
-
-**Não verificados** (o MCP do n8n não consegue abri-los): `CadastroUsuariosSite`, `[AulasHA]AgentIA-FAQ`,
-`[AulasHA]Forms-SendEmail` e `TesteChat`. Abrir no editor do n8n e conferir nodes Supabase antes de desligar o
-projeto. Dos inativos, `[AulasHA]AgentIA-CreateVector` e `AgenteIASite` podem usar Supabase Vector Store.
-
-Workflows ativos lidos **sem** Supabase: `BeautyHairApp - Assistente Telegram`, `[PRD]LinkedInPost`,
-`[PRD]LinkedInInsights`, `[PRD]SiteNPI-AjudanteCadastro`, `[PRD]SiteNPI-AjudanteTelegranAtividades`.
+**Watchtower não tem nenhum workflow hoje.** Faltam (a criar com o prefixo novo): `[PRD]WTower-NotificarPagamento`
+(receptor do webhook de pagamento do `watchtower-api`, payload `PaymentWebhookPayload`) e
+`[PRD]WTower-AlertaHealthCamera` (receptor do alerta de health, `HealthAlertWebhookPayload`). Sem eles, a API
+envia para uma URL vazia e a aprovação de pagamento fica só manual no painel.
 
 ## 8. Achado de segurança (existe até hoje)
 
