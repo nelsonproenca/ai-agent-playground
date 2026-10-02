@@ -232,3 +232,24 @@ começar.
 7. **Lovable reintroduzindo o Supabase** se a sincronização continuar ligada.
 8. **Fluxos do site quebrados antes da pausa:** não há comportamento anterior para comparar; definir o resultado
    correto na Fase 4 e testar com dado de teste.
+
+---
+
+## Resultado da Fase A1/A2 (02/10/2026)
+
+Decisões 1 a 5 aceitas (todas as recomendações). Testes isolados executados com `test_workflow` (gatilho e node
+do Telegram fixados, então **nenhuma mensagem real foi enviada**; os nodes Set rodaram de verdade):
+
+| # | Resultado |
+|---|---|
+| T1 | passou: CPF `***.***.***-01`, link com `&` escapado, caminho até `Responder 200` |
+| T2 | **achou falha e foi corrigida**: o link do comprovante não escapava `<` e `>`; agora escapa. Reteste passou (nome, e-mail e link com HTML saem literais) |
+| T3 | passou: corpo vazio não gera erro (campos vazios, CPF `***.***.***-`) |
+| T4, T5 | passaram: sem header e com header errado, o webhook real responde **403** e não cria execução |
+| T6 | passou: `12:00Z` virou `02/10/2026 09:00` (São Paulo) |
+| T7 | passou: erro de 500 caracteres cortado em 300, `<script>` escapado |
+| T8 | passou: sem `checkedAt` mostra "agora" |
+| T9 | passou: 403 sem header ou com header errado; `GET` retorna 404; nenhuma execução criada |
+
+Os dois fluxos foram **publicados (ativos)**: sem o segredo nada dispara. Ainda **não** foi verificado o texto final
+da mensagem no Telegram (o node estava fixado): isso fica para E1 e E5, com a API ligada (Fase A3).
