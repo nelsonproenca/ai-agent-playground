@@ -4,6 +4,8 @@ Criado em 01/10/2026, **refeito em 02/10/2026** com a validação dos workflows 
 para validação** (com testes do n8n do Watchtower). Inventário em [MAPEAMENTO.md](MAPEAMENTO.md); convenção de nomes
 do n8n em `.claude/rules/n8n-workflows.md`.
 
+**Roteiro operacional da Fase 0:** [FASE0_ROTEIRO.md](FASE0_ROTEIRO.md) (script `scripts/export-supabase.sh`).
+
 **Escopo (decisão de 02/10/2026):** só contam os workflows de `SiteNPI`, `WTower` e `BeHair`. O resto era teste e
 é ignorado.
 
