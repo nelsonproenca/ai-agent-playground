@@ -264,3 +264,29 @@ da mensagem no Telegram (o node estava fixado): isso fica para E1 e E5, com a AP
   `/start` no bot `AtividadesSiteNPIBot`. O 502 era o caminho de erro funcionando como projetado.
 - **Falta da Fase A3:** configurar no painel admin (tela de health) a URL
   `https://n8n.nelson-proenca-info.com.br/webhook/wtower-health-alerta`. Depois: E1 a E7 (ponta a ponta).
+
+## Resultado de E1–E6 e da Fase B (02/10/2026)
+
+| Teste | Resultado |
+|---|---|
+| E1, E2 | passaram: comprovante real → Telegram com link → aprovação → acesso ativo (conferido no banco). Ajustes feitos no caminho: comprovante abre em modal; slot vazio mostra "Plano ativo" quando há acesso |
+| E5 | passou: câmera de teste offline gerou o alerta no Telegram; seletor de dono passou a mostrar nome e e-mail |
+| E6 | **confirmou o achado**: 4 mensagens idênticas para a mesma queda (13:37 e três às 13:49), uma por verificação |
+| E3 | não executado (n8n fora do ar não pode travar o cliente) |
+
+Achados e correções além do plano:
+- **Cadastro de câmera dava 500**: `SyncStreamsAsync` escrevia `/opt/go2rtc/streams.yaml` (arquivo do host) depois de gravar a câmera; agora a falha vira aviso (commit `4f2a2a9`). Câmeras **Bridge** não sincronizam o go2rtc a partir do container.
+- **Caddy em duas redes** derrubou o site com 502 (UFW); corrigido com `ufw allow` do IP do Caddy (ver CLAUDE.md).
+- Pendências de UI vistas nas capturas: URL do stream com token (`jwt=`) aparece na mensagem de erro do player;
+  o cartão mostra "AO VIVO" para câmera offline (vem do cadastro, não da saúde); o resumo do Health Check pode
+  mostrar "0 offline" com câmera offline.
+
+**Fase B implementada (commit `a5d18ae`), falta o deploy:** `HealthAlertRules` (um aviso na N-ésima falha e um na
+recuperação, derivados do histórico, sem estado novo), `HealthCheckBackgroundService` (verificação automática a
+cada `check_interval_minutes`, 1 a 60 min, sequencial; desliga com `HealthCheck__Enabled=false`) e campo `event`
+(`down`/`up`) no webhook. 36 testes xUnit; o teste do handler falha no código antigo com os mesmos 4 avisos do E6.
+O fluxo `[PRD]WTower-AlertaHealthCamera` já foi atualizado e publicado (monta a mensagem no node Set; sem `event`
+assume `down`, então é compatível com a API antiga).
+
+Para validar depois do deploy (E5/E6 refeitos): com a câmera de teste offline, **1 aviso** na 2ª falha (agora
+automático, sem clicar), **nenhum** nas seguintes, e **1 "voltou ao ar"** ao corrigir a URL ou remover o bloqueio.
