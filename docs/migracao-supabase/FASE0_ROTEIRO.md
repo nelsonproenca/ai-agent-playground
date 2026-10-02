@@ -88,12 +88,15 @@ O Supabase só entrega o schema (OpenAPI) para a chave `service_role`, então co
 avisa `schema INDISPONÍVEL`. O caminho é o **SQL Editor** do painel: `https://supabase.com/dashboard/project/nsdektdgohfqfioonosc/sql/new`.
 Cole **uma consulta por vez** e clique em **Run**. São só leituras (`select`).
 
-**Q1. Colunas de todas as tabelas** (é o schema real). Depois de rodar, use **Download CSV** no resultado e salve como
-`/e/Backups/supabase-2026-10-02/schema/colunas.csv`:
+**Q1. Colunas das 6 tabelas do CRM** (é o schema real). Atenção: o SQL Editor **corta qualquer resultado em 100
+linhas**, e uma Q1 sobre todas as tabelas passa disso e some com as últimas (foi o que aconteceu na 1ª rodada: sumiram
+`leads_ia` e `playground_analise`). Por isso ela é restrita às 6 tabelas (cerca de 50 linhas). Depois de rodar, use
+**Download CSV** e salve como `/e/Backups/supabase-2026-10-02/schema/colunas.csv` (sobrescreva o anterior):
 ```sql
 select table_name, ordinal_position as pos, column_name, data_type, is_nullable, column_default
 from information_schema.columns
 where table_schema = 'public'
+  and table_name in ('agendamentos','colaboradores','contatos_clientes','enrich_company','leads_ia','playground_analise')
 order by table_name, ordinal_position;
 ```
 
@@ -117,19 +120,38 @@ where schemaname in ('public', 'storage')
 order by schemaname, tablename, policyname;
 ```
 
-**Q4. Todas as tabelas com estimativa de linhas** (para achar dado de CRM fora das 6):
+**Q4. Contagem EXATA de linhas** das 6 tabelas e das demais (para achar dado fora das 6 e comparar com o MySQL).
+A versão antiga desta consulta usava estimativas do Postgres (`pg_stat_user_tables`), que **zeram em projeto restaurado**
+e davam 0 para tudo, até para `leads_ia`, que tem 5 linhas. Esta usa `count(*)`:
 ```sql
-select relname as tabela, n_live_tup as linhas_estimadas
-from pg_stat_user_tables
-where schemaname = 'public'
-order by relname;
+select 'agendamentos' as tabela, count(*) as linhas from public.agendamentos
+union all select 'colaboradores', count(*) from public.colaboradores
+union all select 'contatos_clientes', count(*) from public.contatos_clientes
+union all select 'enrich_company', count(*) from public.enrich_company
+union all select 'leads_ia', count(*) from public.leads_ia
+union all select 'playground_analise', count(*) from public.playground_analise
+union all select 'clientes', count(*) from public.clientes
+union all select 'projetos', count(*) from public.projetos
+union all select 'etapas', count(*) from public.etapas
+union all select 'artefatos', count(*) from public.artefatos
+union all select 'pedidos', count(*) from public.pedidos
+union all select 'pedido_respostas', count(*) from public.pedido_respostas
+union all select 'contact_messages', count(*) from public.contact_messages
+union all select 'admin_audit_log', count(*) from public.admin_audit_log
+union all select 'profiles', count(*) from public.profiles
+union all select 'subscriptions', count(*) from public.subscriptions
+union all select 'user_access', count(*) from public.user_access
+union all select 'payments', count(*) from public.payments
+union all select 'pending_payments', count(*) from public.pending_payments
+union all select 'cameras', count(*) from public.cameras
+order by 1;
 ```
 
 Cole aqui os resultados de **Q2, Q3 e Q4** (só nomes e contagens; nenhum dado pessoal). Com o Q1 salvo em
 `schema/colunas.csv`, o `verify` aceita o schema. O que cada uma responde:
 - **Q2:** se existem imagens em outros buckets (por exemplo `portfolio-privado`) que o `all` não exporta. Se existirem,
   eu preparo a exportação delas.
-- **Q4:** se existe alguma tabela de CRM com dados além das 6.
+- **Q4:** a contagem exata de cada tabela: confirma as 6 e mostra se há dado de CRM fora delas (e se as tabelas já migradas para o MySQL ainda têm linhas aqui).
 
 ### Passo 4. 🌐 SITE: comparar com o painel (só o painel sabe)
 | Conferência | Onde | Esperado |

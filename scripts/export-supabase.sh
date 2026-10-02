@@ -275,7 +275,17 @@ verify_export() {
   # Confere o CONTEÚDO: com a chave pública o openapi.json pode ser só um JSON de erro (101 bytes).
   if [ -s "$OUT/schema/openapi.json" ] && grep -qE '"(swagger|openapi)"' "$OUT/schema/openapi.json"; then
     ok "schema: openapi.json válido"
-  elif [ -s "$OUT/schema/colunas.csv" ]; then ok "schema: colunas.csv (obtido pelo SQL Editor) presente"
+  elif [ -s "$OUT/schema/colunas.csv" ]; then
+    # O SQL Editor corta o resultado em 100 linhas: confere que o CSV cobre as 6 tabelas, não só que existe.
+    local missing=""
+    for t in "${TABLES[@]}"; do
+      { sed 's/^"//' "$OUT/schema/colunas.csv" | grep -q "^$t,"; } || missing="$missing $t"
+    done
+    if [ -n "$missing" ]; then
+      warn "schema/colunas.csv NÃO cobre:$missing (o SQL Editor limita a 100 linhas; rode a Q1 restrita às 6 tabelas)"; bad=1
+    else
+      ok "schema: colunas.csv cobre as 6 tabelas ($(($(wc -l < "$OUT/schema/colunas.csv") - 1)) colunas)"
+    fi
   else warn "schema ausente: salve o resultado da consulta Q1 do roteiro em schema/colunas.csv"; bad=1; fi
   [ -s "$OUT/schema/tabelas.txt" ] && ok "tabelas expostas: $(tr '\n' ' ' < "$OUT/schema/tabelas.txt")"
 
