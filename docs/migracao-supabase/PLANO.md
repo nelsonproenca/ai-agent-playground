@@ -68,7 +68,7 @@ aceitar qualquer POST.
    tipos do MAPEAMENTO.
 3. Guardar o backup fora do VPS e fora do repo (tem e-mail e telefone de terceiros).
 4. Com o projeto ativo, **fechar as policies públicas** das tabelas ou pausar de novo logo após exportar.
-5. No n8n: ligar "Available in MCP" em `[PRD]SiteNPI-ChatCriarEventos` e conferir se usa Supabase; checar no
+5. No n8n: `ChatCriarEventos` já foi verificado (sem Supabase); checar no
    editor `AgenteIASite` e `[AulasHA]AgentIA-CreateVector` (inativos, podem ter Vector Store).
 
 ### Fase 1: `portal-api`, dados do CRM e ponte com o n8n

@@ -108,13 +108,15 @@ os três fluxos, não só de trocar o node de banco.
 | `[PRD]SiteNPI-Validação Comprovante PIX` (`nc6px6dcRJigkUQe`) | webhook `/validar-pagamento` (header auth) | **Watchtower antigo**: usa `profiles` e `subscriptions` do Supabase e espera outro payload; não bate com o `watchtower-api`. Arquivar |
 | `[PRD]SiteNPI-AgentIA-FAQ` (`1pOv6396VsYt6gTs`) | WhatsApp Trigger | agente de FAQ de e-commerce (curso); tool Supabase `produtos_dtc` getAll — **tabela removida em 12/09/2026, tool quebrada**; também usa Pinecone (não é Supabase) |
 | `[PRD]SiteNPI-CadastroUsuariosSite` (`JC1ytFdRKYjRAOhm`) | Form Trigger | cadastro do "site de astrologia"; usa **Google Sheets**, sem Supabase. **Reenvia a senha em texto por e-mail e a guarda na planilha**: risco |
+| `[PRD]SiteNPI-ChatCriarEventos` (`1Xgl5uys9ge3IV78`) | Chat Trigger | agente Nathan com Google Calendar/Docs e aviso no Telegram; **sem Supabase** (só o texto do aviso cita) |
 | `[PRD]SiteNPI-Forms-SendEmail` (`kpLRdPGtoFFxJ7xm`) | Execute Workflow (sub-workflow) | e-mail de funcionário pelo Gmail; sem Supabase |
 | `[PRD]SiteNPI-AjudanteCadastro`, `-AjudanteTelegranAtividades` | Form / Telegram | Google Sheets e Gemini; sem Supabase |
 | `[PRD]LinkedInPost`, `[PRD]LinkedInInsights` | Telegram | Gemini, Gmail, Docs, SerpAPI; sem Supabase |
 | `BeautyHairApp - Assistente Telegram` (`7naUAYLjSKSPPs6s`) | webhook | chama `beautyhairapp-api`; sem Supabase |
 
-**Ainda não verificado:** `[PRD]SiteNPI-ChatCriarEventos` (`1Xgl5uys9ge3IV78`) segue com "MCP desabilitado"
-(o flag não ficou ligado depois do renome; reativar no card do workflow). Também fechados para o MCP, ambos
+**Verificado em 02/10/2026:** `[PRD]SiteNPI-ChatCriarEventos` (`1Xgl5uys9ge3IV78`, Chat Trigger) é o agente Nathan (Gemini, memória, Google Calendar e Google Docs) com aviso no Telegram: **sem nenhum node
+Supabase**. Só o texto do aviso ainda diz "Aguardando confirmação no Supabase" e usa `{{ json.nome }}` (sem `$`),
+então os campos do aviso saem vazios; corrigir junto com o resto. Continuam fechados para o MCP, ambos
 inativos: `AgenteIASite` e `[AulasHA]AgentIA-CreateVector` (este último pode ter Supabase Vector Store).
 
 ### 7.3 Separação por projeto (regra em `.claude/rules/n8n-workflows.md`)
