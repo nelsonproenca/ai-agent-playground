@@ -27,7 +27,7 @@ A convenção de nomes do n8n está em `.claude/rules/n8n-workflows.md` (workspa
 2. **Imagens públicas:** Caddy direto do volume ou endpoint da API? → **endpoint público de leitura no
    `portal-api`**; upload e remoção só admin.
 3. **Dados históricos:** importar ou começar vazio? → **importar**.
-4. **Workflow "Validação Comprovante PIX":** → **arquivar**, e criar o receptor novo do Watchtower
+4. ~~**Workflow "Validação Comprovante PIX":**~~ **feito em 02/10/2026** (arquivado; receptor novo criado)
    (`[PRD]WTower-NotificarPagamento`).
 5. **Workflows de outros contextos que estão com prefixo `SiteNPI`** (`AgentIA-FAQ` de e-commerce,
    `CadastroUsuariosSite` do site de astrologia, `Forms-SendEmail`): ficam em produção ou saem? → **decidir caso

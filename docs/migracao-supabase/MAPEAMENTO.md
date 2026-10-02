@@ -158,3 +158,27 @@ CRM só com sessão de admin no `portal-api`).
   comentários em `ClienteEndpoints`, `ProjetoEndpoints`, `ProjetoDtos`, `Cliente`, `ClaimsPrincipalExtensions`.
 - Workspace: `CLAUDE.md` (pendência), `.claude/rules/*`, `.claude/settings.local.json` (permissões do CLI
   `supabase`), documentação em `documentacao/` e `.llm/` (histórica).
+
+### 7.4 Executado no n8n em 02/10/2026
+
+| Ação | Workflow | Resultado |
+|---|---|---|
+| Renomeado | `BeautyHairApp - Assistente Telegram` | `[PRD]BeHair-AssistenteTelegram` (ativo, path do webhook `beautyhairapp-assistente` inalterado) |
+| Renomeado | `BeautyHairApp - RAG: Carregar Conteudo` | `[PRD]BeHair-RAGCarregarConteudo` (inativo) |
+| Criado (inativo) | `[PRD]WTower-NotificarPagamento` (`wHEGtQZA90DrN0M2`) | webhook `POST /webhook/wtower-pagamento`, header `X-Webhook-Secret`; recebe o `PaymentWebhookPayload`, avisa o Nelson no Telegram (CPF mascarado, link do comprovante e do painel) e responde 200, ou 502 se o Telegram falhar |
+| Criado (inativo) | `[PRD]WTower-AlertaHealthCamera` (`c8CvoUXg6SbLqGux`) | webhook `POST /webhook/wtower-health-alerta`, mesmo header; recebe o `HealthAlertWebhookPayload` e avisa no Telegram |
+| Arquivado | `[PRD]SiteNPI-Validação Comprovante PIX` | Watchtower antigo (Supabase); 0 execuções |
+| Arquivado | `[PRD]SiteNPI-AgentIA-FAQ` | tool Supabase quebrada; 0 execuções; ninguém o chama |
+| Arquivado | `[PRD]SiteNPI-Forms-SendEmail` | sub-workflow que nenhum workflow chama; 0 execuções |
+| Arquivado | `[PRD]SiteNPI-CadastroUsuariosSite` | não referenciado pelo site institucional; reenviava senha em texto. **Teve 2 execuções em 20/09/2026** (1 sucesso, 1 erro): se algo externo (ex.: o "site de astrologia") ainda usa o formulário, restaurar do arquivo no n8n |
+
+Critério do item "são usados no site institucional?": nenhum dos três é referenciado pelo `portal-web`
+(só `LeadEnricher` e `TechPlayground` chamam o n8n), e nenhum workflow tem node Execute Workflow apontando
+para eles. Arquivar é reversível (restaurar pelo n8n).
+
+Os dois fluxos `WTower` foram criados **inativos**: falta testar e ativar (Telegram de teste) e preencher o
+`N8n__WebhookUrl` do `watchtower-api` (ver `CLAUDE.md`). O `N8n__WebhookSecret` precisa ser igual ao valor da
+credencial `Watchtower Webhook Secret` do n8n, que os dois webhooks usam.
+
+Ainda sem acesso pelo MCP (inativos): `AgenteIASite`, `[AulasHA]AgentIA-CreateVector` e
+`C6 Bank - Pix Conciliação`; conferir no editor do n8n antes de desligar o Supabase.
