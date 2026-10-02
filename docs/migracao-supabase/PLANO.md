@@ -68,8 +68,8 @@ aceitar qualquer POST.
    tipos do MAPEAMENTO.
 3. Guardar o backup fora do VPS e fora do repo (tem e-mail e telefone de terceiros).
 4. Com o projeto ativo, **fechar as policies públicas** das tabelas ou pausar de novo logo após exportar.
-5. No n8n: `ChatCriarEventos` já foi verificado (sem Supabase); checar no
-   editor `AgenteIASite` e `[AulasHA]AgentIA-CreateVector` (inativos, podem ter Vector Store).
+5. No n8n: só os workflows de `SiteNPI`, `WTower` e `BeHair` contam (decisão de 02/10/2026); os de teste ficam
+   ignorados. `ChatCriarEventos` já foi verificado (sem Supabase).
 
 ### Fase 1: `portal-api`, dados do CRM e ponte com o n8n
 
@@ -145,8 +145,6 @@ do Nelson):
   `PaymentWebhookPayload` do `watchtower-api`, avisa o Nelson e leva ao painel de aprovação) e
   `[PRD]WTower-AlertaHealthCamera` (`HealthAlertWebhookPayload`). Depois preencher `N8n__WebhookUrl` em
   `watchtower.env` na VPS.
-- Classificar ou arquivar os inativos sem projeto (`[PROD]AjudanteTelegran`, `AgenteIASite`, `LeitorPlanilhasCB`,
-  `TranscreverPDFSite`, `C6 Bank - Pix Conciliação`).
 - Atualizar `documentacao/02-Inventario_de_Fluxos_n8n.md` (hoje lista só 4 fluxos) com o inventário por projeto.
 
 **4.3 Segurança do que sobrou:** `CadastroUsuariosSite` reenvia a senha em texto e a guarda em planilha

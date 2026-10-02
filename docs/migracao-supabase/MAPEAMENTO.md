@@ -180,5 +180,7 @@ Os dois fluxos `WTower` foram criados **inativos**: falta testar e ativar (Teleg
 `N8n__WebhookUrl` do `watchtower-api` (ver `CLAUDE.md`). O `N8n__WebhookSecret` precisa ser igual ao valor da
 credencial `Watchtower Webhook Secret` do n8n, que os dois webhooks usam.
 
-Ainda sem acesso pelo MCP (inativos): `AgenteIASite`, `[AulasHA]AgentIA-CreateVector` e
-`C6 Bank - Pix Conciliação`; conferir no editor do n8n antes de desligar o Supabase.
+**Escopo (decisão do Nelson, 02/10/2026):** só valem os workflows chamados pelo site institucional e pelos SaaS
+(`SiteNPI`, `WTower`, `BeHair`). Os demais (`[AulasHA]*`, `LinkedIn*`, `AgenteIASite`, `C6 Bank`,
+`LeitorPlanilhasCB`, `TranscreverPDFSite`, `[PROD]AjudanteTelegran`) eram testes e **ficam ignorados**: não
+entram em renomes, auditorias nem na condição para desligar o Supabase.
