@@ -83,6 +83,54 @@ bucket com checksum, e uma **conferência automática** no fim. Procure a últim
 - `VEREDITO: exportação conferida` → pode seguir.
 - `VEREDITO: há pendências` ou qualquer `AVISO` → **não pause o projeto**; me mande a saída.
 
+### Passo 3b. 🌐 SITE: schema e inventário do Storage pelo SQL Editor (obrigatório)
+O Supabase só entrega o schema (OpenAPI) para a chave `service_role`, então com a chave pública o `all` sempre
+avisa `schema INDISPONÍVEL`. O caminho é o **SQL Editor** do painel: `https://supabase.com/dashboard/project/nsdektdgohfqfioonosc/sql/new`.
+Cole **uma consulta por vez** e clique em **Run**. São só leituras (`select`).
+
+**Q1. Colunas de todas as tabelas** (é o schema real). Depois de rodar, use **Download CSV** no resultado e salve como
+`/e/Backups/supabase-2026-10-02/schema/colunas.csv`:
+```sql
+select table_name, ordinal_position as pos, column_name, data_type, is_nullable, column_default
+from information_schema.columns
+where table_schema = 'public'
+order by table_name, ordinal_position;
+```
+
+**Q2. Inventário do Storage** (todos os buckets, inclusive privados, que a chave pública não enxerga):
+```sql
+select b.id as bucket, b.public as publico,
+       coalesce(nullif(split_part(o.name, '/', 1), o.name), '(raiz)') as pasta,
+       count(o.id) as arquivos,
+       coalesce(sum((o.metadata->>'size')::bigint), 0) as bytes
+from storage.buckets b
+left join storage.objects o on o.bucket_id = b.id
+group by b.id, b.public, 3
+order by b.id, 3;
+```
+
+**Q3. Policies (quem pode ler e escrever o quê hoje)**:
+```sql
+select schemaname, tablename, policyname, cmd, roles
+from pg_policies
+where schemaname in ('public', 'storage')
+order by schemaname, tablename, policyname;
+```
+
+**Q4. Todas as tabelas com estimativa de linhas** (para achar dado de CRM fora das 6):
+```sql
+select relname as tabela, n_live_tup as linhas_estimadas
+from pg_stat_user_tables
+where schemaname = 'public'
+order by relname;
+```
+
+Cole aqui os resultados de **Q2, Q3 e Q4** (só nomes e contagens; nenhum dado pessoal). Com o Q1 salvo em
+`schema/colunas.csv`, o `verify` aceita o schema. O que cada uma responde:
+- **Q2:** se existem imagens em outros buckets (por exemplo `portfolio-privado`) que o `all` não exporta. Se existirem,
+  eu preparo a exportação delas.
+- **Q4:** se existe alguma tabela de CRM com dados além das 6.
+
 ### Passo 4. 🌐 SITE: comparar com o painel (só o painel sabe)
 | Conferência | Onde | Esperado |
 |---|---|---|
@@ -115,6 +163,22 @@ cat /e/Backups/supabase-2026-10-02/schema/tabelas.txt
 Cole aqui a saída desses dois comandos **e a data limite de restauração** do passo 1. Com isso eu valido os tipos
 reais contra o mapeamento e começo a Fase 1. Se preferir, só me diga o caminho da pasta: eu leio **apenas** o
 schema e o manifesto, sem abrir os arquivos de dados.
+
+## 4b. Resultado da primeira exportação (02/10/2026)
+
+Rodada real no seu backup `/e/Backups/supabase-2026-10-02/`:
+
+| Item | Resultado |
+|---|---|
+| Tabelas (servidor = arquivo, JSON e CSV) | `colaboradores` 3, `contatos_clientes` 0, `leads_ia` 5, `agendamentos` 5, `enrich_company` 2, `playground_analise` 0 |
+| Colunas das 4 tabelas com dados | conferem com o dicionário de dados |
+| Imagens | **1 arquivo** (`convites/convite-nelson-proenca.png`, PNG 1024×1024, 43 KB, checksum ok); `clientes/` e `colaboradores/` estão vazias |
+| `colaboradores.foto_url` | os 3 apontam para `images.unsplash.com` (externo), sem dependência do Storage |
+| Schema | **pendente**: a chave pública não acessa o OpenAPI (ver Passo 3b) |
+
+O primeiro `all` mostrou "0 arquivos" por um **bug do script** (a listagem real traz um bloco `metadata` aninhado que o
+leitor não aceitava). Foi corrigido, testado com o formato real e o arquivo foi baixado. O `verify` também passou a
+validar o **conteúdo** do schema, não só o tamanho do arquivo.
 
 ## 5. Atalhos úteis (todos 🖥️ LOCAL)
 
@@ -149,7 +213,8 @@ assim que abrir o link: é lá que aparece o prazo e o botão certo.
 ## 8. Checklist de aceite
 
 - [ ] 🌐 Projeto restaurado e **prazo de restauração anotado**
-- [ ] 🖥️ `all` terminou com `VEREDITO: exportação conferida`
+- [ ] 🖥️ `all` terminou com `VEREDITO: exportação conferida` (depois do Passo 3b: `schema/colunas.csv` salvo)
+- [ ] 🌐 Consultas Q2, Q3 e Q4 do Passo 3b rodadas e coladas para mim
 - [ ] 🌐 Linhas das 6 tabelas e arquivos do Storage iguais às do `all`
 - [ ] 🌐 Nenhuma tabela `NÃO MAPEADA` pendente
 - [ ] 🖥️ `.7z` com senha criado e copiado para um segundo lugar (fora da VPS)

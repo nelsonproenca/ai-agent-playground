@@ -32,12 +32,12 @@ fail() { echo "ERRO: $*" >&2; exit 1; }
 ok()   { echo "OK:   $*"; }
 warn() { echo "AVISO: $*" >&2; }
 
-MODE="run"; OUT=""; WHAT="all"
+MODE="run"; OUT=""; WHAT="all"; ARG3="${3:-}"
 if [ "${1:-}" = "--wait" ]; then MODE="wait"; else OUT="${1:-}"; WHAT="${2:-all}"; fi
 
 if [ "$MODE" = "run" ]; then
-  [ -n "$OUT" ] || fail "uso: bash scripts/export-supabase.sh --wait | <pasta> [all|tables|csv|schema|storage|verify|pack]"
-  case "$WHAT" in all|tables|csv|schema|storage|verify|pack) ;; *) fail "segundo argumento inválido: $WHAT" ;; esac
+  [ -n "$OUT" ] || fail "uso: bash scripts/export-supabase.sh --wait | <pasta> [all|tables|csv|schema|storage|urls|verify|pack]"
+  case "$WHAT" in all|tables|csv|schema|storage|urls|verify|pack) ;; *) fail "segundo argumento inválido: $WHAT" ;; esac
   mkdir -p "$OUT"
   if git -C "$OUT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     fail "a pasta de saída está dentro de um repositório git; escolha uma pasta FORA dos repos (os dados são de terceiros)"
@@ -144,7 +144,15 @@ export_csv() {
 export_schema() {
   mkdir -p "$OUT/schema"
   api "$URL/rest/v1/" > "$OUT/schema/openapi.json" || fail "falha lendo o schema (OpenAPI)"
-  case "$(head -c 1 "$OUT/schema/openapi.json")" in "{") ;; *) fail "schema inesperado: $(head -c 120 "$OUT/schema/openapi.json")" ;; esac
+  # O Supabase só entrega o OpenAPI para a chave service_role: com a chave pública vem um JSON de erro
+  # (que também começa com "{"), então checa o conteúdo e não só o primeiro caractere.
+  if ! grep -qE '"(swagger|openapi)"' "$OUT/schema/openapi.json"; then
+    warn "schema INDISPONÍVEL com a chave pública: $(head -c 140 "$OUT/schema/openapi.json")"
+    warn "use as consultas SQL do roteiro (Passo 3b) no SQL Editor do painel para obter colunas e tabelas"
+    rm -f "$OUT/schema/openapi.json" "$OUT/schema/tabelas.txt"
+    manifest "schema: INDISPONIVEL (a chave publica nao acessa o OpenAPI; usar SQL Editor)"
+    return 0
+  fi
   ok "schema (colunas e tipos reais) -> schema/openapi.json"
   manifest "schema: openapi.json $(wc -c < "$OUT/schema/openapi.json" | tr -d ' ') bytes"
 
@@ -172,8 +180,10 @@ list_names() {  # nomes de arquivos de uma pasta do bucket (ignora subpastas, qu
       "$URL/storage/v1/object/list/uploads") || fail "falha listando uploads/$prefix"
     case "$res" in "["*) ;; *) fail "listagem inesperada de uploads/$prefix: ${res:0:120}" ;; esac
     [ "$res" = "[]" ] && break
-    printf '%s' "$res" | { grep -o '{[^{}]*"name":"[^"]*"[^{}]*"id":"[^"]*"[^{}]*}' || true; } \
-      | sed -E 's/.*"name":"([^"]*)".*/\1/'
+    # Formato real: {"name":"x.png","version":"...","id":"...","metadata":{...aninhado...}}. Pastas vêm com "id":null.
+    # Por isso o padrão não pode exigir um objeto sem chaves internas: casa só o começo name..id.
+    printf '%s' "$res" | { grep -oE '"name":"[^"]*",("version":("[^"]*"|null),)?"id":"[^"]*"' || true; } \
+      | sed -E 's/^"name":"([^"]*)".*/\1/'
     n=$(printf '%s' "$res" | { grep -o '"name":"' || true; } | wc -l | tr -d ' ')
     [ "$n" -lt "$PAGE_SIZE" ] && break
     offset=$((offset + PAGE_SIZE))
@@ -194,7 +204,39 @@ export_storage() {
     done < <(list_names "$prefix")
   done
   ok "$count arquivos do bucket uploads -> uploads/"
-  manifest "uploads: $count arquivos"
+  if [ "$count" = 0 ]; then
+    warn "0 arquivos: o bucket pode estar mesmo vazio OU a listagem foi bloqueada para a chave pública. Confirme no SQL Editor (Passo 3b, consulta Q2); se houver arquivos, use o modo 'urls'."
+    manifest "uploads: 0 arquivos (SEM CONFIRMACAO: bucket vazio ou listagem bloqueada)"
+  else
+    manifest "uploads: $count arquivos"
+  fi
+  if [ "$count" -gt 0 ]; then
+    (cd "$OUT/uploads" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$OUT/uploads.sha256"
+    ok "checksums -> uploads.sha256"
+  fi
+}
+
+# ─── urls: baixa imagens a partir de uma lista (quando a listagem do bucket é bloqueada) ──────────
+
+# Cada linha do arquivo é uma URL pública do bucket, ex.: https://<ref>.supabase.co/storage/v1/object/public/uploads/clientes/abc.png
+# (por exemplo, os logo_url de clientes que já estão no MySQL do portal).
+export_urls() {
+  local list="$ARG3" line rel count=0 prefix="$URL/storage/v1/object/public/uploads/"
+  [ -n "$list" ] && [ -f "$list" ] || fail "uso: bash scripts/export-supabase.sh <pasta> urls <arquivo-com-uma-URL-por-linha>"
+  mkdir -p "$OUT/uploads"
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"; line="${line%%\?*}"
+    [ -n "$line" ] || continue
+    case "$line" in "$prefix"*) ;; *) warn "ignorada (não é do bucket uploads deste projeto): ${line:0:100}"; continue ;; esac
+    rel="${line#"$prefix"}"
+    rel=$(printf '%b' "${rel//%/\\x}")          # %20 -> espaço, %C3%A7 -> ç
+    case "$rel" in *..*) warn "ignorada (caminho suspeito): $rel"; continue ;; esac
+    mkdir -p "$OUT/uploads/$(dirname "$rel")"
+    "$CURL" -sS -f --max-time 90 -o "$OUT/uploads/$rel" "$line" || { warn "falhou o download de $rel"; rm -f "$OUT/uploads/$rel"; continue; }
+    count=$((count + 1))
+  done < "$list"
+  ok "$count arquivos baixados pela lista -> uploads/"
+  manifest "uploads (por lista de URLs): $count arquivos"
   if [ "$count" -gt 0 ]; then
     (cd "$OUT/uploads" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$OUT/uploads.sha256"
     ok "checksums -> uploads.sha256"
@@ -223,9 +265,18 @@ verify_export() {
     if (cd "$OUT/uploads" && sha256sum -c ../uploads.sha256 --quiet 2>/dev/null); then
       ok "imagens: $(wc -l < "$OUT/uploads.sha256" | tr -d ' ') arquivos, todos os checksums OK"
     else warn "imagens: algum checksum falhou"; bad=1; fi
-  else warn "imagens: pasta uploads/ ou uploads.sha256 ausente (bucket vazio?)"; fi
+  elif [ "${ALLOW_EMPTY_UPLOADS:-0}" = 1 ]; then
+    ok "imagens: 0 arquivos, aceito por ALLOW_EMPTY_UPLOADS=1 (bucket confirmado vazio)"
+  else
+    warn "imagens: 0 arquivos NÃO confirmados. Rode a consulta Q2 do roteiro; se o bucket estiver mesmo vazio, rode 'ALLOW_EMPTY_UPLOADS=1 ... verify'"
+    bad=1
+  fi
 
-  if [ -s "$OUT/schema/openapi.json" ]; then ok "schema: openapi.json presente"; else warn "schema ausente"; bad=1; fi
+  # Confere o CONTEÚDO: com a chave pública o openapi.json pode ser só um JSON de erro (101 bytes).
+  if [ -s "$OUT/schema/openapi.json" ] && grep -qE '"(swagger|openapi)"' "$OUT/schema/openapi.json"; then
+    ok "schema: openapi.json válido"
+  elif [ -s "$OUT/schema/colunas.csv" ]; then ok "schema: colunas.csv (obtido pelo SQL Editor) presente"
+  else warn "schema ausente: salve o resultado da consulta Q1 do roteiro em schema/colunas.csv"; bad=1; fi
   [ -s "$OUT/schema/tabelas.txt" ] && ok "tabelas expostas: $(tr '\n' ' ' < "$OUT/schema/tabelas.txt")"
 
   echo
@@ -260,6 +311,7 @@ case "$WHAT" in
   csv)     export_csv ;;
   schema)  export_schema ;;
   storage) export_storage ;;
+  urls)    export_urls ;;
   verify)  verify_export ;;
   pack)    pack_export ;;
   all)     export_tables; export_csv; export_schema; export_storage; verify_export ;;
