@@ -290,3 +290,15 @@ assume `down`, então é compatível com a API antiga).
 
 Para validar depois do deploy (E5/E6 refeitos): com a câmera de teste offline, **1 aviso** na 2ª falha (agora
 automático, sem clicar), **nenhum** nas seguintes, e **1 "voltou ao ar"** ao corrigir a URL ou remover o bloqueio.
+
+## Fechamento das Fases A e B (02/10/2026)
+
+**Fase A concluída** (T1–T9, E1, E2, E5, E6; E3 não executado). **Fase B concluída e validada em produção:**
+com a câmera de teste, o n8n recebeu **exatamente 2 alertas reais** depois do deploy, a recuperação ("✅ voltou ao
+ar", 14:26) e a nova queda ("🚨 sem sinal", 14:36), com 10 minutos entre eles (2 rodadas de 5 min) e **nenhum a
+mais**; antes, com a câmera offline de forma contínua, o agendador rodou sem gerar aviso novo. Também corrigidos no
+front: status em minúsculas (contadores e cores), token fora da mensagem de erro do player, selo "AO VIVO" fiel ao
+vídeo, seletor de dono por nome/e-mail e comprovante em modal.
+
+**Próxima frente:** Fase 0 do portal (restaurar o Supabase e exportar os dados), que não depende de nada e tem
+prazo de restauração.
