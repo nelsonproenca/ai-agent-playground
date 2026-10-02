@@ -202,6 +202,25 @@ O primeiro `all` mostrou "0 arquivos" por um **bug do script** (a listagem real 
 leitor não aceitava). Foi corrigido, testado com o formato real e o arquivo foi baixado. O `verify` também passou a
 validar o **conteúdo** do schema, não só o tamanho do arquivo.
 
+## 4c. Resultado final da exportação (02/10/2026): `verify` verde
+
+| Conferência | Resultado |
+|---|---|
+| 6 tabelas, JSON e CSV, servidor = arquivo | `colaboradores` 3, `contatos_clientes` 0, `leads_ia` 5, `agendamentos` 5, `enrich_company` 2, `playground_analise` 0 |
+| Contagem **exata** no SQL Editor | bate com o exportado nas 6 tabelas |
+| Schema (`schema/colunas.csv`, Q1 restrita) | 46 colunas, cobre as 6 tabelas, idêntico ao dicionário |
+| Imagens | 1 arquivo (`convites/convite-nelson-proenca.png`, 43.147 bytes), igual ao inventário do Storage (Q2) |
+| Outros buckets | `portfolio-privado`: **0 arquivos** (nada a salvar) |
+| Dados fora das 6 tabelas | `cameras` 1 e `profiles` 3 (Watchtower antigo, **descartados**); `clientes` 2 (já migrado para o MySQL do portal; confirmar contagem); `projetos`, `etapas`, `artefatos`, `pedidos`, `pedido_respostas`, `contact_messages`, `admin_audit_log`, `payments`, `subscriptions`, `user_access`: 0 |
+
+Achados de segurança confirmados pela Q3 (policies): todas as tabelas do CRM têm leitura e escrita **públicas**;
+`contatos_clientes` e `pedidos` aceitam até `delete` público; o bucket `uploads` aceita `insert`, `update` e
+`delete` públicos. A migração (Fases 1 a 3) fecha isso.
+
+Armadilhas encontradas nesta rodada (já corrigidas no script e no roteiro): o OpenAPI exige `service_role`; a
+listagem real do Storage traz `metadata` aninhado; o SQL Editor corta resultados em 100 linhas; e `pg_stat_user_tables`
+mostra 0 em projeto restaurado (usar `count(*)`).
+
 ## 5. Atalhos úteis (todos 🖥️ LOCAL)
 
 | Comando | Para quê |
