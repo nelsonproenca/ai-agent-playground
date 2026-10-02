@@ -253,3 +253,14 @@ do Telegram fixados, então **nenhuma mensagem real foi enviada**; os nodes Set 
 
 Os dois fluxos foram **publicados (ativos)**: sem o segredo nada dispara. Ainda **não** foi verificado o texto final
 da mensagem no Telegram (o node estava fixado): isso fica para E1 e E5, com a API ligada (Fase A3).
+
+## Resultado da Fase A3 (02/10/2026): API ligada ao n8n
+
+- Segredo novo definido nos dois lados (credencial `Watchtower Webhook Secret` do n8n e `watchtower.env`), e
+  `N8n__WebhookUrl` gravado; container `watchtower-api` recriado com `scripts/vps-prepare.sh set-n8n`.
+- `scripts/vps-prepare.sh test-n8n` (pagamento de teste) → **HTTP 200** e mensagem no Telegram.
+- Achados do caminho: (1) o primeiro `test-n8n` deu 403 porque o valor colado era diferente do da credencial
+  (o n8n não mostra o valor salvo; foi preciso definir um novo); (2) depois deu 502 com `chat not found` até o
+  `/start` no bot `AtividadesSiteNPIBot`. O 502 era o caminho de erro funcionando como projetado.
+- **Falta da Fase A3:** configurar no painel admin (tela de health) a URL
+  `https://n8n.nelson-proenca-info.com.br/webhook/wtower-health-alerta`. Depois: E1 a E7 (ponta a ponta).
