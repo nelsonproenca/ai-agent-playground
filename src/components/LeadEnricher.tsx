@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { aguardarResultado, iniciarEnrich, obterEnrich } from "@/features/crm/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +19,7 @@ const TryParseSuggestions = (output: string): { summary: string; suggestions: st
   const summaryLines: string[] = [];
 
   for (const line of lines) {
-    const match = line.match(/^\d+[\.\)]\s*(.+)/);
+    const match = line.match(/^\d+[.)]\s*(.+)/);
     if (match) {
       suggestions.push(match[1]);
     } else {
@@ -60,47 +60,12 @@ const LeadEnricher = () => {
     }, 1000);
 
     try {
-      // 1. Insert into Supabase
-      const { data: inserted, error: insertError } = await supabase
-        .from("enrich_company")
-        .insert({
-          company_name: domain.trim(),
-          segment: segment.trim(),
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      // 2. Call n8n webhook
-      await fetch(
-        "https://n8n.nelson-proenca-info.com.br/webhook/enriquecer-empresa",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          mode: "no-cors",
-          body: JSON.stringify({
-            id: inserted.id,
-            nome_empresa: domain.trim(),
-            segmento_empresa: segment.trim(),
-          }),
-        }
-      );
-
-      // 3. Poll for output_ia
-      const pollForResult = async (id: string, attempts = 0): Promise<string | null> => {
-        if (attempts > 30) return null;
-        await new Promise((r) => setTimeout(r, 2000));
-        const { data } = await supabase
-          .from("enrich_company")
-          .select("output_ai")
-          .eq("id", id)
-          .maybeSingle();
-        if (data?.output_ai) return data.output_ai;
-        return pollForResult(id, attempts + 1);
-      };
-
-      const output = await pollForResult(inserted.id);
+      // O portal-api grava o pedido e avisa o n8n; o resultado volta por polling no próprio portal-api.
+      const { id } = await iniciarEnrich({ nomeEmpresa: domain.trim(), segmento: segment.trim() });
+      const output = await aguardarResultado(async () => {
+        const r = await obterEnrich(id);
+        return { pronto: r.pronto, texto: r.outputAi };
+      });
       clearInterval(interval);
       setTerminalStep(TERMINAL_LINES.length);
 
@@ -109,9 +74,9 @@ const LeadEnricher = () => {
       } else {
         setError("Timeout: o agente não retornou a tempo. Tente novamente.");
       }
-    } catch (err: any) {
+    } catch (err) {
       clearInterval(interval);
-      setError(err.message || "Erro ao executar enriquecimento.");
+      setError((err instanceof Error && err.message) || "Erro ao executar enriquecimento.");
     } finally {
       setLoading(false);
     }

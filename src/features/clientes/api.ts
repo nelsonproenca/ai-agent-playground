@@ -2,7 +2,7 @@ import { portalApi } from "@/features/portal-shared/apiClient";
 
 /**
  * Seam único da entidade Cliente no portal-backend (ticket #15). `contatos_clientes`
- * continua no Supabase (CRM, fora de escopo) — não faz parte deste módulo.
+ * ficam em `features/crm/api.ts` — não fazem parte deste módulo.
  */
 
 export interface Cliente {

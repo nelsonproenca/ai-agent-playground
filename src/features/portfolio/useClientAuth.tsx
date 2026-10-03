@@ -1,39 +1,43 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { portalClientApi, PortalApiError } from "@/features/portal-shared/apiClient";
 import type { Cliente } from "@/features/clientes/api";
+import { getSessaoCliente, logoutCliente, solicitarLink } from "./clientAuthApi";
 
 interface ClientAuthContextType {
-  session: Session | null;
+  /** Há sessão válida (cookie do portal do cliente). */
+  authenticated: boolean;
   cliente: Cliente | null;
   loading: boolean;
   requestMagicLink: (email: string) => Promise<{ error: string | null }>;
+  /** Recarrega a sessão (usado pela página que acabou de trocar o token do link pelo cookie). */
+  refresh: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const ClientAuthContext = createContext<ClientAuthContextType>({
-  session: null,
+  authenticated: false,
   cliente: null,
   loading: true,
   requestMagicLink: async () => ({ error: "not initialized" }),
+  refresh: async () => {},
   logout: async () => {},
 });
 
 export const ClientAuthProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /** Resolve o próprio cliente via o backend (ticket #19) — o e-mail vem do JWT
-   * validado no servidor, não é mais passado pelo front (que só precisa saber
-   * SE há sessão, não confiar no e-mail dela pra decidir o que mostrar). */
-  const resolveCliente = async (hasSession: boolean) => {
-    if (!hasSession) {
-      setCliente(null);
-      return;
-    }
+  /** Descobre se há sessão e, havendo, resolve o cadastro do cliente. O e-mail vem do cookie validado no
+   * servidor; o front só precisa saber SE há sessão, não confia em nada que ele mesmo informou. */
+  const refresh = useCallback(async () => {
     try {
+      const sessao = await getSessaoCliente();
+      setAuthenticated(!!sessao);
+      if (!sessao) {
+        setCliente(null);
+        return;
+      }
       setCliente(await portalClientApi.get<Cliente>("/clientes/me"));
     } catch (err) {
       if (err instanceof PortalApiError && (err.status === 404 || err.status === 401)) {
@@ -42,39 +46,27 @@ export const ClientAuthProvider = ({ children }: { children: ReactNode }) => {
       }
       throw err;
     }
-  };
-
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
-      await resolveCliente(!!data.session);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      setSession(newSession);
-      await resolveCliente(!!newSession);
-    });
-
-    return () => listener.subscription.unsubscribe();
   }, []);
 
-  const requestMagicLink = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/portal` },
-    });
-    return { error: error?.message ?? null };
-  };
+  useEffect(() => {
+    refresh()
+      .catch(() => {
+        setAuthenticated(false);
+        setCliente(null);
+      })
+      .finally(() => setLoading(false));
+  }, [refresh]);
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
+    await logoutCliente();
+    setAuthenticated(false);
     setCliente(null);
   };
 
   return (
-    <ClientAuthContext.Provider value={{ session, cliente, loading, requestMagicLink, logout }}>
+    <ClientAuthContext.Provider
+      value={{ authenticated, cliente, loading, requestMagicLink: solicitarLink, refresh, logout }}
+    >
       {children}
     </ClientAuthContext.Provider>
   );

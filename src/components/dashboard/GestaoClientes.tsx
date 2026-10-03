@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  createContato, deleteContato, listContatos, updateContato, type ContatoCliente as Contato,
+} from "@/features/crm/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,11 +11,8 @@ import {
 } from "@/components/ui/table";
 import { Building2, Plus, Loader2, UserPlus, Contact, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 import { listClientes, createCliente, updateCliente, type Cliente } from "@/features/clientes/api";
 import ImageUpload from "./ImageUpload";
-
-type Contato = Tables<"contatos_clientes">;
 
 const maskPhone = (value: string) => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -62,12 +61,11 @@ const GestaoClientes = () => {
 
   const fetchContatos = async (clienteId: string) => {
     setLoadingContatos(true);
-    const { data } = await supabase
-      .from("contatos_clientes")
-      .select("*")
-      .eq("cliente_id", clienteId)
-      .order("created_at", { ascending: false });
-    if (data) setContatos(data);
+    try {
+      setContatos(await listContatos(clienteId));
+    } catch {
+      toast.error("Erro ao carregar contatos.");
+    }
     setLoadingContatos(false);
   };
 
@@ -179,27 +177,36 @@ const GestaoClientes = () => {
 
     setSavingContato(true);
     const payload = {
-      cliente_id: selectedClienteId,
+      clienteId: selectedClienteId,
       nome: contatoNome.trim(),
       email: contatoEmail.trim() || null,
       telefone: contatoTelefone.trim() || null,
     };
 
-    if (editContatoId) {
-      const { error } = await supabase.from("contatos_clientes").update(payload).eq("id", editContatoId);
-      if (error) { toast.error("Erro ao atualizar contato."); }
-      else { toast.success("Contato atualizado!"); resetContatoForm(); fetchContatos(selectedClienteId); }
-    } else {
-      const { error } = await supabase.from("contatos_clientes").insert(payload);
-      if (error) { toast.error("Erro ao adicionar contato."); }
-      else { toast.success("Contato adicionado!"); resetContatoForm(); fetchContatos(selectedClienteId); }
+    try {
+      if (editContatoId) {
+        await updateContato(editContatoId, payload);
+        toast.success("Contato atualizado!");
+      } else {
+        await createContato(payload);
+        toast.success("Contato adicionado!");
+      }
+      resetContatoForm();
+      fetchContatos(selectedClienteId);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar contato.");
     }
     setSavingContato(false);
   };
 
   const handleDeleteContato = async (contatoId: string) => {
     if (!selectedClienteId) return;
-    await supabase.from("contatos_clientes").delete().eq("id", contatoId);
+    try {
+      await deleteContato(contatoId);
+    } catch {
+      toast.error("Erro ao remover contato.");
+      return;
+    }
     if (editContatoId === contatoId) resetContatoForm();
     fetchContatos(selectedClienteId);
     toast.success("Contato removido.");

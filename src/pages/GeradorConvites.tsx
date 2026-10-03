@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { listColaboradores, type Colaborador } from "@/features/crm/api";
+import { listConvites, nomeDoConvite, removerUpload, salvarConvite } from "@/features/uploads/api";
 import { QRCodeCanvas } from "qrcode.react";
 import { ArrowLeft, Copy, Download, QrCode, Check, CloudUpload, Loader2, Image, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,6 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import type { Tables } from "@/integrations/supabase/types";
-
-type Colaborador = Tables<"colaboradores">;
 
 type StoredFile = {
   name: string;
@@ -38,32 +36,24 @@ const GeradorConvites = () => {
 
   const fetchGallery = useCallback(async () => {
     setGalleryLoading(true);
-    const { data, error } = await supabase.storage.from("uploads").list("convites", {
-      sortBy: { column: "created_at", order: "desc" },
-    });
-    if (!error && data) {
+    try {
+      const data = await listConvites();
       const files: StoredFile[] = data
-        .filter((f) => f.name.endsWith(".png"))
-        .map((f) => ({
-          name: f.name,
-          url: supabase.storage.from("uploads").getPublicUrl(`convites/${f.name}`).data.publicUrl,
-          created_at: f.created_at ?? null,
-        }));
+        .filter((f) => f.arquivo.endsWith(".png"))
+        .map((f) => ({ name: f.arquivo, url: f.url, created_at: f.atualizadoEm }))
+        .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
       setGallery(files);
+    } catch {
+      toast.error("Erro ao carregar os convites salvos.");
     }
     setGalleryLoading(false);
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await supabase
-        .from("colaboradores")
-        .select("*")
-        .order("nome");
-      if (data) setColabs(data);
-      setLoading(false);
-    };
-    fetchData();
+    listColaboradores()
+      .then((data) => setColabs([...data].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))))
+      .catch(() => toast.error("Erro ao carregar colaboradores."))
+      .finally(() => setLoading(false));
     fetchGallery();
   }, [fetchGallery]);
 
@@ -93,7 +83,7 @@ const GeradorConvites = () => {
     });
   }, []);
 
-  // Auto-save to Supabase when QR renders
+  // Auto-save when QR renders
   useEffect(() => {
     if (!selected) return;
     setSavedUrl(null);
@@ -107,23 +97,13 @@ const GeradorConvites = () => {
         return;
       }
 
-    const safeName = selected.nome
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/\s+/g, "-");
-    const fileName = `convites/convite-${safeName}.png`;
-      const { error } = await supabase.storage
-        .from("uploads")
-        .upload(fileName, blob, { contentType: "image/png", upsert: true });
-
-      if (error) {
-        toast.error("Erro ao salvar QR Code no storage.");
-      } else {
-        const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(fileName);
-        setSavedUrl(urlData.publicUrl);
+      try {
+        const salvo = await salvarConvite(nomeDoConvite(selected.nome), blob);
+        setSavedUrl(salvo.url);
         toast.success("QR Code salvo no storage!");
         fetchGallery();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Erro ao salvar QR Code no storage.");
       }
       setSaving(false);
     }, 500);
@@ -144,8 +124,7 @@ const GeradorConvites = () => {
     if (!blob) return;
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    const sn = selected.nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, "-");
-    link.download = `convite-${sn}.png`;
+    link.download = nomeDoConvite(selected.nome);
     link.href = url;
     link.click();
     URL.revokeObjectURL(url);
@@ -191,7 +170,7 @@ const GeradorConvites = () => {
                   <SelectItem key={c.id} value={c.id} className="font-mono">
                     <span className="flex items-center gap-2">
                       <Avatar className="h-5 w-5">
-                        <AvatarImage src={c.foto_url ?? undefined} />
+                        <AvatarImage src={c.fotoUrl ?? undefined} />
                         <AvatarFallback className="text-[8px] bg-secondary">
                           {c.nome.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
@@ -226,7 +205,7 @@ const GeradorConvites = () => {
               <div className="w-full space-y-3 text-center">
                 <div className="flex items-center justify-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={selected.foto_url ?? undefined} />
+                    <AvatarImage src={selected.fotoUrl ?? undefined} />
                     <AvatarFallback className="bg-secondary text-muted-foreground text-xs">
                       {selected.nome.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
@@ -281,7 +260,7 @@ const GeradorConvites = () => {
                   ) : savedUrl ? (
                     <>
                       <CloudUpload className="h-3 w-3 text-primary" />
-                      <span className="text-muted-foreground">Salvo no Supabase Storage</span>
+                      <span className="text-muted-foreground">Salvo no servidor</span>
                     </>
                   ) : null}
                 </div>
@@ -347,14 +326,12 @@ const GeradorConvites = () => {
                           size="sm"
                           className="font-mono text-xs gap-1 h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={async () => {
-                            const { error } = await supabase.storage
-                              .from("uploads")
-                              .remove([`convites/${file.name}`]);
-                            if (error) {
-                              toast.error("Erro ao excluir convite.");
-                            } else {
+                            try {
+                              await removerUpload("convites", file.name);
                               toast.success("Convite excluído!");
                               fetchGallery();
+                            } catch {
+                              toast.error("Erro ao excluir convite.");
                             }
                           }}
                         >

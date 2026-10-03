@@ -304,3 +304,41 @@ vídeo, seletor de dono por nome/e-mail e comprovante em modal.
 
 **Próxima frente:** Fase 0 do portal (restaurar o Supabase e exportar os dados), que não depende de nada e tem
 prazo de restauração.
+
+## Fases 1 a 4: implementadas (03/10/2026), falta o deploy
+
+O código das quatro fases está pronto. O que depende da VPS, do n8n e da Meta, na ordem certa, está em
+[COMANDOS_PENDENTES.md](COMANDOS_PENDENTES.md). **Nada foi publicado nem implantado ainda.**
+
+**Verificado (local):**
+- `portal-api`: build com **0 avisos** e **150 testes xUnit** verdes (serviços com EF InMemory, endpoints em host
+  de teste com as mesmas políticas e rate limits da API, o limite de 32 KB num **Kestrel real**, importadores com
+  arquivos sintéticos). Mutação no limite de expiração do token faz um teste falhar.
+- Importadores rodados em **simulação contra o backup real**: `colaboradores 3`, `contatos_clientes 0`,
+  `leads_ia 5`, `agendamentos 5`, `enrich_company 2`, `playground_analise 0`, 0 puladas; nenhum valor passa do
+  tamanho das colunas do MySQL; `uploads: 1 a copiar`, nenhuma URL do Supabase no banco (a conferir na VPS).
+- `portal-web`: `tsc -b` limpo, `vite build` ok, **56 testes** (fetch simulado + 1 de componente), zero ocorrências
+  de "supabase" em `src/`. `npm run lint`: só 2 erros antigos em arquivos shadcn gerados (`ui/command.tsx`,
+  `ui/textarea.tsx`), que não se editam à mão.
+- n8n: os 4 fluxos foram editados **só no rascunho** (nada publicado) e testados com `test_workflow` (dados
+  simulados, sem mensagem real): o contrato chega certo nos `Edit Fields`, e no Instagram o `Merge` agora devolve
+  **1 item** com tudo.
+
+**Não verificado:** nada rodou contra **MySQL real** (migrations geradas, mas aplicadas só na VPS); e-mail do login
+(Resend) e cookie `Secure` atrás do Caddy; `X-Forwarded-For` (rate limit por IP) atrás do Caddy; cascata de
+`ContatosClientes` ao apagar cliente (o EF InMemory não impõe FK); webhooks reais do n8n (as credenciais ainda não
+existem); o fluxo do Instagram com mensagem real.
+
+**Decisões que diferem do plano:**
+- `/auth/cliente/verificar` é **POST** (não GET): o link do e-mail abre `/portal/entrar` no site, que faz o POST.
+  Assim, antivírus e pré-visualizadores de e-mail não gastam o token só de abrir a URL.
+- O cliente tem **cookie próprio** (`portal_cliente`), separado do `portal_admin`; um não derruba o outro. A
+  política `Admin` exige o papel `admin`; o CSRF (`X-Portal-Admin`) agora vale também para o cliente.
+- `GET /convites` e os uploads entraram na Fase 2 (junto do storage). Convite tem **envio com nome fixo**
+  (`PUT /uploads/convites/{nome}`, só PNG/JPEG/GIF/WebP, extensão conferida com o conteúdo), porque a landing
+  acha o convite de cada pessoa por `convite-<nome>.png`.
+- "Lead → contato" não ganhou endpoint: o front já compõe `POST /clientes` + `POST /contatos-clientes`.
+- Não existe mais `import-clientes`/`import-projetos` (já usados) nem `Supabase:Url`; ficaram só `import-crm` e
+  `import-uploads` (migração única, a remover depois de validar).
+- Antes de repetir um erro antigo: `LeadEnricher` e `TechPlayground` chamavam o n8n direto (inclusive a URL de
+  teste `webhook-test`); agora só falam com o `portal-api`.

@@ -1,6 +1,6 @@
 /**
  * Camada de serviço da autenticação do admin (ticket #14) — chama o portal-backend
- * (sessão via cookie httpOnly, não Supabase). Único seam da feature: `useAuth.tsx`
+ * (sessão via cookie httpOnly). Único seam da feature: `useAuth.tsx`
  * nunca chama `fetch` diretamente.
  *
  * Em produção o portal-backend é servido no mesmo domínio do site (path-routed

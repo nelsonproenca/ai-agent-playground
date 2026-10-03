@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { aguardarResultado, iniciarPlayground, obterPlayground } from "@/features/crm/api";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,48 +47,12 @@ const TechPlayground = () => {
     }, 800);
 
     try {
-      // 1. Save to Supabase
-      const { data: inserted, error: insertError } = await supabase
-        .from("playground_analise")
-        .insert({
-          input_tecnico: inputTecnico,
-          tipo_analise: tipoAnalise,
-          status: "processando",
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      // 2. Call n8n webhook
-      const response = await fetch(
-        "https://n8n.nelson-proenca-info.com.br/webhook-test/leads-site",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          mode: "no-cors",
-          body: JSON.stringify({
-            id: inserted.id,
-            input_tecnico: inputTecnico,
-            tipo_analise: tipoAnalise,
-          }),
-        }
-      );
-
-      // 3. Poll for output_ia
-      const pollForResult = async (id: string, attempts = 0): Promise<string | null> => {
-        if (attempts > 30) return null; // max ~60s
-        await new Promise((r) => setTimeout(r, 2000));
-        const { data } = await supabase
-          .from("playground_analise")
-          .select("output_ia, status")
-          .eq("id", id)
-          .maybeSingle();
-        if (data?.output_ia) return data.output_ia;
-        return pollForResult(id, attempts + 1);
-      };
-
-      const output = await pollForResult(inserted.id);
+      // O portal-api grava a análise e avisa o n8n; o resultado volta por polling no próprio portal-api.
+      const { id } = await iniciarPlayground({ tipoAnalise, inputTecnico });
+      const output = await aguardarResultado(async () => {
+        const r = await obterPlayground(id);
+        return { pronto: r.pronto, texto: r.outputIa };
+      });
       clearInterval(interval);
       setTerminalStep(TERMINAL_LINES.length);
 
@@ -97,9 +61,9 @@ const TechPlayground = () => {
       } else {
         setError("Timeout: a análise não retornou a tempo. Tente novamente.");
       }
-    } catch (err: any) {
+    } catch (err) {
       clearInterval(interval);
-      setError(err.message || "Erro ao executar análise.");
+      setError((err instanceof Error && err.message) || "Erro ao executar análise.");
     } finally {
       setLoading(false);
     }

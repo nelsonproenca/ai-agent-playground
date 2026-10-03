@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { atualizarAgendamento, listAgendamentos } from "@/features/crm/api";
 import {
   ArrowLeft, Users, Clock, DollarSign, Search,
   Phone, Mail, ExternalLink, Loader2, CalendarDays,
@@ -49,20 +49,12 @@ const DashboardAgendamentos = () => {
 
   const { data: agendamentos = [], isLoading } = useQuery({
     queryKey: ["agendamentos"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("agendamentos")
-        .select("*")
-        .order("data_reuniao", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: listAgendamentos,
   });
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from("agendamentos").update({ status }).eq("id", id);
-      if (error) throw error;
+      await atualizarAgendamento(id, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agendamentos"] });
@@ -73,8 +65,7 @@ const DashboardAgendamentos = () => {
 
   const toggleComissao = useMutation({
     mutationFn: async ({ id, paid }: { id: string; paid: boolean }) => {
-      const { error } = await supabase.from("agendamentos").update({ comissao_paga: paid }).eq("id", id);
-      if (error) throw error;
+      await atualizarAgendamento(id, { comissaoPaga: paid });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agendamentos"] });
@@ -84,7 +75,7 @@ const DashboardAgendamentos = () => {
   });
 
   const indicadores = useMemo(
-    () => [...new Set(agendamentos.map((a) => a.indicado_por).filter(Boolean))] as string[],
+    () => [...new Set(agendamentos.map((a) => a.indicadoPor).filter(Boolean))] as string[],
     [agendamentos]
   );
 
@@ -98,9 +89,9 @@ const DashboardAgendamentos = () => {
       const q = search.toLowerCase();
       const matchSearch =
         !q ||
-        a.cliente_nome?.toLowerCase().includes(q) ||
-        a.cliente_email?.toLowerCase().includes(q);
-      const matchIndicador = filterIndicador === "all" || a.indicado_por === filterIndicador;
+        a.clienteNome?.toLowerCase().includes(q) ||
+        a.clienteEmail?.toLowerCase().includes(q);
+      const matchIndicador = filterIndicador === "all" || a.indicadoPor === filterIndicador;
       const matchOrigem = filterOrigem === "all" || a.origem === filterOrigem;
       return matchSearch && matchIndicador && matchOrigem;
     });
@@ -108,7 +99,7 @@ const DashboardAgendamentos = () => {
 
   const totalLeads = agendamentos.length;
   const pendentes = agendamentos.filter((a) => a.status === "pendente").length;
-  const pipeline = agendamentos.reduce((s, a) => s + (a.valor_projeto ?? 0), 0);
+  const pipeline = agendamentos.reduce((s, a) => s + (a.valorProjeto ?? 0), 0);
 
   return (
     <div className="min-h-screen bg-background grid-pattern">
@@ -208,20 +199,20 @@ const DashboardAgendamentos = () => {
                           {/* Contato icon */}
                           <TableCell className="w-10 px-2">
                             <ContactModal
-                              nome={a.cliente_nome}
-                              email={a.cliente_email}
-                              whatsapp={a.cliente_whatsapp}
+                              nome={a.clienteNome}
+                              email={a.clienteEmail}
+                              whatsapp={a.clienteWhatsapp}
                             />
                           </TableCell>
 
                           {/* Date */}
                           <TableCell className="font-mono text-xs whitespace-nowrap">
-                            {formatDate(a.data_reuniao)}
+                            {formatDate(a.dataReuniao)}
                           </TableCell>
 
                           {/* Client */}
                           <TableCell>
-                            <p className="font-medium text-sm">{a.cliente_nome ?? "—"}</p>
+                            <p className="font-medium text-sm">{a.clienteNome ?? "—"}</p>
                           </TableCell>
 
                           {/* Origem */}
@@ -237,7 +228,7 @@ const DashboardAgendamentos = () => {
                               variant="secondary"
                               className="font-mono text-[10px]"
                             >
-                              {a.indicado_por ?? "—"}
+                              {a.indicadoPor ?? "—"}
                             </Badge>
                           </TableCell>
 
@@ -264,18 +255,18 @@ const DashboardAgendamentos = () => {
                           <TableCell className="text-right">
                             <div className="flex flex-col items-end gap-1">
                               <span className="font-mono text-sm font-semibold text-primary">
-                                {formatCurrency(a.valor_projeto)}
+                                {formatCurrency(a.valorProjeto)}
                               </span>
                               <div className="flex items-center gap-1.5">
                                 <Checkbox
-                                  checked={a.comissao_paga ?? false}
+                                  checked={a.comissaoPaga ?? false}
                                   onCheckedChange={(checked) =>
                                     toggleComissao.mutate({ id: a.id, paid: !!checked })
                                   }
                                   className="h-3.5 w-3.5"
                                 />
                                 <span className="text-[10px] text-muted-foreground">
-                                  {a.comissao_paga ? "Paga" : "Pendente"}
+                                  {a.comissaoPaga ? "Paga" : "Pendente"}
                                 </span>
                               </div>
                             </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createColaborador, listColaboradores, updateColaborador, type Colaborador } from "@/features/crm/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Users, Plus, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 import ImageUpload from "./ImageUpload";
-
-type Colaborador = Tables<"colaboradores">;
 
 const GestaoColabs = () => {
   const [colabs, setColabs] = useState<Colaborador[]>([]);
@@ -30,11 +27,11 @@ const GestaoColabs = () => {
 
   const fetchColabs = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("colaboradores")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setColabs(data);
+    try {
+      setColabs(await listColaboradores());
+    } catch {
+      toast.error("Erro ao carregar colaboradores.");
+    }
     setLoading(false);
   };
 
@@ -70,7 +67,7 @@ const GestaoColabs = () => {
     setEmail(c.email);
     setCargo(c.cargo ?? "");
     setDepartamento(c.departamento ?? "");
-    setFotoUrl(c.foto_url);
+    setFotoUrl(c.fotoUrl);
     setErrors({});
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -86,27 +83,21 @@ const GestaoColabs = () => {
       email: email.trim(),
       cargo: cargo.trim() || null,
       departamento: departamento.trim() || null,
-      foto_url: fotoUrl,
+      fotoUrl,
     };
 
-    if (editId) {
-      const { error } = await supabase.from("colaboradores").update(payload).eq("id", editId);
-      if (error) {
-        toast.error("Erro ao atualizar colaborador.");
-      } else {
+    try {
+      if (editId) {
+        await updateColaborador(editId, payload);
         toast.success("Colaborador atualizado com sucesso!");
-        resetForm();
-        fetchColabs();
-      }
-    } else {
-      const { error } = await supabase.from("colaboradores").insert(payload);
-      if (error) {
-        toast.error("Erro ao cadastrar colaborador.");
       } else {
+        await createColaborador(payload);
         toast.success("Colaborador cadastrado com sucesso!");
-        resetForm();
-        fetchColabs();
       }
+      resetForm();
+      fetchColabs();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar colaborador.");
     }
     setSaving(false);
   };

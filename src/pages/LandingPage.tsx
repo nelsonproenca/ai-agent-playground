@@ -7,7 +7,8 @@ import {
   Cloud, Server, DollarSign, Bot, Cpu, BrainCircuit,
   Layers, Mail, Linkedin, ArrowRight, Phone, Loader2,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { listColaboradores } from "@/features/crm/api";
+import { listConvites, nomeDoConvite } from "@/features/uploads/api";
 import {
   Dialog,
   DialogContent,
@@ -94,44 +95,29 @@ const LandingPage = () => {
 
   const fetchColabsWithQr = useCallback(async () => {
     setLoadingColabs(true);
-    // Fetch all saved QR files
-    const { data: files } = await supabase.storage.from("uploads").list("convites", {
-      sortBy: { column: "created_at", order: "desc" },
-    });
-    if (!files || files.length === 0) {
-      setColabsWithQr([]);
-      setLoadingColabs(false);
-      return;
-    }
+    try {
+      // Convites j\u00e1 salvos (um por pessoa) e colaboradores, ambos p\u00fablicos.
+      const [convites, colabs] = await Promise.all([listConvites(), listColaboradores()]);
+      const pngFiles = convites.filter((f) => f.arquivo.endsWith(".png"));
 
-    const pngFiles = files.filter((f) => f.name.endsWith(".png"));
-
-    // Fetch collaborators
-    const { data: colabs } = await supabase.from("colaboradores").select("*").order("nome");
-    if (!colabs) {
-      setColabsWithQr([]);
-      setLoadingColabs(false);
-      return;
-    }
-
-    // Match collaborators with existing QR files
-    const matched: ColabWithQr[] = [];
-    for (const colab of colabs) {
-      const safeName = colab.nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, "-");
-      const expectedName = `convite-${safeName}.png`;
-      const found = pngFiles.find((f) => f.name === expectedName);
-      if (found) {
-        const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(`convites/${found.name}`);
-        matched.push({
-          id: colab.id,
-          nome: colab.nome,
-          cargo: colab.cargo,
-          foto_url: colab.foto_url,
-          qr_url: urlData.publicUrl,
-        });
+      // Casa cada colaborador com o convite que o gerador salvou com o nome dele.
+      const matched: ColabWithQr[] = [];
+      for (const colab of [...colabs].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))) {
+        const found = pngFiles.find((f) => f.arquivo === nomeDoConvite(colab.nome));
+        if (found) {
+          matched.push({
+            id: colab.id,
+            nome: colab.nome,
+            cargo: colab.cargo,
+            foto_url: colab.fotoUrl,
+            qr_url: found.url,
+          });
+        }
       }
+      setColabsWithQr(matched);
+    } catch {
+      setColabsWithQr([]);
     }
-    setColabsWithQr(matched);
     setLoadingColabs(false);
   }, []);
 

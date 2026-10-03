@@ -1,17 +1,15 @@
 /**
- * Cliente HTTP compartilhado pras features do portal-backend (Clientes, Projetos,
- * Etapas, Artefatos, Pedidos — tickets #15+). Sessão via cookie httpOnly (não
- * Bearer token, ver ticket #14) — por isso `credentials: "same-origin"` em toda
- * chamada, e o header de CSRF (`X-Portal-Admin`) em toda escrita.
+ * Cliente HTTP compartilhado pelas features do portal-api (Clientes, Projetos, Etapas, Artefatos, Pedidos,
+ * CRM, uploads). A sessão é sempre cookie httpOnly (admin: `portal_admin`; cliente do portal: `portal_cliente`),
+ * por isso `credentials: "same-origin"` em toda chamada e o header de CSRF (`X-Portal-Admin`) em toda escrita
+ * (vale para os dois perfis).
  *
- * Same-origin sempre: em produção o Caddy serve o backend no mesmo domínio do
- * site; em dev, o proxy do Vite (`vite.config.ts`) replica isso.
+ * Same-origin sempre: em produção o Caddy serve o backend no mesmo domínio do site; em dev, o proxy do Vite
+ * (`vite.config.ts`) replica isso.
  */
 
-import { supabase } from "@/integrations/supabase/client";
-
-const BASE_URL = "/api/portal";
-const CSRF_HEADER = "X-Portal-Admin";
+export const BASE_URL = "/api/portal";
+export const CSRF_HEADER = "X-Portal-Admin";
 
 export class PortalApiError extends Error {
   constructor(public status: number, message: string) {
@@ -19,81 +17,95 @@ export class PortalApiError extends Error {
   }
 }
 
+const STATUS_MESSAGES: Record<number, string> = {
+  401: "Sessão expirada ou acesso negado. Entre novamente.",
+  403: "Você não tem permissão para fazer isso.",
+  404: "Não encontrado.",
+  413: "O conteúdo enviado é grande demais.",
+  429: "Muitas tentativas. Aguarde um pouco e tente de novo.",
+};
+
+/** Mensagem para mostrar ao usuário: a do servidor (`{ error }`, já em pt-BR), ou uma genérica pelo status. */
+async function errorMessage(res: Response): Promise<string> {
+  try {
+    const body = await res.clone().json();
+    if (body && typeof body.error === "string") return body.error;
+  } catch {
+    // corpo vazio ou não-JSON: cai na mensagem pelo status
+  }
+  return STATUS_MESSAGES[res.status] ?? `Erro inesperado (HTTP ${res.status}).`;
+}
+
 async function handle<T>(res: Response): Promise<T> {
   if (res.ok) {
     if (res.status === 204) return undefined as T;
     return res.json() as Promise<T>;
   }
-  throw new PortalApiError(res.status, `HTTP ${res.status} ${res.statusText}`);
+  throw new PortalApiError(res.status, await errorMessage(res));
 }
 
-/** Anexa o Bearer do Supabase quando existir sessão (ticket #19) — leitura sem
- * custo quando não há: alguns endpoints (projeto/etapas/artefatos por id) são
- * compartilhados entre a tela do admin (cookie) e a do portal do cliente
- * (Bearer), então o GET tenta os dois; o backend decide o que cada um vê. */
-async function getSupabaseAuthHeader(): Promise<Record<string, string>> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+const jsonWrite = (method: string, body: unknown): RequestInit => ({
+  method,
+  credentials: "same-origin",
+  headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1" },
+  body: JSON.stringify(body),
+});
 
 export const portalApi = {
   async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      credentials: "same-origin",
-      headers: await getSupabaseAuthHeader(),
-    });
-    return handle<T>(res);
+    return handle<T>(await fetch(`${BASE_URL}${path}`, { credentials: "same-origin" }));
   },
 
   async post<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
-      body: JSON.stringify(body),
-    });
-    return handle<T>(res);
+    return handle<T>(await fetch(`${BASE_URL}${path}`, jsonWrite("POST", body)));
   },
 
   async put<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "PUT",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json", [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
-      body: JSON.stringify(body),
-    });
-    return handle<T>(res);
+    return handle<T>(await fetch(`${BASE_URL}${path}`, jsonWrite("PUT", body)));
+  },
+
+  async patch<T>(path: string, body: unknown): Promise<T> {
+    return handle<T>(await fetch(`${BASE_URL}${path}`, jsonWrite("PATCH", body)));
   },
 
   async delete<T>(path: string): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "DELETE",
-      credentials: "same-origin",
-      headers: { [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
-    });
-    return handle<T>(res);
+    return handle<T>(
+      await fetch(`${BASE_URL}${path}`, {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: { [CSRF_HEADER]: "1" },
+      }),
+    );
   },
 
   async postForm<T>(path: string, formData: FormData): Promise<T> {
     // Sem Content-Type — o browser seta multipart/form-data + boundary sozinho.
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { [CSRF_HEADER]: "1", ...(await getSupabaseAuthHeader()) },
-      body: formData,
-    });
-    return handle<T>(res);
+    return handle<T>(
+      await fetch(`${BASE_URL}${path}`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { [CSRF_HEADER]: "1" },
+        body: formData,
+      }),
+    );
+  },
+
+  async putForm<T>(path: string, formData: FormData): Promise<T> {
+    return handle<T>(
+      await fetch(`${BASE_URL}${path}`, {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { [CSRF_HEADER]: "1" },
+        body: formData,
+      }),
+    );
   },
 };
 
 /**
- * Cliente HTTP exclusivo do Portal do Cliente (ticket #19) — endpoints que só
- * fazem sentido pro cliente autenticado (ex: "meus projetos"), nunca pro admin.
+ * Endpoints do Portal do Cliente que só fazem sentido para o cliente autenticado (ex.: "meus projetos").
+ * Hoje usa o mesmo transporte (cookie) do `portalApi`; o nome fica para deixar a intenção clara nos chamadores.
  */
 export const portalClientApi = {
-  async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, { headers: await getSupabaseAuthHeader() });
-    return handle<T>(res);
-  },
+  get: portalApi.get,
 };

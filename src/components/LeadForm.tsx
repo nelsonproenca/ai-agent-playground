@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { criarLead } from "@/features/crm/api";
+import { PortalApiError } from "@/features/portal-shared/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,24 +31,23 @@ const LeadForm = ({ onSuccess }: LeadFormProps) => {
     setLoading(true);
     setError("");
 
-    const payload = {
-      nome: nome.trim().slice(0, 100),
-      empresa: empresa.trim().slice(0, 200) || null,
-      contato: contato.trim().slice(0, 255),
-      canal: canal || null,
-      desafio_tecnico: desafio.trim().slice(0, 2000),
-      origem: "Site_Institucional",
-    };
-
-    const { error: dbError } = await supabase.from("leads_ia").insert(payload);
-
-    setLoading(false);
-
-    if (dbError) {
-      setError("Erro ao enviar. Tente novamente.");
+    try {
+      await criarLead({
+        nome: nome.trim().slice(0, 100),
+        empresa: empresa.trim().slice(0, 200) || null,
+        contato: contato.trim().slice(0, 255),
+        canal: canal || null,
+        desafioTecnico: desafio.trim().slice(0, 2000),
+      });
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof PortalApiError && err.status === 429
+        ? err.message
+        : "Erro ao enviar. Tente novamente.");
       return;
     }
 
+    setLoading(false);
     onSuccess();
   };
 

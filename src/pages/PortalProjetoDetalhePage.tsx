@@ -323,10 +323,10 @@ const PortalProjetoDetalheContent = ({ projetoId }: { projetoId: string }) => {
 
 const PortalProjetoDetalhePage = () => {
   const { id } = useParams<{ id: string }>();
-  const { session, loading } = useClientAuth();
+  const { authenticated, loading } = useClientAuth();
 
   if (loading) return null;
-  if (!session) return <p className="text-muted-foreground font-mono text-center py-12">Faça login para ver este projeto.</p>;
+  if (!authenticated) return <p className="text-muted-foreground font-mono text-center py-12">Faça login para ver este projeto.</p>;
   if (!id) return null;
 
   return (

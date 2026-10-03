@@ -135,10 +135,10 @@ const PortalLista = () => {
 };
 
 const PortalPage = () => {
-  const { session, cliente, loading } = useClientAuth();
+  const { authenticated, cliente, loading } = useClientAuth();
 
   if (loading) return null;
-  if (!session || !cliente) return <PortalLogin />;
+  if (!authenticated || !cliente) return <PortalLogin />;
   return <PortalLista />;
 };
 

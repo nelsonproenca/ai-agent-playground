@@ -20,6 +20,7 @@ import ProjetosPage from "./pages/ProjetosPage";
 import ProjetoDetalhePage from "./pages/ProjetoDetalhePage";
 import PortalPage from "./pages/PortalPage";
 import PortalProjetoDetalhePage from "./pages/PortalProjetoDetalhePage";
+import PortalEntrarPage from "./pages/PortalEntrarPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import { ClientAuthProvider } from "@/features/portfolio/useClientAuth";
 import GeradorConvites from "./pages/GeradorConvites";
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/admin/projetos" element={<ProjetosPage />} />
             <Route path="/admin/projetos/:id" element={<ProjetoDetalhePage />} />
             <Route path="/portal" element={<ClientAuthProvider><PortalPage /></ClientAuthProvider>} />
+            <Route path="/portal/entrar" element={<ClientAuthProvider><PortalEntrarPage /></ClientAuthProvider>} />
             <Route path="/portal/:id" element={<ClientAuthProvider><PortalProjetoDetalhePage /></ClientAuthProvider>} />
             <Route path="/convites" element={<GeradorConvites />} />
             <Route path="/contato" element={<Contato />} />

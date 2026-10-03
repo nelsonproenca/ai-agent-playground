@@ -26,3 +26,19 @@ Este documento descreve os 4 fluxos principais que orquestram a inteligência do
 - **Saída:** Resposta gravada em uma tabela no BD.
 - **Nome do Arquivo:** [PRD]SiteNPI-SearchCompany.json
 
+
+## Contrato atual com o portal-api (03/10/2026, publicar depois do deploy)
+
+Os fluxos 1 a 4 **não gravam mais em banco**: o `portal-api` grava o registro, chama o webhook do n8n (header
+`X-Webhook-Secret`, credencial `SiteNPI Webhook Secret`) e o n8n devolve o resultado por HTTP no próprio
+`portal-api` (`http://portal-api:8080`, mesma rede Docker `n8n_default`). O navegador nunca chama o n8n.
+
+| Fluxo | Webhook novo | Corpo recebido | Callback |
+|---|---|---|---|
+| `[PRD]SiteNPI-AddLeads` | `/webhook/sitenpi-leads` | `{id, nome, empresa, contato, canal, desafioTecnico}` | `PATCH /leads/{id}/analise` `{analiseIa}` |
+| `[PRD]SiteNPI-AddChallenger` | `/webhook/sitenpi-playground` | `{id, tipoAnalise, inputTecnico}` | `PATCH /playground/{id}/resultado` `{outputIa}` |
+| `[PRD]SiteNPI-SearchCompany` | `/webhook/sitenpi-enriquecer-empresa` | `{id, nomeEmpresa, segmento}` | `PATCH /enrich/{id}/resultado` `{outputAi}` |
+| `[PRD]SiteNPI-AutomatedServiceInstagram` | `/webhook/atendimento_instagram` (Meta, sem header; falta validar `X-Hub-Signature-256`) | payload da Meta | `POST /agendamentos` |
+
+As colunas "Saída: gravada em tabela no BD" acima descrevem o desenho antigo (Supabase). Os paths antigos
+(`leads-site`, `analise-tecnica`, `enriquecer-empresa`) deixam de existir quando os fluxos novos forem publicados.

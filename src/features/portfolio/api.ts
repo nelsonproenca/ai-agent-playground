@@ -1,17 +1,17 @@
-import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert, TablesUpdate } from "./dbTypes";
 import { portalApi, portalClientApi, PortalApiError } from "@/features/portal-shared/apiClient";
 
 /**
  * Camada de serviço da feature Portfólio/Portal do Cliente (issue #1).
  * Único seam da feature: toda operação de projetos/etapas/artefatos/pedidos
- * passa por este módulo — componentes de UI nunca chamam `fetch`/Supabase
+ * passa por este módulo — componentes de UI nunca chamam `fetch`
  * diretamente. Desde o ticket #21, tudo aqui fala com o portal-backend
- * (tickets #15-#20); os tipos continuam usando `Tables<...>` do Supabase só
+ * (tickets #15-#20); os tipos (`./dbTypes`) mantêm o formato de linha de tabela só
  * pra manter o shape (nomes de campo) que os componentes já esperavam.
  */
 
 // `Projeto`/`NovoProjeto` migraram pro portal-backend (ticket #16) — o shape
-// (snake_case) é mantido de propósito igual ao que o Supabase gerava, pra não
+// (snake_case) é mantido de propósito igual ao que o front já consumia, pra não
 // precisar reescrever os componentes que consomem isso (ver spec, "Frontend
 // changes").
 export type Projeto = Tables<"projetos">;
@@ -37,7 +37,7 @@ export async function listProjetosPublicos(
 }
 
 /** Projetos do cliente autenticado (ticket #19) — o backend resolve o dono a
- * partir do JWT do Supabase (token Bearer), não de um id passado pelo front. */
+ * partir do cookie de sessão do cliente, não de um id passado pelo front. */
 export async function listProjetosDoCliente(): Promise<Projeto[]> {
   return portalClientApi.get<Projeto[]>("/projetos/mine");
 }

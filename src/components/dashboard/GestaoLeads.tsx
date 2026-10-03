@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Filter, Calendar, User, MessageSquare, CheckCircle2, Eye, UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +10,9 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
-import type { Tables } from "@/integrations/supabase/types";
 import { createCliente } from "@/features/clientes/api";
+import { createContato, listLeads, marcarLeadVisto, type Lead } from "@/features/crm/api";
 
-type Lead = Tables<"leads_ia">;
 type FilterKey = "all" | "alta_complexidade" | "automacao" | "consultoria_dotnet";
 
 const FILTER_CONFIG: Record<FilterKey, { label: string; keywords: string[] }> = {
@@ -41,43 +39,49 @@ const GestaoLeads = () => {
   const [converting, setConverting] = useState(false);
 
   useEffect(() => {
-    const fetchLeads = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("leads_ia")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (!error && data) setLeads(data);
-      setLoading(false);
+    let ativo = true;
+    const fetchLeads = async (primeira: boolean) => {
+      if (primeira) setLoading(true);
+      try {
+        const data = await listLeads();
+        if (ativo) setLeads(data);
+      } catch {
+        if (primeira) toast.error("Erro ao carregar leads.");
+      }
+      if (ativo && primeira) setLoading(false);
     };
 
-    fetchLeads();
-
-    const channel = supabase
-      .channel("leads-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "leads_ia" }, () => {
-        fetchLeads();
-      })
-      .subscribe();
+    fetchLeads(true);
+    // Sem atualização em tempo real: relê a lista de tempos em tempos (a análise da IA chega depois do envio).
+    const timer = setInterval(() => fetchLeads(false), 30_000);
 
     return () => {
-      supabase.removeChannel(channel);
+      ativo = false;
+      clearInterval(timer);
     };
   }, []);
 
   const toggleVisto = async (e: React.MouseEvent, lead: Lead) => {
     e.stopPropagation();
-    const newValue = !lead.visto_pelo_nelson;
-    setLeads((prev) => prev.map((l) => l.id === lead.id ? { ...l, visto_pelo_nelson: newValue } : l));
-    if (selectedLead?.id === lead.id) setSelectedLead((prev) => prev ? { ...prev, visto_pelo_nelson: newValue } : prev);
-    await supabase.from("leads_ia").update({ visto_pelo_nelson: newValue }).eq("id", lead.id);
+    const newValue = !lead.vistoPeloNelson;
+    const aplicar = (valor: boolean) => {
+      setLeads((prev) => prev.map((l) => l.id === lead.id ? { ...l, vistoPeloNelson: valor } : l));
+      setSelectedLead((prev) => prev && prev.id === lead.id ? { ...prev, vistoPeloNelson: valor } : prev);
+    };
+    aplicar(newValue);
+    try {
+      await marcarLeadVisto(lead.id, newValue);
+    } catch {
+      aplicar(!newValue); // desfaz a marcação otimista
+      toast.error("Não foi possível atualizar o lead.");
+    }
   };
 
   const convertLeadToCliente = async (lead: Lead) => {
     setConverting(true);
     const nome = lead.nome ?? "Sem nome";
     const email = lead.contato ?? "";
-    const empresa = (lead as any).empresa ?? null;
+    const empresa = lead.empresa;
 
     let cliente;
     try {
@@ -91,9 +95,11 @@ const GestaoLeads = () => {
     }
 
     if (email) {
-      await supabase.from("contatos_clientes").insert({
-        cliente_id: cliente.id, nome, email, telefone: null,
-      });
+      try {
+        await createContato({ clienteId: cliente.id, nome, email, telefone: null });
+      } catch {
+        toast.warning("Cliente criado, mas o contato não pôde ser adicionado.");
+      }
     }
 
     toast.success("Lead convertido em cliente com sucesso!");
@@ -103,12 +109,12 @@ const GestaoLeads = () => {
   const filteredLeads = leads.filter((lead) => {
     if (activeFilter === "all") return true;
     const keywords = FILTER_CONFIG[activeFilter].keywords;
-    const text = `${lead.analise_ia ?? ""} ${lead.desafio_tecnico ?? ""}`.toLowerCase();
+    const text = `${lead.analiseIa ?? ""} ${lead.desafioTecnico ?? ""}`.toLowerCase();
     return keywords.some((kw) => text.includes(kw));
   });
 
   const getStatusBadge = (lead: Lead) => {
-    if (lead.analise_ia) {
+    if (lead.analiseIa) {
       return <Badge className="bg-primary/20 text-primary border-primary/30">Analisado</Badge>;
     }
     return <Badge variant="secondary" className="text-muted-foreground">Pendente</Badge>;
@@ -167,19 +173,19 @@ const GestaoLeads = () => {
                   onClick={() => setSelectedLead(lead)}
                 >
                   <TableCell className="font-mono text-xs text-muted-foreground">
-                    {new Date(lead.created_at).toLocaleDateString("pt-BR")}
+                    {new Date(lead.createdAt).toLocaleDateString("pt-BR")}
                   </TableCell>
                   <TableCell className="font-medium text-foreground">{lead.nome ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{lead.canal ?? "—"}</TableCell>
-                  <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.desafio_tecnico ?? ""}>{lead.desafio_tecnico ?? "—"}</TableCell>
-                  <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.analise_ia ?? ""}>{lead.analise_ia ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.desafioTecnico ?? ""}>{lead.desafioTecnico ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate" title={lead.analiseIa ?? ""}>{lead.analiseIa ?? "—"}</TableCell>
                   <TableCell className="text-center">
                     <button
                       className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-primary transition-colors group"
                       onClick={(e) => toggleVisto(e, lead)}
-                      title={lead.visto_pelo_nelson ? "Marcar como não visto" : "Marcar como visto"}
+                      title={lead.vistoPeloNelson ? "Marcar como não visto" : "Marcar como visto"}
                     >
-                      {lead.visto_pelo_nelson ? (
+                      {lead.vistoPeloNelson ? (
                         <CheckCircle2 className="h-4 w-4 text-primary" />
                       ) : (
                         <Eye className="h-5 w-5 text-foreground stroke-[2.5] group-hover:text-black transition-colors" />
@@ -203,7 +209,7 @@ const GestaoLeads = () => {
             </SheetTitle>
             <SheetDescription className="font-mono text-xs text-muted-foreground flex items-center gap-2">
               <Calendar className="h-3 w-3" />
-              {selectedLead && new Date(selectedLead.created_at).toLocaleString("pt-BR")}
+              {selectedLead && new Date(selectedLead.createdAt).toLocaleString("pt-BR")}
               {selectedLead?.canal && (
                 <Badge variant="secondary" className="ml-2 text-xs">{selectedLead.canal}</Badge>
               )}
@@ -213,12 +219,12 @@ const GestaoLeads = () => {
           {selectedLead && (
             <div className="mt-4">
               <Button
-                variant={selectedLead.visto_pelo_nelson ? "default" : "secondary"}
+                variant={selectedLead.vistoPeloNelson ? "default" : "secondary"}
                 size="sm"
                 className="font-mono text-xs w-full gap-2"
                 onClick={(e) => toggleVisto(e, selectedLead)}
               >
-                {selectedLead.visto_pelo_nelson ? (
+                {selectedLead.vistoPeloNelson ? (
                   <><CheckCircle2 className="h-4 w-4" /> Visto pelo Nelson</>
                 ) : (
                   <><Eye className="h-4 w-4" /> Marcar como visto</>
@@ -263,7 +269,7 @@ const GestaoLeads = () => {
                 {"// desafio_tecnico"}
               </h4>
               <div className="rounded-lg bg-secondary/50 p-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                {selectedLead?.desafio_tecnico || "Nenhum desafio informado."}
+                {selectedLead?.desafioTecnico || "Nenhum desafio informado."}
               </div>
             </div>
 
@@ -272,7 +278,7 @@ const GestaoLeads = () => {
                 ✦ Análise da Consultoria (IA)
               </h4>
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap glow-primary">
-                {selectedLead?.analise_ia || (
+                {selectedLead?.analiseIa || (
                   <span className="text-muted-foreground italic">Análise pendente...</span>
                 )}
               </div>

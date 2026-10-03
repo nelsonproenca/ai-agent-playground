@@ -1,28 +1,20 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { listColaboradores, type Colaborador } from "@/features/crm/api";
 import { motion } from "framer-motion";
 import { Terminal, Users, Mail, Briefcase } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { NavLink } from "@/components/NavLink";
-import type { Tables } from "@/integrations/supabase/types";
-
-type Colaborador = Tables<"colaboradores">;
 
 const Colabs = () => {
   const [colabs, setColabs] = useState<Colaborador[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase
-        .from("colaboradores")
-        .select("*")
-        .order("nome", { ascending: true });
-      if (data) setColabs(data);
-      setLoading(false);
-    };
-    fetch();
+    listColaboradores()
+      .then((data) => setColabs([...data].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))))
+      .catch(() => setColabs([]))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -64,8 +56,8 @@ const Colabs = () => {
                 <Card className="border-border bg-card hover:border-primary/40 transition-colors group">
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                     <Avatar className="h-20 w-20 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
-                      {c.foto_url ? (
-                        <AvatarImage src={c.foto_url} alt={c.nome} />
+                      {c.fotoUrl ? (
+                        <AvatarImage src={c.fotoUrl} alt={c.nome} />
                       ) : null}
                       <AvatarFallback className="bg-secondary text-foreground font-mono text-lg">
                         {c.nome.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
