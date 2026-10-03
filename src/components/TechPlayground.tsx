@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MarkdownView from "@/components/MarkdownView";
 import { aguardarResultado, iniciarPlayground, obterPlayground } from "@/features/crm/api";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -166,9 +167,7 @@ const TechPlayground = () => {
               <span className="font-mono text-sm text-primary">output_ia.md</span>
             </div>
             <div className="p-5">
-              <pre className="font-mono text-sm text-foreground whitespace-pre-wrap leading-relaxed overflow-x-auto">
-                {result}
-              </pre>
+              <MarkdownView>{result}</MarkdownView>
             </div>
           </div>
         )}

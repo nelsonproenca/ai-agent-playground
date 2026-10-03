@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MarkdownView from "@/components/MarkdownView";
 import { aguardarResultado, iniciarEnrich, obterEnrich } from "@/features/crm/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,32 +14,12 @@ const TERMINAL_LINES = [
   "> Montando sugestões de automação...",
 ];
 
-const TryParseSuggestions = (output: string): { summary: string; suggestions: string[] } => {
-  const lines = output.split("\n").map((l) => l.trim()).filter(Boolean);
-  const suggestions: string[] = [];
-  const summaryLines: string[] = [];
-
-  for (const line of lines) {
-    const match = line.match(/^\d+[.)]\s*(.+)/);
-    if (match) {
-      suggestions.push(match[1]);
-    } else {
-      summaryLines.push(line);
-    }
-  }
-
-  return {
-    summary: summaryLines.join("\n"),
-    suggestions: suggestions.length > 0 ? suggestions.slice(0, 5) : [],
-  };
-};
-
 const LeadEnricher = () => {
   const [domain, setDomain] = useState("");
   const [segment, setSegment] = useState("");
   const [loading, setLoading] = useState(false);
   const [terminalStep, setTerminalStep] = useState(0);
-  const [result, setResult] = useState<{ summary: string; suggestions: string[] } | null>(null);
+  const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const runEnrichment = async () => {
@@ -70,7 +51,7 @@ const LeadEnricher = () => {
       setTerminalStep(TERMINAL_LINES.length);
 
       if (output) {
-        setResult(TryParseSuggestions(output));
+        setResult(output);
       } else {
         setError("Timeout: o agente não retornou a tempo. Tente novamente.");
       }
@@ -169,41 +150,12 @@ const LeadEnricher = () => {
 
         {/* Result */}
         {result && (
-          <div className="space-y-4 animate-float-in">
-            {/* Summary */}
-            {result.summary && (
-              <div className="rounded-xl border border-primary/30 bg-card p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Globe className="h-4 w-4 text-primary" />
-                  <span className="font-mono text-sm text-primary font-semibold">Resumo da Pesquisa</span>
-                </div>
-                <pre className="font-mono text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                  {result.summary}
-                </pre>
-              </div>
-            )}
-
-            {/* Suggestions */}
-            {result.suggestions.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-mono text-sm text-muted-foreground flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-accent" />
-                  Sugestões de Automação
-                </h3>
-                <div className="grid gap-3">
-                  {result.suggestions.map((suggestion, i) => (
-                    <Card key={i} className="border-accent/20 hover:border-accent/40 transition-colors">
-                      <CardContent className="p-4 flex items-start gap-3">
-                        <div className="mt-0.5 rounded-md bg-accent/10 p-1.5 shrink-0">
-                          <Sparkles className="h-4 w-4 text-accent" />
-                        </div>
-                        <p className="text-sm text-foreground leading-relaxed">{suggestion}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div className="rounded-xl border border-primary/30 bg-card p-5 animate-float-in">
+            <div className="flex items-center gap-2 mb-3">
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="font-mono text-sm text-primary font-semibold">Resumo e Sugestões de Automação</span>
+            </div>
+            <MarkdownView>{result}</MarkdownView>
           </div>
         )}
       </div>
