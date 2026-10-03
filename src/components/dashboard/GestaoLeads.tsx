@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Filter, Calendar, User, MessageSquare, CheckCircle2, Eye, UserPlus, Loader2 } from "lucide-react";
+import { Filter, Calendar, User, MessageSquare, CheckCircle2, Eye, UserPlus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,12 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { createCliente } from "@/features/clientes/api";
-import { createContato, listLeads, marcarLeadVisto, type Lead } from "@/features/crm/api";
+import { createContato, excluirLead, listLeads, marcarLeadVisto, type Lead } from "@/features/crm/api";
 
 type FilterKey = "all" | "alta_complexidade" | "automacao" | "consultoria_dotnet";
 
@@ -37,6 +41,8 @@ const GestaoLeads = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [converting, setConverting] = useState(false);
+  const [leadParaExcluir, setLeadParaExcluir] = useState<Lead | null>(null);
+  const [excluindo, setExcluindo] = useState(false);
 
   useEffect(() => {
     let ativo = true;
@@ -74,6 +80,22 @@ const GestaoLeads = () => {
     } catch {
       aplicar(!newValue); // desfaz a marcação otimista
       toast.error("Não foi possível atualizar o lead.");
+    }
+  };
+
+  const confirmarExclusao = async () => {
+    if (!leadParaExcluir) return;
+    setExcluindo(true);
+    try {
+      await excluirLead(leadParaExcluir.id);
+      setLeads((prev) => prev.filter((l) => l.id !== leadParaExcluir.id));
+      setSelectedLead((prev) => (prev?.id === leadParaExcluir.id ? null : prev));
+      setLeadParaExcluir(null);
+      toast.success("Lead excluído.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível excluir o lead.");
+    } finally {
+      setExcluindo(false);
     }
   };
 
@@ -251,6 +273,19 @@ const GestaoLeads = () => {
             </div>
           )}
 
+          {selectedLead && (
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-mono text-xs w-full gap-2 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => setLeadParaExcluir(selectedLead)}
+              >
+                <Trash2 className="h-4 w-4" /> Excluir lead
+              </Button>
+            </div>
+          )}
+
           <div className="mt-6 space-y-6">
             {selectedLead?.contato && (
               <div className="space-y-2">
@@ -286,6 +321,29 @@ const GestaoLeads = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Confirmação de exclusão */}
+      <AlertDialog open={!!leadParaExcluir} onOpenChange={(o) => { if (!o && !excluindo) setLeadParaExcluir(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir este lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O lead <strong>{leadParaExcluir?.nome ?? "sem nome"}</strong> e a análise da IA serão apagados.
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={excluindo}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmarExclusao(); }}
+              disabled={excluindo}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {excluindo ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Excluindo...</> : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

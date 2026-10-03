@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { chamada, json, mockFetch, vazio } from "@/test/fetchMock";
 import {
-  aguardarResultado, atualizarAgendamento, criarLead, createContato, deleteColaborador, iniciarEnrich,
+  aguardarResultado, atualizarAgendamento, criarLead, createContato, excluirLead, deleteColaborador, iniciarEnrich,
   iniciarPlayground, listContatos, listLeads, marcarLeadVisto, obterEnrich, obterPlayground,
 } from "./api";
 
@@ -75,6 +75,17 @@ describe("features/crm/api: chamadas ao portal-api (nunca direto ao n8n)", () =>
     expect(chamada(fetch, 2).url).toBe("/api/portal/contatos-clientes");
     expect(chamada(fetch, 3).url).toBe("/api/portal/colaboradores/col-1");
     expect(chamada(fetch, 3).init.method).toBe("DELETE");
+  });
+
+  it("excluirLead usa DELETE com o header de CSRF", async () => {
+    const fetch = mockFetch(vazio());
+
+    await excluirLead("l1");
+
+    const c = chamada(fetch);
+    expect(c.url).toBe("/api/portal/leads/l1");
+    expect(c.init.method).toBe("DELETE");
+    expect(c.headers["X-Portal-Admin"]).toBe("1");
   });
 
   it("atualizarAgendamento manda só os campos informados", async () => {

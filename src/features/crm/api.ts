@@ -85,6 +85,7 @@ export interface NovoLeadInput {
 /** Formulário público do site. */
 export const criarLead = (input: NovoLeadInput) => portalApi.post<{ id: string }>("/leads", input);
 export const listLeads = () => portalApi.get<Lead[]>("/leads");
+export const excluirLead = (id: string) => portalApi.delete<void>(`/leads/${id}`);
 export const marcarLeadVisto = (id: string, visto: boolean) => portalApi.patch<Lead>(`/leads/${id}/visto`, { visto });
 
 // ─── Enriquecer empresa e playground (públicos, com polling) ──────────────────
