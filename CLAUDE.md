@@ -17,7 +17,7 @@ Projeto originado no Lovable — pode ser editado localmente ou pela plataforma,
 
 ## Estrutura de páginas
 
-- **Público**: `/` (Index/landing), `/landing`, `/contato`, `/claw3d`, `/colabs`, `/clientes` (vitrine de logos de empresas parceiras — **não confundir** com o CRM de clientes), `/projetos` (vitrine pública de portfólio, fala com o `portal-backend`)
+- **Público**: `/` (Index/landing), `/landing`, `/contato`, `/colabs`, `/clientes` (vitrine de logos de empresas parceiras — **não confundir** com o CRM de clientes), `/projetos` (vitrine pública de portfólio, fala com o `portal-backend`)
 - **Admin** (autenticado via `/login`, hook `useAuth`): `/admin`, `/admin/leads`, `/admin/colaboradores`, `/admin/clientes` (CRM — "Gestão de Clientes"), `/admin/agendamentos`, `/admin/projetos`
 - **Watchtower**: **não vive mais aqui.** Foi extraído pra repositório e domínio próprios
   (`saas/watchtower/watchtower-web`, servido em `watchtower.nelson-proenca-info.com.br`). O

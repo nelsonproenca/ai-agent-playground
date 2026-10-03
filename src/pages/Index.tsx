@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard, Box } from "lucide-react";
+import { Terminal, Cpu, FlaskConical, Lock, MessageSquarePlus, Users, Building2, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import InstagramCTA from "@/components/InstagramCTA";
@@ -144,30 +144,6 @@ const Index = () => {
                   </h3>
                   <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
                     Gerenciamento do site.
-                  </p>
-                </div>
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Claw3D */}
-        <div className="max-w-4xl mx-auto mt-4">
-          <motion.div variants={hoverCard} initial="rest" whileHover="hover">
-            <motion.div variants={glowCard}>
-              <Link
-                to="/claw3d"
-                className="inline-flex items-center gap-6 group rounded-xl border border-border bg-card p-6 hover:border-primary/50 transition-colors w-full"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
-                  <Box className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-0.5 text-left">
-                  <h3 className="text-lg font-extrabold text-foreground font-mono">
-                    Claw<span className="text-primary">3D</span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-mono group-hover:text-primary transition-colors">
-                    Veja meus agentes de IA trabalhando em um escritório 3D.
                   </p>
                 </div>
               </Link>
